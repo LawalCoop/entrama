@@ -1,14 +1,5 @@
-import { Presentation } from '../icons'
-import AppLayout from '@/components/AppLayout'
-import EnConstruccion from '@/components/EnConstruccion'
+import Cargando from '@/components/Cargando'
 
-export default function Presentar() {
-  return (
-    <AppLayout
-      titulo="Presentar"
-      icon={<Presentation size={40} />}
-    >
-      <EnConstruccion />
-    </AppLayout>
-  )
+export default function Pagina() {
+  return <Cargando />
 }

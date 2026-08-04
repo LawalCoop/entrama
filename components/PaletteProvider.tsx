@@ -1,41 +1,7 @@
 'use client'
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
-
-export type Marca = 'amarillo' | 'gris' | 'verde' | 'rojo' | 'morado' | 'violeta' | 'oscuro'
-
-/** Una combinación reparte dos colores de marca entre las categorías 6 y 7. */
-export type Combinacion = { a: Marca; b: Marca }
-
-/**
- * Dos listas que avanzan por separado, y cada avance salta de una a la otra, así
- * la alternancia oscuro/claro no se rompe nunca — ni al cerrar el círculo.
- *
- * A y B salen siempre del grupo legible sobre ese fondo: sobre oscuro
- * amarillo/gris/rojo/verde, sobre claro morado/violeta/oscuro.
- *
- * Como 4 y 3 son coprimos, el ciclo completo son 24 pasos.
- */
-const OSCURAS: readonly Combinacion[] = [
-  { a: 'amarillo', b: 'gris' },
-  { a: 'verde', b: 'amarillo' },
-  { a: 'rojo', b: 'gris' },
-  { a: 'gris', b: 'verde' },
-]
-
-const CLARAS: readonly Combinacion[] = [
-  { a: 'violeta', b: 'morado' },
-  { a: 'morado', b: 'oscuro' },
-  { a: 'oscuro', b: 'violeta' },
-]
-
-const CICLO = 2 * OSCURAS.length * CLARAS.length
-
-/** Pares avanzan una lista; impares la otra. Cada lista rota a su propio ritmo. */
-function combinacionEn(paso: number): Combinacion {
-  const vuelta = Math.floor(paso / 2)
-  return paso % 2 === 0 ? OSCURAS[vuelta % OSCURAS.length] : CLARAS[vuelta % CLARAS.length]
-}
+import { CICLO, CLAVE, OSCURAS, CLARAS, combinacionEn, type Combinacion } from '@/lib/paletas'
 
 type Valor = Combinacion & { siguiente: () => void }
 
@@ -44,8 +10,8 @@ const CombinacionContext = createContext<Valor>({ ...combinacionEn(0), siguiente
 /**
  * Los colores de marca activos y cómo avanzar.
  *
- * `a` lo usan la W, el logotipo del footer y el ícono de Recolectar; `b`, el
- * ícono de Presentar. `siguiente` lo dispara solo la W.
+ * `a` lo usan la W, el logotipo del footer, los triángulos y el prompt; `b` está
+ * reservado. `siguiente` lo disparan la W y el triángulo del header.
  */
 export const useCombinacion = () => useContext(CombinacionContext)
 
@@ -53,13 +19,38 @@ export const useCombinacion = () => useContext(CombinacionContext)
  * El color vive en `data-palette` sobre <html>, no en un wrapper, para que las
  * variables lleguen también a <body> — que es quien pinta el fondo. El valor es
  * el color A, que identifica la combinación de forma única.
+ *
+ * El paso se guarda en localStorage, así la próxima sesión sigue donde quedó.
+ * La restauración va en un efecto y no en el estado inicial: leer localStorage
+ * durante el render daría un HTML distinto del que vino del server y React se
+ * quejaría de hidratación. El script de `layout.tsx` se ocupa de que los colores
+ * ya estén bien antes del primer pintado.
  */
 export default function PaletteProvider({ children }: { children: ReactNode }) {
   const [paso, setPaso] = useState(0)
   const combinacion = combinacionEn(paso)
 
-  // El módulo evita que el contador crezca sin techo en una sesión larga.
-  const siguiente = useCallback(() => setPaso((n) => (n + 1) % CICLO), [])
+  const siguiente = useCallback(() => {
+    setPaso((n) => {
+      // El módulo evita que el contador crezca sin techo en una sesión larga.
+      const sig = (n + 1) % CICLO
+      try {
+        localStorage.setItem(CLAVE, String(sig))
+      } catch {
+        // Modo privado o storage lleno: el ciclo sigue, solo no se recuerda.
+      }
+      return sig
+    })
+  }, [])
+
+  useEffect(() => {
+    try {
+      const guardado = Number(localStorage.getItem(CLAVE))
+      if (Number.isInteger(guardado) && guardado >= 0) setPaso(guardado % CICLO)
+    } catch {
+      // Sin storage disponible se arranca en la primera combinación.
+    }
+  }, [])
 
   useEffect(() => {
     document.documentElement.dataset.palette = combinacion.a

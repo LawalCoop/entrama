@@ -1,0 +1,19 @@
+/* No aporta estilo propio: es la caja accesible alrededor de la marca. Toma el
+   alto del panel para que la W pueda llenarlo, y centra lo que tenga adentro
+   para que el triángulo —que mide bastante menos— quede en el mismo lugar. */
+.boton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--texto);
+  outline-offset: 4px;
+  border-radius: 4px;
+}

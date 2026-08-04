@@ -28,14 +28,6 @@
   border-top: 1px solid var(--borde);
 }
 
-/* Sin opacidad: al 0.4 el logo quedaba en 1.76 de contraste contra el fondo,
-   debajo del umbral 3.0 para elementos gráficos. Opaco sobre la superficie
-   del escalón, el peor caso de las 7 combinaciones da 4.05. */
-.footerLogo {
-  height: 100%;
-  width: auto;
-}
-
 @media (max-width: 600px) {
   .content {
     padding: 24px 24px;

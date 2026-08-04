@@ -80,8 +80,11 @@
 
 /* El triángulo de sección lleva el mismo halo que la W: en el header los dos
    ocupan el mismo lugar y son la misma marca. Los íconos de las tarjetas no lo
-   llevan — ahí son interfaz, no identidad. */
-.trailing > svg {
+   llevan — ahí son interfaz, no identidad.
+ *
+ * Descendiente y no hijo directo: el botón de paleta envuelve a la marca, así
+ * que el svg cuelga de `.trailing > button > svg`. */
+.trailing svg {
   filter: var(--halo);
 }
 

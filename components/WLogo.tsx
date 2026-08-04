@@ -6,9 +6,8 @@ import styles from './WLogo.module.css'
 /**
  * La W del header. Usa el Color A y cambia de archivo con la combinación.
  *
- * Es además el único disparador del cambio de paleta, así que va dentro de un
- * <button> de verdad: se activa con teclado, se anuncia como control y toma
- * foco. Un onClick sobre el <img> no daría nada de eso.
+ * El click lo maneja `BotonPaleta`, que la envuelve — igual que al triángulo de
+ * las secciones, para que los dos se comporten igual.
  *
  * A diferencia del logotipo del footer, la W NO va recortada al contenido: la
  * marca necesita su aire para leerse, y sin él se deforma. Por eso el PNG es
@@ -20,18 +19,16 @@ const ANCHO = 500
 const ALTO = 500
 
 export default function WLogo() {
-  const { a, siguiente } = useCombinacion()
+  const { a } = useCombinacion()
 
   return (
-    <button type="button" onClick={siguiente} className={styles.boton} aria-label="Cambiar la paleta de colores">
-      <img
-        src={`/w-${a}.png`}
-        alt=""
-        width={ANCHO}
-        height={ALTO}
-        className={styles.w}
-        draggable={false}
-      />
-    </button>
+    <img
+      src={`/w-${a}.png`}
+      alt=""
+      width={ANCHO}
+      height={ALTO}
+      className={styles.w}
+      draggable={false}
+    />
   )
 }

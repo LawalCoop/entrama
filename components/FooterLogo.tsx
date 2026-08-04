@@ -1,7 +1,7 @@
 'use client'
 
 import { useCombinacion } from './PaletteProvider'
-import styles from './AppLayout.module.css'
+import styles from './FooterLogo.module.css'
 
 /**
  * El logotipo Lawal del footer. Usa el Color A, el mismo que la W.

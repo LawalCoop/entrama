@@ -1,0 +1,10 @@
+/* Sin opacidad: al 0.4 el logo quedaba en 1.76 de contraste contra el fondo,
+   debajo del umbral 3.0 para elementos gráficos. Opaco sobre la superficie del
+   escalón, el peor caso de las 7 combinaciones da 4.05.
+
+   El alto sale del footer, que lo fija: la imagen viene recortada al contenido
+   exacto, así que estos 100% son 100% de letras. */
+.footerLogo {
+  height: 100%;
+  width: auto;
+}

@@ -1,11 +1,10 @@
 import { ClipboardList, Presentation } from './icons'
-import AppLayout from '@/components/AppLayout'
 import SelectionCard from '@/components/SelectionCard'
 import styles from './page.module.css'
 
 export default function Home() {
   return (
-    <AppLayout home titulo="Entrama">
+    <>
       <p className={styles.subtitle}>¿Qué querés hacer?</p>
       <div className={styles.cards}>
         <SelectionCard
@@ -23,6 +22,6 @@ export default function Home() {
           description="Creá una presentación interactiva con las respuestas recolectadas."
         />
       </div>
-    </AppLayout>
+    </>
   )
 }
