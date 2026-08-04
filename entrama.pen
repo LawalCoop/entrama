@@ -3,16 +3,304 @@
   "children": [
     {
       "type": "frame",
-      "id": "bi8Au",
+      "id": "h1jYI",
       "x": 0,
-      "y": 0,
-      "name": "Frame",
+      "y": -680,
+      "name": "component/App Layout",
+      "reusable": true,
       "clip": true,
       "width": 800,
       "height": 600,
-      "fill": "#FFFFFF",
-      "layout": "none"
+      "fill": "$bg",
+      "layout": "vertical",
+      "padding": [
+        32,
+        48,
+        48,
+        48
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "Lav6C",
+          "name": "Header",
+          "width": "fill_container",
+          "gap": 10,
+          "padding": [
+            0,
+            0,
+            32,
+            0
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "Q0Xbis",
+              "name": "App Title",
+              "fill": "$ink",
+              "content": "Entrama",
+              "fontFamily": "DM Serif Display",
+              "fontSize": 20,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "path",
+              "id": "R6A2L",
+              "name": "Logo",
+              "geometry": "M4 2c0 0 4 0 6 4 2 4-2 6 2 8 4 2 8 0 8 0m0-12c0 0-4 0-6 4-2 4 2 6-2 8-4 2-8 0-8 0m8-14l0 4m0 8l0 4",
+              "viewBox": [
+                2,
+                0,
+                20,
+                16
+              ],
+              "fill": "$ink",
+              "width": 22,
+              "height": 22,
+              "stroke": "$ink",
+              "strokeWidth": 1.5,
+              "strokeLinecap": "round"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "JhSI6",
+          "name": "Content",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 32,
+          "justifyContent": "center",
+          "alignItems": "center"
+        }
+      ]
+    },
+    {
+      "id": "QwqAx",
+      "type": "ref",
+      "ref": "h1jYI",
+      "name": "Selección inicial",
+      "x": 0,
+      "y": 0,
+      "descendants": {
+        "JhSI6": {
+          "type": "frame",
+          "id": "Q4tOe",
+          "name": "Content",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 32,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "x0pbyt",
+              "name": "Subtitle",
+              "fill": "$muted",
+              "content": "¿Qué querés hacer?",
+              "fontFamily": "Inter",
+              "fontSize": 15,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "eOlwE",
+              "name": "Cards Row",
+              "gap": 24,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "SHsAE",
+                  "name": "Card Recolectar",
+                  "width": 280,
+                  "fill": "$card",
+                  "cornerRadius": 14,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 4
+                    },
+                    "blur": 16
+                  },
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": [
+                    32,
+                    28,
+                    28,
+                    28
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "r8v6Qr",
+                      "name": "Icon Bg",
+                      "width": 48,
+                      "height": 48,
+                      "fill": "#2D6A4F14",
+                      "cornerRadius": 12,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "xr49v",
+                          "name": "Collect Icon",
+                          "width": 24,
+                          "height": 24,
+                          "icon": "clipboard-list",
+                          "library": "lucide",
+                          "fill": "$accent-recolectar"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "HgHiQ",
+                      "name": "Card Title",
+                      "fill": "$ink",
+                      "content": "Recolectar",
+                      "fontFamily": "DM Serif Display",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "iyO9G",
+                      "name": "Card Desc",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Armá un formulario para juntar respuestas de tu equipo o audiencia.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hIdeW",
+                  "name": "Card Presentar",
+                  "width": 280,
+                  "fill": "$card",
+                  "cornerRadius": 14,
+                  "stroke": "$line",
+                  "strokeWidth": 1,
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 4
+                    },
+                    "blur": 16
+                  },
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": [
+                    32,
+                    28,
+                    28,
+                    28
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "hVScg",
+                      "name": "Icon Bg",
+                      "width": 48,
+                      "height": 48,
+                      "fill": "#7B2D8B14",
+                      "cornerRadius": 12,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "U1QXJv",
+                          "name": "Present Icon",
+                          "width": 24,
+                          "height": 24,
+                          "icon": "presentation",
+                          "library": "lucide",
+                          "fill": "$accent-presentar"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "qAENM",
+                      "name": "Card Title",
+                      "fill": "$ink",
+                      "content": "Presentar",
+                      "fontFamily": "DM Serif Display",
+                      "fontSize": 22,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "yEqt4",
+                      "name": "Card Desc",
+                      "fill": "$muted",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Creá una presentación interactiva con las respuestas recolectadas.",
+                      "lineHeight": 1.5,
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
     }
   ],
+  "variables": {
+    "bg": {
+      "type": "color",
+      "value": "#F5F2EE"
+    },
+    "card": {
+      "type": "color",
+      "value": "#FFFFFF"
+    },
+    "ink": {
+      "type": "color",
+      "value": "#1A1A1A"
+    },
+    "muted": {
+      "type": "color",
+      "value": "#8C8680"
+    },
+    "accent-recolectar": {
+      "type": "color",
+      "value": "#2D6A4F"
+    },
+    "accent-presentar": {
+      "type": "color",
+      "value": "#7B2D8B"
+    },
+    "line": {
+      "type": "color",
+      "value": "#E5E0DA"
+    }
+  },
   "fileToken": "f88182bb-9f29-4d23-88f0-aa7f1f2ad138"
 }
