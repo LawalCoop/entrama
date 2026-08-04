@@ -48,9 +48,12 @@ export default async function Page() {
             }}
           >
             {db.ok
-              ? `${db.version.split(' on ')[0]} · ${db.latencyMs}ms · TLS ${
-                  db.verified ? 'verified' : 'unverified'
-                }`
+              ? [
+                  db.version.split(' on ')[0],
+                  `${db.latencyMs}ms`,
+                  `TLS ${db.verified ? 'verified' : 'unverified'}`,
+                  `schema v${db.schemaVersion ?? '—'}`,
+                ].join(' · ')
               : db.error}
           </p>
         </div>

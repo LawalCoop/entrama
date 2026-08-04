@@ -2,6 +2,7 @@
   "name": "entrama",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/LawalCoop/entrama.git"
@@ -9,10 +10,14 @@
   "license": "ISC",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "dev:local": "node scripts/dev-local.ts",
+    "build": "npm run migrate && next build",
+    "start": "next start",
+    "migrate": "node --env-file-if-exists=.env.local scripts/migrate.ts"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.5.4",
+    "@electric-sql/pglite-socket": "^0.2.7",
     "next": "^16.3.0",
     "pg": "^8.22.0",
     "react": "^19.2.8",
