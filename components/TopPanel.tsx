@@ -1,45 +1,38 @@
+import type { ReactNode } from 'react'
 import Link from 'next/link'
-import EntramaSvg from './EntramaSvg'
+import { Prompt } from '@/app/icons'
+import WLogo from './WLogo'
 import styles from './TopPanel.module.css'
 
-export type Breadcrumb = {
-  label: string
-  href?: string
-  icon?: React.ReactNode
-}
-
 type Props = {
-  crumbs?: Breadcrumb[]
-  icon?: React.ReactNode
+  /** La portada muestra la W; las demás, el triángulo de su sección. */
+  home?: boolean
+  /** Nombre de la pantalla. El triángulo de prompt lo agrega el panel. */
+  titulo: string
+  icon?: ReactNode
 }
 
-export default function TopPanel({ crumbs, icon }: Props) {
-  const isHome = !crumbs?.length
-
+export default function TopPanel({ home = false, titulo, icon }: Props) {
   return (
     <header className={styles.panel}>
-      <nav className={styles.nav}>
-        {isHome ? (
-          <span className={styles.title}>Entrama</span>
-        ) : (
-          <Link href="/" className={styles.titleMuted}>Entrama</Link>
+      <nav className={styles.linea} aria-label="Ruta">
+        {/* La raíz solo aparece adentro, y es la vuelta a la portada. */}
+        {!home && (
+          <>
+            <Link href="/" className={styles.raiz}>
+              Entrama
+            </Link>
+            <Prompt className={styles.prompt} />
+          </>
         )}
 
-        {crumbs?.map((crumb, i) => (
-          <span key={i} className={styles.crumbGroup}>
-            <span className={styles.sep}>›</span>
-            {crumb.href ? (
-              <Link href={crumb.href} className={styles.crumbLink}>{crumb.label}</Link>
-            ) : (
-              <span className={styles.crumbActive}>{crumb.label}</span>
-            )}
-          </span>
-        ))}
+        <span className={styles.titulo} aria-current="page">
+          {titulo}
+        </span>
+        <Prompt className={styles.prompt} />
       </nav>
 
-      <div className={styles.trailing}>
-        {isHome ? <EntramaSvg /> : icon}
-      </div>
+      <div className={styles.trailing}>{home ? <WLogo /> : icon}</div>
     </header>
   )
 }

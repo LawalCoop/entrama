@@ -1,0 +1,30 @@
+/* El botón no aporta estilo propio: es la caja accesible alrededor de la W. */
+.boton {
+  display: block;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--texto);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* Llena el alto del panel. La imagen es cuadrada, así que el ancho iguala al
+   alto solo. El width/height del <img> quedan como hint de proporción para
+   evitar salto de layout; el alto real lo manda este CSS.
+
+   El halo sigue la silueta de la W, no su caja: drop-shadow respeta el canal
+   alfa del PNG, cosa que box-shadow no hace. Definido en globals.css, que es
+   donde el triángulo del header lo comparte. */
+.w {
+  display: block;
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  filter: var(--halo);
+}

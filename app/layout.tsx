@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
-import { DM_Serif_Display, Inter } from 'next/font/google'
+import { Space_Grotesk, Inter } from 'next/font/google'
+import PaletteProvider from '@/components/PaletteProvider'
 import './globals.css'
 
-const dmSerif = DM_Serif_Display({ weight: '400', subsets: ['latin'], variable: '--font-dm-serif' })
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-heading' })
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
@@ -13,8 +14,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es" className={`${dmSerif.variable} ${inter.variable}`}>
-      <body>{children}</body>
+    <html lang="es" className={`${spaceGrotesk.variable} ${inter.variable}`}>
+      <body>
+        <PaletteProvider>{children}</PaletteProvider>
+      </body>
     </html>
   )
 }

@@ -1,82 +1,99 @@
 .panel {
   display: flex;
-  align-items: center;
+  /* stretch, no center: así `.trailing` toma el alto completo y la W lo llena.
+     `.linea` centra su propio contenido, así que el título no se estira. */
+  align-items: stretch;
   justify-content: space-between;
-  padding: 32px 48px;
-  background: var(--card);
-  border-bottom: 1px solid var(--line);
+  /* El panel fija el alto; el logo lo llena de borde a borde. Sin padding
+     vertical, para que la W toque arriba y abajo. */
+  height: 72px;
+  padding: 0 56px;
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
 }
 
-.nav {
+/* `align-self: center` para no estirarse: el panel usa stretch para que la W
+   llene los 72px, y sin esto la línea heredaba ese alto y el texto quedaba
+   pegado arriba. Con la caja ya del alto del texto, `baseline` alinea el prompt
+   con la base de las letras, que es lo que le da el aire de consola. */
+.linea {
   display: flex;
-  align-items: center;
+  align-self: center;
+  align-items: baseline;
   gap: 8px;
 }
 
-.title {
-  font-family: var(--font-dm-serif), serif;
-  font-size: 20px;
-  color: var(--ink);
+.titulo {
+  font-family: var(--font-heading), sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--texto);
 }
 
-.titleMuted {
-  font-family: var(--font-dm-serif), serif;
-  font-size: 20px;
-  color: var(--muted);
+/* La raíz: mismo peso que el título pero apagada, para que el tramo activo sea
+   el que domina. Es además el único camino de vuelta a la portada. */
+.raiz {
+  font-family: var(--font-heading), sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--texto-suave);
   text-decoration: none;
 }
 
-.titleMuted:hover {
-  color: var(--ink);
+.raiz:hover {
+  color: var(--texto);
 }
 
-.crumbGroup {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.raiz:focus-visible {
+  outline: 2px solid var(--texto);
+  outline-offset: 3px;
+  border-radius: 3px;
+  color: var(--texto);
 }
 
-.sep {
-  font-size: 16px;
-  color: var(--muted);
+/* El signo de prompt, en Color A: es lo que hace leer la línea como consola en
+   vez de como título. Va siempre, incluso en la portada.
+ *
+ * `font-size` acá no pinta texto — es contra lo que resuelve el `em` del alto,
+ * así que el triángulo escala con el título en vez de quedar fijo. 0.62em es
+ * aproximadamente la altura de mayúscula, para que iguale el peso de la palabra.
+ *
+ * En un contenedor flex con `align-items: baseline`, la base de un SVG es su
+ * borde inferior — así que apoya en la misma línea que las letras. */
+.prompt {
+  font-size: 17px;
+  height: 0.62em;
+  width: auto;
+  color: var(--color-a);
 }
 
-.crumbLink {
-  font-family: var(--font-dm-serif), serif;
-  font-size: 20px;
-  color: var(--muted);
-  text-decoration: none;
-}
-
-.crumbLink:hover {
-  color: var(--ink);
-}
-
-.crumbActive {
-  font-family: var(--font-dm-serif), serif;
-  font-size: 20px;
-  color: var(--ink);
-}
-
+/* Hueco cuadrado del alto del panel, ocupado igual por la W que por el ícono de
+   sección. Sin esto cada uno mide distinto (72px la W, 22px el ícono) y el
+   header se corre al navegar entre páginas. */
 .trailing {
   display: flex;
   align-items: center;
-  color: var(--ink);
+  justify-content: center;
+  aspect-ratio: 1;
+  color: var(--texto);
+}
+
+/* El triángulo de sección lleva el mismo halo que la W: en el header los dos
+   ocupan el mismo lugar y son la misma marca. Los íconos de las tarjetas no lo
+   llevan — ahí son interfaz, no identidad. */
+.trailing > svg {
+  filter: var(--halo);
 }
 
 @media (max-width: 600px) {
   .panel {
-    padding: 16px 20px;
+    height: 60px;
+    padding: 0 24px;
   }
 
-  .title,
-  .titleMuted,
-  .crumbLink,
-  .crumbActive {
-    font-size: 16px;
-  }
-
-  .sep {
-    font-size: 13px;
+  .titulo,
+  .raiz,
+  .prompt {
+    font-size: 15px;
   }
 }

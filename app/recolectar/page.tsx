@@ -1,13 +1,14 @@
 import { ClipboardList } from '../icons'
 import AppLayout from '@/components/AppLayout'
+import EnConstruccion from '@/components/EnConstruccion'
 
 export default function Recolectar() {
   return (
     <AppLayout
-      crumbs={[{ label: 'Recolectar' }]}
-      icon={<ClipboardList size={22} />}
+      titulo="Recolectar"
+      icon={<ClipboardList size={40} />}
     >
-      <p style={{ color: 'var(--muted)' }}>Próximamente</p>
+      <EnConstruccion />
     </AppLayout>
   )
 }

@@ -13,24 +13,21 @@
       "height": 600,
       "fill": "$bg",
       "layout": "vertical",
-      "padding": [
-        32,
-        48,
-        48,
-        48
-      ],
       "children": [
         {
           "type": "frame",
           "id": "Lav6C",
-          "name": "Header",
+          "name": "Top Panel",
           "width": "fill_container",
-          "gap": 10,
+          "fill": "$card",
+          "stroke": "$line",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "gap": 8,
           "padding": [
-            0,
-            0,
             32,
-            0
+            48
           ],
           "alignItems": "center",
           "children": [
@@ -40,26 +37,98 @@
               "name": "App Title",
               "fill": "$ink",
               "content": "Entrama",
-              "fontFamily": "DM Serif Display",
-              "fontSize": 20,
+              "fontFamily": "Space Grotesk",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "EHgYA",
+              "x": 0,
+              "y": 0,
+              "name": "Sep 1",
+              "enabled": false,
+              "fill": "$muted",
+              "content": "›",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 16,
               "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "ocdNa",
+              "x": 0,
+              "y": 0,
+              "name": "Level 1 Name",
+              "enabled": false,
+              "fill": "$ink",
+              "content": "Sección",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "M6EZrW",
+              "x": 0,
+              "y": 0,
+              "name": "Sep 2",
+              "enabled": false,
+              "fill": "$muted",
+              "content": "›",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 16,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "IKEFj",
+              "x": 0,
+              "y": 0,
+              "name": "Level 2 Name",
+              "enabled": false,
+              "fill": "$ink",
+              "content": "Sub",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "caN5G",
+              "name": "Spacer",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "icon",
+              "id": "ySbYl",
+              "x": 0,
+              "y": 0,
+              "name": "Section Icon",
+              "enabled": false,
+              "width": 22,
+              "height": 22,
+              "icon": "clipboard-list",
+              "library": "lucide",
+              "fill": "$accent-recolectar"
             },
             {
               "type": "path",
               "id": "R6A2L",
-              "name": "Logo",
-              "geometry": "M4 2c0 0 4 0 6 4 2 4-2 6 2 8 4 2 8 0 8 0m0-12c0 0-4 0-6 4-2 4 2 6-2 8-4 2-8 0-8 0m8-14l0 4m0 8l0 4",
+              "name": "W Logo",
+              "geometry": "M0 0l4.5 0 4.5 16 5-14 5 14 4.5-16 4.5 0-7 20-3.5 0-3.5-12-3.5 12-3.5 0z",
               "viewBox": [
-                2,
                 0,
-                20,
-                16
+                0,
+                28,
+                20
               ],
               "fill": "$ink",
               "width": 22,
-              "height": 22,
-              "stroke": "$ink",
-              "strokeWidth": 1.5,
+              "height": 16,
+              "stroke": "#00000000",
+              "strokeLinejoin": "round",
               "strokeLinecap": "round"
             }
           ]
@@ -72,6 +141,7 @@
           "height": "fill_container",
           "layout": "vertical",
           "gap": 32,
+          "padding": 48,
           "justifyContent": "center",
           "alignItems": "center"
         }
@@ -114,160 +184,425 @@
               "alignItems": "center",
               "children": [
                 {
-                  "type": "frame",
-                  "id": "SHsAE",
+                  "id": "LsU6r",
+                  "type": "ref",
+                  "ref": "T0Szr",
                   "name": "Card Recolectar",
-                  "width": 280,
-                  "fill": "$card",
-                  "cornerRadius": 14,
-                  "stroke": "$line",
-                  "strokeWidth": 1,
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "#0000000A",
-                    "offset": {
-                      "x": 0,
-                      "y": 4
+                  "descendants": {
+                    "ut0vi": {
+                      "fill": "#2D6A4F14"
                     },
-                    "blur": 16
-                  },
-                  "layout": "vertical",
-                  "gap": 16,
-                  "padding": [
-                    32,
-                    28,
-                    28,
-                    28
-                  ],
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "r8v6Qr",
-                      "name": "Icon Bg",
-                      "width": 48,
-                      "height": 48,
-                      "fill": "#2D6A4F14",
-                      "cornerRadius": 12,
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon",
-                          "id": "xr49v",
-                          "name": "Collect Icon",
-                          "width": 24,
-                          "height": 24,
-                          "icon": "clipboard-list",
-                          "library": "lucide",
-                          "fill": "$accent-recolectar"
-                        }
-                      ]
+                    "W5JAc": {
+                      "icon": "clipboard-list",
+                      "fill": "$accent-recolectar"
                     },
-                    {
-                      "type": "text",
-                      "id": "HgHiQ",
-                      "name": "Card Title",
-                      "fill": "$ink",
-                      "content": "Recolectar",
-                      "fontFamily": "DM Serif Display",
-                      "fontSize": 22,
-                      "fontWeight": "normal"
+                    "oMW4T": {
+                      "content": "Recolectar"
                     },
-                    {
-                      "type": "text",
-                      "id": "iyO9G",
-                      "name": "Card Desc",
-                      "fill": "$muted",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "Armá un formulario para juntar respuestas de tu equipo o audiencia.",
-                      "lineHeight": 1.5,
-                      "fontFamily": "Inter",
-                      "fontSize": 13,
-                      "fontWeight": "normal"
+                    "FTKp6": {
+                      "content": "Armá un formulario para juntar respuestas de tu equipo o audiencia."
                     }
-                  ]
+                  }
                 },
                 {
-                  "type": "frame",
-                  "id": "hIdeW",
+                  "id": "MA5WL",
+                  "type": "ref",
+                  "ref": "T0Szr",
                   "name": "Card Presentar",
-                  "width": 280,
-                  "fill": "$card",
-                  "cornerRadius": 14,
-                  "stroke": "$line",
-                  "strokeWidth": 1,
-                  "effect": {
-                    "type": "shadow",
-                    "shadowType": "outer",
-                    "color": "#0000000A",
-                    "offset": {
-                      "x": 0,
-                      "y": 4
+                  "descendants": {
+                    "ut0vi": {
+                      "fill": "#7B2D8B14"
                     },
-                    "blur": 16
-                  },
-                  "layout": "vertical",
-                  "gap": 16,
-                  "padding": [
-                    32,
-                    28,
-                    28,
-                    28
-                  ],
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "hVScg",
-                      "name": "Icon Bg",
-                      "width": 48,
-                      "height": 48,
-                      "fill": "#7B2D8B14",
-                      "cornerRadius": 12,
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon",
-                          "id": "U1QXJv",
-                          "name": "Present Icon",
-                          "width": 24,
-                          "height": 24,
-                          "icon": "presentation",
-                          "library": "lucide",
-                          "fill": "$accent-presentar"
-                        }
-                      ]
+                    "W5JAc": {
+                      "icon": "presentation",
+                      "fill": "$accent-presentar"
                     },
-                    {
-                      "type": "text",
-                      "id": "qAENM",
-                      "name": "Card Title",
-                      "fill": "$ink",
-                      "content": "Presentar",
-                      "fontFamily": "DM Serif Display",
-                      "fontSize": 22,
-                      "fontWeight": "normal"
+                    "oMW4T": {
+                      "content": "Presentar"
                     },
-                    {
-                      "type": "text",
-                      "id": "yEqt4",
-                      "name": "Card Desc",
-                      "fill": "$muted",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "Creá una presentación interactiva con las respuestas recolectadas.",
-                      "lineHeight": 1.5,
-                      "fontFamily": "Inter",
-                      "fontSize": 13,
-                      "fontWeight": "normal"
+                    "FTKp6": {
+                      "content": "Creá una presentación interactiva con las respuestas recolectadas."
                     }
-                  ]
+                  }
                 }
               ]
             }
           ]
+        }
+      }
+    },
+    {
+      "type": "frame",
+      "id": "T0Szr",
+      "x": 0,
+      "y": -960,
+      "name": "component/Selection Card",
+      "reusable": true,
+      "width": 280,
+      "fill": "$card",
+      "cornerRadius": 10,
+      "stroke": "$line",
+      "strokeWidth": 1,
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#00000030",
+        "offset": {
+          "x": 0,
+          "y": 2
+        },
+        "blur": 12
+      },
+      "layout": "vertical",
+      "gap": 16,
+      "padding": [
+        32,
+        28,
+        28,
+        28
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "ut0vi",
+          "name": "Icon Bg",
+          "width": 48,
+          "height": 48,
+          "fill": "#2D6A4F14",
+          "cornerRadius": 12,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon",
+              "id": "W5JAc",
+              "name": "Card Icon",
+              "width": 24,
+              "height": 24,
+              "icon": "clipboard-list",
+              "library": "lucide",
+              "fill": "$accent-recolectar"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "oMW4T",
+          "name": "Card Title",
+          "fill": "$ink",
+          "content": "Título",
+          "fontFamily": "Space Grotesk",
+          "fontSize": 22,
+          "fontWeight": "700"
+        },
+        {
+          "type": "text",
+          "id": "FTKp6",
+          "name": "Card Desc",
+          "fill": "$muted",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "Descripción de la acción.",
+          "lineHeight": 1.5,
+          "fontFamily": "Inter",
+          "fontSize": 13,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "id": "hb34l",
+      "type": "ref",
+      "ref": "h1jYI",
+      "name": "Recolectar",
+      "x": 880,
+      "y": 0,
+      "descendants": {
+        "Q0Xbis": {
+          "fill": "$muted"
+        },
+        "EHgYA": {
+          "enabled": true
+        },
+        "ocdNa": {
+          "enabled": true,
+          "content": "Recolectar"
+        },
+        "ySbYl": {
+          "enabled": true,
+          "icon": "clipboard-list",
+          "fill": "$accent-recolectar"
+        },
+        "R6A2L": {
+          "enabled": false
+        }
+      }
+    },
+    {
+      "type": "frame",
+      "id": "itzIC",
+      "x": 0,
+      "y": -1884,
+      "name": "component/App Layout Mobile",
+      "reusable": true,
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "sJZij",
+          "name": "Top Panel",
+          "width": "fill_container",
+          "fill": "$card",
+          "stroke": "$line",
+          "strokeWidth": {
+            "bottom": 1
+          },
+          "gap": 6,
+          "padding": [
+            16,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "wlulf",
+              "name": "App Title",
+              "fill": "$ink",
+              "content": "Entrama",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "h5kfX",
+              "x": 0,
+              "y": 0,
+              "name": "Sep 1",
+              "enabled": false,
+              "fill": "$muted",
+              "content": "›",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "Rrn1F",
+              "x": 0,
+              "y": 0,
+              "name": "Level 1 Name",
+              "enabled": false,
+              "fill": "$ink",
+              "content": "Sección",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "PRnB6",
+              "x": 0,
+              "y": 0,
+              "name": "Sep 2",
+              "enabled": false,
+              "fill": "$muted",
+              "content": "›",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "text",
+              "id": "hUjf1",
+              "x": 0,
+              "y": 0,
+              "name": "Level 2 Name",
+              "enabled": false,
+              "fill": "$ink",
+              "content": "Sub",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 22,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "c3l5u",
+              "name": "Spacer",
+              "width": "fill_container",
+              "height": 1
+            },
+            {
+              "type": "path",
+              "id": "BXcNc",
+              "name": "W Logo",
+              "geometry": "M0 0l4.5 0 4.5 16 5-14 5 14 4.5-16 4.5 0-7 20-3.5 0-3.5-12-3.5 12-3.5 0z",
+              "viewBox": [
+                0,
+                0,
+                28,
+                20
+              ],
+              "fill": "$ink",
+              "width": 16,
+              "height": 12,
+              "stroke": "#00000000",
+              "strokeLinejoin": "round",
+              "strokeLinecap": "round"
+            },
+            {
+              "type": "icon",
+              "id": "T3LJb",
+              "x": 0,
+              "y": 0,
+              "name": "Section Icon",
+              "enabled": false,
+              "width": 18,
+              "height": 18,
+              "icon": "clipboard-list",
+              "library": "lucide",
+              "fill": "$accent-recolectar"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "kLlZ7",
+          "name": "Content",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            24,
+            20
+          ],
+          "justifyContent": "center",
+          "alignItems": "center"
+        }
+      ]
+    },
+    {
+      "id": "hlKKJ",
+      "type": "ref",
+      "ref": "itzIC",
+      "name": "Selección inicial — Mobile",
+      "x": 470,
+      "y": -1884,
+      "descendants": {
+        "kLlZ7": {
+          "type": "frame",
+          "id": "J8OkJ",
+          "name": "Content",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 24,
+          "padding": [
+            24,
+            20
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "p2k5es",
+              "name": "Subtitle",
+              "fill": "$muted",
+              "content": "¿Qué querés hacer?",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "qrf0H",
+              "name": "Cards Column",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 16,
+              "children": [
+                {
+                  "id": "moAEy",
+                  "type": "ref",
+                  "ref": "T0Szr",
+                  "name": "Card Recolectar",
+                  "width": "fill_container",
+                  "descendants": {
+                    "ut0vi": {
+                      "fill": "#2D6A4F14"
+                    },
+                    "W5JAc": {
+                      "icon": "clipboard-list",
+                      "fill": "$accent-recolectar"
+                    },
+                    "oMW4T": {
+                      "content": "Recolectar"
+                    },
+                    "FTKp6": {
+                      "content": "Armá un formulario para juntar respuestas de tu equipo o audiencia."
+                    }
+                  }
+                },
+                {
+                  "id": "mcRma",
+                  "type": "ref",
+                  "ref": "T0Szr",
+                  "name": "Card Presentar",
+                  "width": "fill_container",
+                  "descendants": {
+                    "ut0vi": {
+                      "fill": "#7B2D8B14"
+                    },
+                    "W5JAc": {
+                      "icon": "presentation",
+                      "fill": "$accent-presentar"
+                    },
+                    "oMW4T": {
+                      "content": "Presentar"
+                    },
+                    "FTKp6": {
+                      "content": "Creá una presentación interactiva con las respuestas recolectadas."
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "dV623",
+      "type": "ref",
+      "ref": "itzIC",
+      "name": "Recolectar — Mobile",
+      "x": 940,
+      "y": -1884,
+      "descendants": {
+        "wlulf": {
+          "fill": "$muted"
+        },
+        "h5kfX": {
+          "enabled": true
+        },
+        "Rrn1F": {
+          "enabled": true,
+          "content": "Recolectar"
+        },
+        "BXcNc": {
+          "enabled": false
+        },
+        "T3LJb": {
+          "enabled": true,
+          "icon": "clipboard-list",
+          "fill": "$accent-recolectar"
         }
       }
     }
@@ -275,31 +610,39 @@
   "variables": {
     "bg": {
       "type": "color",
-      "value": "#F5F2EE"
+      "value": "#0F1319"
     },
     "card": {
       "type": "color",
-      "value": "#FFFFFF"
+      "value": "#181C22"
     },
     "ink": {
       "type": "color",
-      "value": "#1A1A1A"
+      "value": "#F0EDE8"
     },
     "muted": {
       "type": "color",
-      "value": "#8C8680"
+      "value": "#7A7D85"
     },
     "accent-recolectar": {
       "type": "color",
-      "value": "#2D6A4F"
+      "value": "#F1663E"
     },
     "accent-presentar": {
       "type": "color",
-      "value": "#7B2D8B"
+      "value": "#9B59B6"
     },
     "line": {
       "type": "color",
-      "value": "#E5E0DA"
+      "value": "#272B33"
+    },
+    "accent-recolectar-bg": {
+      "type": "color",
+      "value": "#F1663E18"
+    },
+    "accent-presentar-bg": {
+      "type": "color",
+      "value": "#9B59B618"
     }
   },
   "fileToken": "f88182bb-9f29-4d23-88f0-aa7f1f2ad138"

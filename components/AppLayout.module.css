@@ -10,13 +10,40 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px;
+  padding: 48px 56px;
   gap: 32px;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  /* Mismo criterio que el header: el footer fija el alto y el logo lo llena.
+     Con superficie propia lee como un escalón y no como fondo continuo. */
+  /* Las imágenes están recortadas al contenido exacto, así que el logo llena
+     este alto de verdad. El padding es el único aire, y es deliberado. */
+  align-items: stretch;
+  height: 64px;
+  padding: 16px 56px;
+  background: var(--superficie);
+  border-top: 1px solid var(--borde);
+}
+
+/* Sin opacidad: al 0.4 el logo quedaba en 1.76 de contraste contra el fondo,
+   debajo del umbral 3.0 para elementos gráficos. Opaco sobre la superficie
+   del escalón, el peor caso de las 7 combinaciones da 4.05. */
+.footerLogo {
+  height: 100%;
+  width: auto;
 }
 
 @media (max-width: 600px) {
   .content {
-    padding: 24px 20px;
+    padding: 24px 24px;
     gap: 24px;
+  }
+
+  .footer {
+    height: 52px;
+    padding: 13px 24px;
   }
 }

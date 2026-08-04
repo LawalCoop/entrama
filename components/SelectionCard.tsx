@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react'
 import Link from 'next/link'
 import styles from './SelectionCard.module.css'
 
 type Props = {
   href: string
-  icon: React.ReactNode
+  icon: ReactNode
   iconBg: string
   title: string
   description: string

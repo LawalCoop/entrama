@@ -1,18 +1,25 @@
 import type { ReactNode } from 'react'
-import TopPanel, { type Breadcrumb } from './TopPanel'
+import FooterLogo from './FooterLogo'
+import TopPanel from './TopPanel'
 import styles from './AppLayout.module.css'
 
 type Props = {
-  crumbs?: Breadcrumb[]
-  icon?: React.ReactNode
+  /** La portada muestra la W; las demás, el triángulo de su sección. */
+  home?: boolean
+  /** Nombre de la pantalla, tal como aparece en el prompt del header. */
+  titulo: string
+  icon?: ReactNode
   children: ReactNode
 }
 
-export default function AppLayout({ crumbs, icon, children }: Props) {
+export default function AppLayout({ home, titulo, icon, children }: Props) {
   return (
     <div className={styles.shell}>
-      <TopPanel crumbs={crumbs} icon={icon} />
+      <TopPanel home={home} titulo={titulo} icon={icon} />
       <main className={styles.content}>{children}</main>
+      <footer className={styles.footer}>
+        <FooterLogo />
+      </footer>
     </div>
   )
 }

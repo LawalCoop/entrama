@@ -1,13 +1,181 @@
+/* 7 categorías. Todo elemento de pantalla cae en una:
+ *
+ *   1 --fondo         lienzo de la página
+ *   2 --superficie    header, tarjetas, footer
+ *   3 --borde         divisores y outline de foco
+ *   4 --texto         títulos, ruta activa
+ *   5 --texto-suave   descripciones, tramo inactivo de la ruta
+ *   6 --color-a       la W, el logotipo del footer, los triángulos, el prompt
+ *   7 --color-b       reservado (hoy sin consumidores)
+ *
+ * Derivados (no son categorías nuevas): -glow y -tinte salen de su color,
+ * --sombra sale del fondo, --ciclo-N es el juego de marca que se lee sobre el
+ * fondo activo — los cuatro claros si el fondo es oscuro, los tres oscuros si
+ * es claro.
+ *
+ * Sobre un fondo dado solo se lee la mitad de la marca, así que A y B salen
+ * siempre del grupo legible. Verificado: texto >= 4.58 (umbral 4.5), gráficos
+ * >= 4.05 (umbral 3.0), contra la superficie donde cada elemento se apoya. */
+
+/* amarillo + gris — fondo oscuro */
+:root, :root[data-palette="amarillo"] {
+  color-scheme: dark;
+  --fondo: #1F1D1C;
+  --superficie: #252525;
+  --borde: #4D453D;
+  --texto: #F1EEE9;
+  --texto-suave: #9298A1;
+  --color-a: #FFBE69;
+  --color-b: #8DA1B5;
+  --color-a-glow: #FFDBAC;
+  --color-a-tinte: #FFBE6922;
+  --color-b-tinte: #8DA1B522;
+  --sombra: #00000055;
+  --sombra-alta: #00000077;
+  --ciclo-1: #FFBE69;
+  --ciclo-2: #8DA1B5;
+  --ciclo-3: #DD5769;
+  --ciclo-4: #468D81;
+}
+
+/* verde + amarillo — fondo oscuro */
+:root[data-palette="verde"] {
+  color-scheme: dark;
+  --fondo: #121A1D;
+  --superficie: #1A2227;
+  --borde: #2C3D41;
+  --texto: #F1EEE9;
+  --texto-suave: #9298A1;
+  --color-a: #468D81;
+  --color-b: #FFBE69;
+  --color-a-glow: #99C0BA;
+  --color-a-tinte: #468D8122;
+  --color-b-tinte: #FFBE6922;
+  --sombra: #00000055;
+  --sombra-alta: #00000077;
+  --ciclo-1: #FFBE69;
+  --ciclo-2: #8DA1B5;
+  --ciclo-3: #DD5769;
+  --ciclo-4: #468D81;
+}
+
+/* rojo + gris — fondo oscuro */
+:root[data-palette="rojo"] {
+  color-scheme: dark;
+  --fondo: #1C161C;
+  --superficie: #231F25;
+  --borde: #47333D;
+  --texto: #F1EEE9;
+  --texto-suave: #9298A1;
+  --color-a: #DD5769;
+  --color-b: #8DA1B5;
+  --color-a-glow: #ECA3AC;
+  --color-a-tinte: #DD576922;
+  --color-b-tinte: #8DA1B522;
+  --sombra: #00000055;
+  --sombra-alta: #00000077;
+  --ciclo-1: #FFBE69;
+  --ciclo-2: #8DA1B5;
+  --ciclo-3: #DD5769;
+  --ciclo-4: #468D81;
+}
+
+/* gris + verde — fondo oscuro */
+:root[data-palette="gris"] {
+  color-scheme: dark;
+  --fondo: #171B21;
+  --superficie: #1E232A;
+  --borde: #39404A;
+  --texto: #F1EEE9;
+  --texto-suave: #9298A1;
+  --color-a: #8DA1B5;
+  --color-b: #468D81;
+  --color-a-glow: #C0CBD6;
+  --color-a-tinte: #8DA1B522;
+  --color-b-tinte: #468D8122;
+  --sombra: #00000055;
+  --sombra-alta: #00000077;
+  --ciclo-1: #FFBE69;
+  --ciclo-2: #8DA1B5;
+  --ciclo-3: #DD5769;
+  --ciclo-4: #468D81;
+}
+
+/* violeta + morado — fondo claro */
+:root[data-palette="violeta"] {
+  color-scheme: light;
+  --fondo: #E9E5E2;
+  --superficie: #F4F3F5;
+  --borde: #C7BEBE;
+  --texto: #191614;
+  --texto-suave: #6B645D;
+  --color-a: #4B3860;
+  --color-b: #91486F;
+  --color-a-glow: #615073;
+  --color-a-tinte: #4B386022;
+  --color-b-tinte: #91486F22;
+  --sombra: #0000001F;
+  --sombra-alta: #00000033;
+  --ciclo-1: #91486F;
+  --ciclo-2: #4B3860;
+  --ciclo-3: #202A33;
+  --ciclo-4: #91486F;
+}
+
+/* morado + oscuro — fondo claro */
+:root[data-palette="morado"] {
+  color-scheme: light;
+  --fondo: #EEE6E3;
+  --superficie: #F8F4F6;
+  --borde: #D3C1C1;
+  --texto: #191614;
+  --texto-suave: #6B645D;
+  --color-a: #91486F;
+  --color-b: #202A33;
+  --color-a-glow: #9E5E80;
+  --color-a-tinte: #91486F22;
+  --color-b-tinte: #202A3322;
+  --sombra: #0000001F;
+  --sombra-alta: #00000033;
+  --ciclo-1: #91486F;
+  --ciclo-2: #4B3860;
+  --ciclo-3: #202A33;
+  --ciclo-4: #91486F;
+}
+
+/* oscuro + violeta — fondo claro */
+:root[data-palette="oscuro"] {
+  color-scheme: light;
+  --fondo: #E6E4DF;
+  --superficie: #F2F2F3;
+  --borde: #BFBCB6;
+  --texto: #191614;
+  --texto-suave: #6B645D;
+  --color-a: #202A33;
+  --color-b: #4B3860;
+  --color-a-glow: #3B444B;
+  --color-a-tinte: #202A3322;
+  --color-b-tinte: #4B386022;
+  --sombra: #0000001F;
+  --sombra-alta: #00000033;
+  --ciclo-1: #91486F;
+  --ciclo-2: #4B3860;
+  --ciclo-3: #202A33;
+  --ciclo-4: #91486F;
+}
+
+/* El halo vive acá y no en un módulo porque lo comparten la W y el triángulo del
+   header. CSS Modules le pone scope al nombre de la animación, así que definirlo
+   dentro de uno obligaría a duplicarlo en el otro.
+ *
+ * Las tres capas se encadenan y las varianzas se suman: con radios 0.5/2/3.5 el
+ * sigma combinado es ~2px y el halo muere a ~5.4px del contorno, donde ya cae
+ * por debajo de 1/255 y no hay nada que pintar. La capa de 0.5px da el filo. */
 :root {
-  --bg: #F5F2EE;
-  --card: #FFFFFF;
-  --ink: #1A1A1A;
-  --muted: #8C8680;
-  --line: #E5E0DA;
-  --accent-recolectar: #2D6A4F;
-  --accent-presentar: #7B2D8B;
-  --accent-recolectar-bg: #2D6A4F14;
-  --accent-presentar-bg: #7B2D8B14;
+  --halo:
+    drop-shadow(0 0 0.5px var(--color-a-glow))
+    drop-shadow(0 0 2px var(--color-a-glow))
+    drop-shadow(0 0 3.5px var(--color-a-glow));
 }
 
 * {
@@ -17,8 +185,15 @@
 }
 
 body {
-  background: var(--bg);
-  color: var(--ink);
+  background: var(--fondo);
+  color: var(--texto);
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   min-height: 100dvh;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }

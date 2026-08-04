@@ -1,0 +1,139 @@
+.escena {
+  width: 140px;
+  height: 140px;
+  perspective: 620px;
+}
+
+/* `ciclo` recorre los colores de marca legibles sobre el fondo activo; las caras
+   los toman por currentColor. `girar` da la vuelta completa. */
+.solido {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  color: var(--ciclo-1);
+  animation:
+    girar 14s linear infinite,
+    ciclo 9s linear infinite;
+}
+
+/* La cara nace con su base en el centro de la escena: de ahí el margen negativo
+   de una altura entera. `transform-origin` en la base es lo que hace que el
+   `rotateX` la incline como una tapa con bisagra en la arista del ecuador. */
+.cara {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 84.853px;
+  height: 73.485px;
+  margin-left: -42.426px;
+  margin-top: -73.485px;
+  transform-origin: 50% 100%;
+
+  /* El trazo y su difusión se salen del viewBox; sin esto el SVG los recorta en
+     el borde de su caja y el halo aparece cortado justo en las aristas. */
+  overflow: visible;
+}
+
+/* Solo transporta el <defs>: no dibuja nada y no debe ocupar lugar. */
+.defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+/* Coreografía en vez de giro parejo.
+ *
+ * La clave está en el `animation-timing-function` dentro de cada paso: aplica
+ * al tramo que arranca ahí, así se puede alternar lento, acelerón y frenada en
+ * la misma animación. Un solo timing global daría siempre la misma cadencia.
+ *
+ * El acelerón se logra con mucho ángulo en poco porcentaje: 360° en el 8% del
+ * ciclo (~1.4s) contra 90° en el 14% (~2.5s) de los tramos lentos.
+ *
+ * Cierra en 720deg, que es ≡ 0 en módulo 360, y con el mismo rotateX del
+ * arranque: por eso el loop no tiene salto. */
+@keyframes girar {
+  0% {
+    transform: rotateX(-18deg) rotateY(0deg);
+    animation-timing-function: ease-in-out;
+  }
+  14% {
+    transform: rotateX(-18deg) rotateY(90deg);
+    animation-timing-function: ease-in-out;
+  }
+  /* Cambia de sentido: vuelve sobre sus pasos. */
+  26% {
+    transform: rotateX(-6deg) rotateY(28deg);
+    animation-timing-function: ease-in-out;
+  }
+  38% {
+    transform: rotateX(-32deg) rotateY(105deg);
+    animation-timing-function: cubic-bezier(0.6, 0, 0.15, 1);
+  }
+  /* Queda suspendido un instante antes del tirón. */
+  43% {
+    transform: rotateX(-32deg) rotateY(108deg);
+    animation-timing-function: cubic-bezier(0.85, 0, 0.12, 1);
+  }
+  /* Acelerón: vuelta entera de golpe. */
+  51% {
+    transform: rotateX(-18deg) rotateY(468deg);
+    animation-timing-function: cubic-bezier(0.1, 0.8, 0.2, 1);
+  }
+  /* Frena en seco y rebota apenas hacia atrás. */
+  56% {
+    transform: rotateX(-18deg) rotateY(482deg);
+    animation-timing-function: ease-in-out;
+  }
+  63% {
+    transform: rotateX(-14deg) rotateY(462deg);
+    animation-timing-function: ease-in-out;
+  }
+  /* Vuelco vertical. */
+  73% {
+    transform: rotateX(-56deg) rotateY(505deg);
+    animation-timing-function: cubic-bezier(0.9, 0, 0.1, 1);
+  }
+  79% {
+    transform: rotateX(26deg) rotateY(528deg);
+    animation-timing-function: cubic-bezier(0.85, 0, 0.15, 1);
+  }
+  /* Segundo acelerón, y a frenar hasta el reposo. */
+  88% {
+    transform: rotateX(-18deg) rotateY(694deg);
+    animation-timing-function: ease-out;
+  }
+  100% {
+    transform: rotateX(-18deg) rotateY(720deg);
+    animation-timing-function: ease-in-out;
+  }
+}
+
+@keyframes ciclo {
+  0%,
+  100% {
+    color: var(--ciclo-1);
+  }
+  25% {
+    color: var(--ciclo-2);
+  }
+  50% {
+    color: var(--ciclo-3);
+  }
+  75% {
+    color: var(--ciclo-4);
+  }
+}
+
+/* Quieto pero girado, para que se siga leyendo como volumen y no como triángulo. */
+@media (prefers-reduced-motion: reduce) {
+  .solido {
+    animation: none;
+    transform: rotateX(-18deg) rotateY(28deg);
+  }
+}
+
+/* Sin variante mobile: las caras van en px fijos y escalarlas desde `.solido`
+   chocaría con el `transform` que usa la animación para girar. 140px entran
+   cómodos en cualquier viewport. */

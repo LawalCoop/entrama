@@ -1,22 +1,63 @@
-export function ClipboardList({ size = 24, color = 'var(--accent-recolectar)' }: { size?: number; color?: string }) {
+/**
+ * Íconos de las dos caras: el triángulo del isotipo Lawal.
+ *
+ * Es el mismo triángulo que la marca tiene suelto arriba a la derecha de la W,
+ * aislado. Va en SVG y no como PNG a propósito: la figura es un isósceles
+ * exacto, así que se reproduce sin pérdida, queda nítido a cualquier tamaño y
+ * toma el color de `--color-a` sin tener que elegir entre siete archivos.
+ *
+ * Proporción tomada del asset original (364x286 = 1.2727), verificada contra el
+ * ancho del triángulo a distintas alturas.
+ *
+ * Recolectar apunta abajo, como el original; Presentar es el mismo triángulo
+ * invertido. Misma figura, sentido opuesto — junta contra proyecta.
+ *
+ * Sin halo: el glow es de la marca, no de la interfaz.
+ */
+const ANCHO = 22
+const ALTO = ANCHO / 1.2727
+const ARRIBA = (24 - ALTO) / 2
+const ABAJO = ARRIBA + ALTO
+const IZQ = (24 - ANCHO) / 2
+const DER = IZQ + ANCHO
+
+const ESTILO = { flexShrink: 0, alignSelf: 'center' } as const
+
+type Props = { size?: number; color?: string }
+
+/** Recolectar: el triángulo del isotipo, apuntando hacia adentro. */
+export function ClipboardList({ size = 24, color = 'var(--color-a)' }: Props) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-      <path d="M12 11h4" />
-      <path d="M12 16h4" />
-      <path d="M8 11h.01" />
-      <path d="M8 16h.01" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={ESTILO}>
+      <polygon points={`${IZQ},${ARRIBA} ${DER},${ARRIBA} 12,${ABAJO}`} />
     </svg>
   )
 }
 
-export function Presentation({ size = 24, color = 'var(--accent-presentar)' }: { size?: number; color?: string }) {
+/**
+ * El mismo triángulo girado 90°, apuntando a la derecha: es el signo de prompt
+ * del header, en lugar de un `>`.
+ *
+ * El caracter mayor-que es un símbolo matemático y las fuentes lo centran sobre
+ * el eje matemático, no sobre la base — así que flota por encima de las letras
+ * aunque las cajas estén bien alineadas. Un triángulo se apoya donde le digamos.
+ *
+ * Girado, el original (364x286) queda 286x364, y ese es el viewBox: sin relleno
+ * alrededor, para que el alto que le pida el CSS sea alto de figura.
+ */
+export function Prompt({ className }: { className?: string }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 3h20" />
-      <path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3" />
-      <path d="m7 21 5-5 5 5" />
+    <svg viewBox="0 0 286 364" fill="currentColor" className={className} aria-hidden="true">
+      <polygon points="0,0 286,182 0,364" />
+    </svg>
+  )
+}
+
+/** Presentar: el mismo triángulo, invertido. */
+export function Presentation({ size = 24, color = 'var(--color-a)' }: Props) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={ESTILO}>
+      <polygon points={`${IZQ},${ABAJO} ${DER},${ABAJO} 12,${ARRIBA}`} />
     </svg>
   )
 }
