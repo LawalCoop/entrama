@@ -1,16 +1,16 @@
 {
-  "version": "2.14",
+  "version": "2.15",
   "children": [
     {
       "type": "frame",
       "id": "h1jYI",
       "x": 0,
-      "y": -680,
+      "y": -1008,
       "name": "component/App Layout",
       "reusable": true,
       "clip": true,
-      "width": 800,
-      "height": 600,
+      "width": 1440,
+      "height": 900,
       "fill": "$bg",
       "layout": "vertical",
       "children": [
@@ -24,6 +24,7 @@
           "strokeWidth": {
             "bottom": 1
           },
+          "strokeLinejoin": "round",
           "gap": 8,
           "padding": [
             32,
@@ -114,22 +115,17 @@
               "fill": "$accent-recolectar"
             },
             {
-              "type": "path",
-              "id": "R6A2L",
+              "type": "rectangle",
+              "id": "Apii7",
               "name": "W Logo",
-              "geometry": "M0 0l4.5 0 4.5 16 5-14 5 14 4.5-16 4.5 0-7 20-3.5 0-3.5-12-3.5 12-3.5 0z",
-              "viewBox": [
-                0,
-                0,
-                28,
-                20
-              ],
-              "fill": "$ink",
-              "width": 22,
-              "height": 16,
-              "stroke": "#00000000",
-              "strokeLinejoin": "round",
-              "strokeLinecap": "round"
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "public/w-gris.png",
+                "mode": "fit"
+              },
+              "width": 140,
+              "height": 140
             }
           ]
         },
@@ -144,6 +140,39 @@
           "padding": 48,
           "justifyContent": "center",
           "alignItems": "center"
+        },
+        {
+          "type": "frame",
+          "id": "hSBws",
+          "name": "Footer",
+          "width": "fill_container",
+          "height": 160,
+          "stroke": "$line",
+          "strokeWidth": {
+            "top": 1
+          },
+          "padding": [
+            20,
+            48
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "KeouE",
+              "name": "Lawal Logotipo",
+              "opacity": 0.4,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "public/lawal-logotipo-gris.png",
+                "mode": "fit"
+              },
+              "width": 524,
+              "height": 120
+            }
+          ]
         }
       ]
     },
@@ -234,8 +263,8 @@
     {
       "type": "frame",
       "id": "T0Szr",
-      "x": 0,
-      "y": -960,
+      "x": 1440,
+      "y": -2016,
       "name": "component/Selection Card",
       "reusable": true,
       "width": 280,
@@ -315,34 +344,14 @@
       "type": "ref",
       "ref": "h1jYI",
       "name": "Recolectar",
-      "x": 880,
-      "y": 0,
-      "descendants": {
-        "Q0Xbis": {
-          "fill": "$muted"
-        },
-        "EHgYA": {
-          "enabled": true
-        },
-        "ocdNa": {
-          "enabled": true,
-          "content": "Recolectar"
-        },
-        "ySbYl": {
-          "enabled": true,
-          "icon": "clipboard-list",
-          "fill": "$accent-recolectar"
-        },
-        "R6A2L": {
-          "enabled": false
-        }
-      }
+      "x": 1645,
+      "y": 0
     },
     {
       "type": "frame",
       "id": "itzIC",
       "x": 0,
-      "y": -1884,
+      "y": -2016,
       "name": "component/App Layout Mobile",
       "reusable": true,
       "clip": true,
@@ -361,6 +370,7 @@
           "strokeWidth": {
             "bottom": 1
           },
+          "strokeLinejoin": "round",
           "gap": 6,
           "padding": [
             16,
@@ -438,24 +448,6 @@
               "height": 1
             },
             {
-              "type": "path",
-              "id": "BXcNc",
-              "name": "W Logo",
-              "geometry": "M0 0l4.5 0 4.5 16 5-14 5 14 4.5-16 4.5 0-7 20-3.5 0-3.5-12-3.5 12-3.5 0z",
-              "viewBox": [
-                0,
-                0,
-                28,
-                20
-              ],
-              "fill": "$ink",
-              "width": 16,
-              "height": 12,
-              "stroke": "#00000000",
-              "strokeLinejoin": "round",
-              "strokeLinecap": "round"
-            },
-            {
               "type": "icon",
               "id": "T3LJb",
               "x": 0,
@@ -467,6 +459,19 @@
               "icon": "clipboard-list",
               "library": "lucide",
               "fill": "$accent-recolectar"
+            },
+            {
+              "type": "rectangle",
+              "id": "blU2V",
+              "name": "W Logo",
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "public/w-gris.png",
+                "mode": "fit"
+              },
+              "width": 100,
+              "height": 100
             }
           ]
         },
@@ -484,6 +489,39 @@
           ],
           "justifyContent": "center",
           "alignItems": "center"
+        },
+        {
+          "type": "frame",
+          "id": "hIBNj",
+          "name": "Footer",
+          "width": "fill_container",
+          "height": 120,
+          "stroke": "$line",
+          "strokeWidth": {
+            "top": 1
+          },
+          "padding": [
+            16,
+            20
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "rectangle",
+              "id": "pKpqK",
+              "name": "Lawal Logotipo",
+              "opacity": 0.4,
+              "fill": {
+                "type": "image",
+                "enabled": true,
+                "url": "public/lawal-logotipo-gris.png",
+                "mode": "fit"
+              },
+              "width": 350,
+              "height": 80
+            }
+          ]
         }
       ]
     },
@@ -492,8 +530,8 @@
       "type": "ref",
       "ref": "itzIC",
       "name": "Selección inicial — Mobile",
-      "x": 470,
-      "y": -1884,
+      "x": 472,
+      "y": -2016,
       "descendants": {
         "kLlZ7": {
           "type": "frame",
@@ -583,8 +621,8 @@
       "type": "ref",
       "ref": "itzIC",
       "name": "Recolectar — Mobile",
-      "x": 940,
-      "y": -1884,
+      "x": 937,
+      "y": -2016,
       "descendants": {
         "wlulf": {
           "fill": "$muted"
@@ -595,9 +633,6 @@
         "Rrn1F": {
           "enabled": true,
           "content": "Recolectar"
-        },
-        "BXcNc": {
-          "enabled": false
         },
         "T3LJb": {
           "enabled": true,
