@@ -48,7 +48,16 @@ export default function RootLayout({
   encabezado: ReactNode
 }) {
   return (
-    <html lang="es" className={`${spaceGrotesk.variable} ${inter.variable}`}>
+    // suppressHydrationWarning por `data-palette`: SCRIPT_PALETA lo escribe
+    // antes de hidratar, así que el atributo del cliente no coincide con el del
+    // server —y no puede coincidir, porque el HTML es estático y no sabe qué
+    // paleta eligió este visitante. La supresión vale solo para los atributos
+    // de este elemento, no para su contenido.
+    <html
+      lang="es"
+      className={`${spaceGrotesk.variable} ${inter.variable}`}
+      suppressHydrationWarning
+    >
       <body>
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_PALETA }} />
         <PaletteProvider>
