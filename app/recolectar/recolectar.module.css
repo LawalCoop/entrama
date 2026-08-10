@@ -1,0 +1,331 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.stepLabel {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-a);
+}
+
+.title {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--texto);
+  margin-top: 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--texto-suave);
+  line-height: 1.5;
+}
+
+/* --- Fields (Paso 1) --- */
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.input {
+  height: 48px;
+  padding: 0 14px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  color: var(--texto);
+  font-family: var(--font-heading), sans-serif;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.input::placeholder {
+  color: var(--texto-suave);
+}
+
+.input:focus {
+  border-color: var(--color-a);
+}
+
+/* --- Options (Paso 2, 4) --- */
+
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 10px 16px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  color: var(--texto);
+  font-family: var(--font-heading), sans-serif;
+  font-size: 15px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.option:hover {
+  border-color: var(--texto-suave);
+}
+
+.optionSelected {
+  background: var(--color-a-tinte);
+  border-color: var(--color-a);
+}
+
+.optionDesc {
+  font-size: 13px;
+  font-weight: normal;
+  color: var(--texto-suave);
+  margin-left: 4px;
+}
+
+/* Otra with input */
+
+.otraToggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  color: var(--texto);
+  font-family: var(--font-heading), sans-serif;
+  font-size: 15px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.otraInput {
+  flex: 1;
+  height: 36px;
+  padding: 0 10px;
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  color: var(--texto);
+  font-family: var(--font-heading), sans-serif;
+  font-size: 14px;
+  outline: none;
+}
+
+.otraInput:focus {
+  border-color: var(--color-a);
+}
+
+/* --- Chips (frecuencia) --- */
+
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.chip {
+  padding: 8px 16px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 20px;
+  color: var(--texto);
+  font-family: var(--font-heading), sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.chip:hover {
+  border-color: var(--texto-suave);
+}
+
+.chipSelected {
+  background: var(--color-a-tinte);
+  border-color: var(--color-a);
+  font-weight: 600;
+}
+
+/* --- Textarea (Paso 3) --- */
+
+.textarea {
+  width: 100%;
+  padding: 14px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  color: var(--texto);
+  font-family: var(--font-heading), sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+
+.textarea::placeholder {
+  color: var(--texto-suave);
+}
+
+.textarea:focus {
+  border-color: var(--color-a);
+}
+
+.charCount {
+  font-size: 12px;
+  color: var(--texto-suave);
+  align-self: flex-end;
+}
+
+/* --- Summary (Paso 5) --- */
+
+.summary {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--borde);
+}
+
+.summaryRow:last-child {
+  border-bottom: none;
+}
+
+.summaryBlock {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summaryLabel {
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.summaryValue {
+  font-family: var(--font-heading), sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--texto);
+}
+
+.summaryText {
+  font-size: 14px;
+  color: var(--texto);
+  line-height: 1.5;
+}
+
+/* --- Confirmation --- */
+
+.confirmation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  text-align: center;
+}
+
+.checkCircle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--color-a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirmTitle {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.confirmDesc {
+  font-size: 14px;
+  color: var(--texto-suave);
+  line-height: 1.5;
+  max-width: 320px;
+}
+
+.btnOutline {
+  width: 100%;
+  height: 52px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  color: var(--texto);
+  font-family: var(--font-heading), sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.btnOutline:hover {
+  border-color: var(--texto-suave);
+}
+
+.btnPrimary {
+  width: 100%;
+  height: 52px;
+  background: var(--color-a);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btnPrimary:hover {
+  opacity: 0.85;
+}
+
+.btnOutline:focus-visible,
+.btnPrimary:focus-visible {
+  outline: 2px solid var(--texto);
+  outline-offset: 3px;
+}
