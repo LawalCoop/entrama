@@ -210,7 +210,7 @@ function PasoResumen() {
             <span className={styles.summaryValue}>{value}</span>
           </div>
         ))}
-        {data.problema && (
+        {!!data.problema && (
           <div className={styles.summaryBlock}>
             <span className={styles.summaryLabel}>Problema</span>
             <p className={styles.summaryText}>{data.problema as string}</p>
