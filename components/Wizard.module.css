@@ -43,26 +43,43 @@
   border: none;
   border-radius: 14px;
   cursor: pointer;
-  border-bottom: 4px solid rgba(0, 0, 0, 0.25);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  transition: transform 0.1s, box-shadow 0.1s, border-bottom-width 0.1s;
   position: relative;
+  transition: transform 0.1s, box-shadow 0.1s, border-bottom-width 0.1s;
+}
+
+/* El par se lee como dos caras del mismo acento: Siguiente relleno, Atrás
+   invertido (outline). La cara inferior sale del color de cara, no de negro
+   fijo: así la extrusión acompaña a las siete paletas, claras y oscuras. */
+.atras {
+  background: var(--superficie);
+  color: var(--color-a);
+  border: 1px solid var(--color-a);
+  border-bottom: 4px solid color-mix(in srgb, var(--color-a) 55%, black);
+  box-shadow: 0 4px 10px var(--sombra);
+}
+
+.siguiente {
+  background: var(--color-a);
+  color: var(--texto-accento);
+  border: none;
+  border-bottom: 4px solid color-mix(in srgb, var(--color-a) 60%, black);
+  box-shadow: 0 4px 10px var(--sombra);
 }
 
 .btn:not(:disabled):active {
   transform: translateY(3px);
   border-bottom-width: 1px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 3px var(--sombra);
 }
 
 .btn:disabled {
   cursor: default;
   border-bottom-width: 3px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 6px var(--sombra);
 }
 
 .btn:not(:disabled):hover {
-  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 5px 14px var(--sombra-alta);
 }
 
 .btn:focus-visible {
@@ -72,11 +89,16 @@
 
 .triangle {
   filter:
-    drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35))
-    drop-shadow(0 0 4px currentColor)
-    drop-shadow(0 0 10px currentColor);
+    drop-shadow(0 2px 0 var(--sombra-alta))
+    drop-shadow(0 0 2px currentColor);
+}
+
+.btnLabel {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 16px;
+  font-weight: 600;
 }
 
 .btn:disabled .triangle {
-  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.15));
+  filter: drop-shadow(0 1px 0 var(--sombra));
 }

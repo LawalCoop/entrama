@@ -44,11 +44,32 @@ export function ClipboardList({ size = 24, color = 'var(--color-a)' }: Props) {
  *
  * Girado, el original (364x286) queda 286x364, y ese es el viewBox: sin relleno
  * alrededor, para que el alto que le pida el CSS sea alto de figura.
+ *
+ * La dirección apunta a la derecha por defecto (el prompt del header); `left`
+ * lo gira para los botones de navegación del wizard. Misma figura, espejada.
  */
-export function Prompt({ className }: { className?: string }) {
+export function Prompt({
+  className,
+  direction = 'right',
+  width,
+  height,
+}: {
+  className?: string
+  direction?: 'right' | 'left'
+  width?: number
+  height?: number
+}) {
+  const points = direction === 'right' ? '0,0 286,182 0,364' : '286,0 0,182 286,364'
   return (
-    <svg viewBox="0 0 286 364" fill="currentColor" className={className} aria-hidden="true">
-      <polygon points="0,0 286,182 0,364" />
+    <svg
+      viewBox="0 0 286 364"
+      fill="currentColor"
+      className={className}
+      width={width}
+      height={height}
+      aria-hidden="true"
+    >
+      <polygon points={points} />
     </svg>
   )
 }

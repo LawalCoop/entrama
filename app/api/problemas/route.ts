@@ -1,3 +1,46 @@
-export async function POST() {
-  return Response.json({ ok: true })
+import { withClient } from '@/lib/db'
+import { validar } from '@/lib/recolectar'
+
+/**
+ * Recibe un envío del wizard de /recolectar y lo guarda.
+ *
+ * Vuelve a validar todo aunque el wizard ya lo haya hecho: el endpoint es
+ * público y el `validate` de cada paso corre en el browser, así que es una guía
+ * para quien completa el formulario, no una garantía para la base.
+ *
+ * El 400 dice qué campo está mal —el cliente es nuestro y ayuda a diagnosticar—
+ * pero el 500 no cuenta nada: el detalle de una falla de base va al log del
+ * server, no a la respuesta.
+ */
+export async function POST(request: Request) {
+  let payload: unknown
+  try {
+    payload = await request.json()
+  } catch {
+    return Response.json({ error: 'El cuerpo no es JSON válido.' }, { status: 400 })
+  }
+
+  const validacion = validar(payload)
+  if (!validacion.ok) {
+    return Response.json({ error: validacion.motivo }, { status: 400 })
+  }
+
+  const { nombre, cooperativa, area, problema, frecuencia, impacto } = validacion.valor
+
+  try {
+    const id = await withClient(async (client) => {
+      const { rows } = await client.query<{ id: string }>(
+        `insert into problemas (nombre, cooperativa, area, problema, frecuencia, impacto)
+         values ($1, $2, $3, $4, $5, $6)
+         returning id`,
+        [nombre, cooperativa, area, problema, frecuencia, impacto],
+      )
+      return rows[0].id
+    })
+
+    return Response.json({ id }, { status: 201 })
+  } catch (err) {
+    console.error('POST /api/problemas:', err)
+    return Response.json({ error: 'No se pudo guardar el problema.' }, { status: 500 })
+  }
 }

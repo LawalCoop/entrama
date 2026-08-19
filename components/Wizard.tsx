@@ -8,6 +8,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from 'react'
+import { Prompt } from '@/app/icons'
 import styles from './Wizard.module.css'
 
 const ACTIVE_COLOR = 'var(--color-a)'
@@ -19,7 +20,6 @@ type WizardCtx = {
   back: () => void
   current: number
   total: number
-  color: string
 }
 
 const Ctx = createContext<WizardCtx>(null!)
@@ -40,9 +40,11 @@ export function Step({ children }: StepProps) {
 type WizardProps = {
   children: ReactElement<StepProps>[]
   onComplete: (data: Record<string, unknown>) => void | Promise<void>
+  /** True mientras onComplete está en curso: deshabilita Enviar y evita el doble envío. */
+  busy?: boolean
 }
 
-export default function Wizard({ children, onComplete }: WizardProps) {
+export default function Wizard({ children, onComplete, busy = false }: WizardProps) {
   const [current, setCurrent] = useState(0)
   const [data, setData] = useState<Record<string, unknown>>({})
   const total = children.length
@@ -51,21 +53,19 @@ export default function Wizard({ children, onComplete }: WizardProps) {
     setData((prev) => ({ ...prev, [key]: value }))
   }, [])
 
+  // `onComplete` va acá, en el handler, no dentro del updater: React puede
+  // invocar el updater dos veces en StrictMode, y ahí un envío doble era seguro.
   const next = useCallback(() => {
-    setCurrent((i) => {
-      if (i >= total - 1) {
-        onComplete(data)
-        return i
-      }
-      return i + 1
-    })
-  }, [total, onComplete, data])
+    if (current >= total - 1) {
+      onComplete(data)
+      return
+    }
+    setCurrent((i) => i + 1)
+  }, [current, total, onComplete, data])
 
   const back = useCallback(() => {
     setCurrent((i) => Math.max(0, i - 1))
   }, [])
-
-  const color = ACTIVE_COLOR
 
   const currentStep = children[current]
   const canAdvance = currentStep.props.validate
@@ -73,7 +73,7 @@ export default function Wizard({ children, onComplete }: WizardProps) {
     : true
 
   return (
-    <Ctx.Provider value={{ data, set, next, back, current, total, color }}>
+    <Ctx.Provider value={{ data, set, next, back, current, total }}>
       <div className={styles.wizard}>
         <div className={styles.progress}>
           {children.map((_, i) => (
@@ -92,50 +92,30 @@ export default function Wizard({ children, onComplete }: WizardProps) {
         <div className={styles.nav}>
           <button
             type="button"
-            className={styles.btn}
-            style={{
-              backgroundColor: 'var(--borde)',
-              color: 'var(--texto)',
-              opacity: current === 0 ? 0.4 : 1,
-            }}
+            className={`${styles.btn} ${styles.atras}`}
+            style={{ opacity: current === 0 ? 0.4 : 1 }}
             disabled={current === 0}
             onClick={back}
             aria-label="Atrás"
           >
-            <Triangle direction="left" />
+            <Prompt direction="left" width={24} height={30} className={styles.triangle} />
           </button>
           <button
             type="button"
-            className={styles.btn}
-            style={{
-              backgroundColor: color,
-              color: '#fff',
-              opacity: canAdvance ? 1 : 0.4,
-            }}
-            disabled={!canAdvance}
+            className={`${styles.btn} ${styles.siguiente}`}
+            style={{ opacity: canAdvance && !busy ? 1 : 0.4 }}
+            disabled={!canAdvance || busy}
             onClick={next}
             aria-label={current === total - 1 ? 'Enviar' : 'Siguiente'}
           >
-            <Triangle direction="right" />
+            {current === total - 1 ? (
+              <span className={styles.btnLabel}>Enviar</span>
+            ) : (
+              <Prompt direction="right" width={24} height={30} className={styles.triangle} />
+            )}
           </button>
         </div>
       </div>
     </Ctx.Provider>
-  )
-}
-
-function Triangle({ direction }: { direction: 'left' | 'right' }) {
-  const points = direction === 'right' ? '0,0 286,182 0,364' : '286,0 0,182 286,364'
-  return (
-    <svg
-      width={24}
-      height={30}
-      viewBox="0 0 286 364"
-      fill="currentColor"
-      className={styles.triangle}
-      aria-hidden="true"
-    >
-      <polygon points={points} />
-    </svg>
   )
 }

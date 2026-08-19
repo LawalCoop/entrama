@@ -1,0 +1,93 @@
+/**
+ * Las opciones del formulario y las reglas que las validan, en un solo lugar.
+ *
+ * Vivían dentro del componente cliente, que es exactamente donde no sirven: el
+ * `validate` de cada paso del wizard corre en el browser y cualquiera puede
+ * saltearlo pegándole al endpoint directo. El server tiene que volver a validar
+ * igual, y si para eso repite las listas, tarde o temprano una de las dos copias
+ * se queda vieja. Acá las dos puntas leen la misma definición.
+ */
+
+export const AREAS = ['Producción', 'Logística', 'Administración', 'Comunicación', 'Ventas'] as const
+
+export const FRECUENCIAS = ['Diario', 'Semanal', 'Mensual', 'Rara vez'] as const
+
+export const IMPACTOS = [
+  { label: 'Poco', desc: 'Es molesto pero se puede seguir trabajando.' },
+  { label: 'Bastante', desc: 'Perdemos tiempo o cometemos errores seguido.' },
+  { label: 'Mucho', desc: 'Frena el trabajo o genera problemas serios.' },
+] as const
+
+/** Cuánto texto admite la descripción del problema. */
+export const LIMITE_PROBLEMA = 1000
+
+/** Tope para los campos de una línea (nombre, cooperativa, área). */
+export const LIMITE_CORTO = 120
+
+/**
+ * `area` no se valida contra AREAS: el paso 2 ofrece "Otra" con texto libre, así
+ * que la lista es una sugerencia, no un dominio cerrado. Frecuencia e impacto sí
+ * son cerrados — no hay forma de elegir algo fuera de la lista en la UI.
+ */
+const FRECUENCIAS_VALIDAS: ReadonlySet<string> = new Set(FRECUENCIAS)
+const IMPACTOS_VALIDOS: ReadonlySet<string> = new Set(IMPACTOS.map((i) => i.label))
+
+export type Problema = {
+  nombre: string
+  cooperativa: string
+  area: string
+  problema: string
+  frecuencia: string
+  impacto: string
+}
+
+export type Validacion =
+  | { ok: true; valor: Problema }
+  | { ok: false; motivo: string }
+
+/** Devuelve el texto recortado, o null si no es un string con contenido dentro del límite. */
+function texto(valor: unknown, limite: number): string | null {
+  if (typeof valor !== 'string') return null
+  const limpio = valor.trim()
+  if (!limpio || limpio.length > limite) return null
+  return limpio
+}
+
+/**
+ * Valida el cuerpo de un envío del wizard.
+ *
+ * Devuelve el motivo en vez de tirar: quien llama decide si lo muestra o lo
+ * loguea. El motivo nombra el campo pero no repite lo que mandaron, así no
+ * termina reflejando input del usuario en la respuesta.
+ */
+export function validar(payload: unknown): Validacion {
+  if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) {
+    return { ok: false, motivo: 'El cuerpo tiene que ser un objeto.' }
+  }
+
+  const d = payload as Record<string, unknown>
+
+  const nombre = texto(d.nombre, LIMITE_CORTO)
+  if (!nombre) return { ok: false, motivo: `"nombre" es obligatorio (hasta ${LIMITE_CORTO} caracteres).` }
+
+  const cooperativa = texto(d.cooperativa, LIMITE_CORTO)
+  if (!cooperativa) return { ok: false, motivo: `"cooperativa" es obligatoria (hasta ${LIMITE_CORTO} caracteres).` }
+
+  const area = texto(d.area, LIMITE_CORTO)
+  if (!area) return { ok: false, motivo: `"area" es obligatoria (hasta ${LIMITE_CORTO} caracteres).` }
+
+  const problema = texto(d.problema, LIMITE_PROBLEMA)
+  if (!problema) return { ok: false, motivo: `"problema" es obligatorio (hasta ${LIMITE_PROBLEMA} caracteres).` }
+
+  const frecuencia = texto(d.frecuencia, LIMITE_CORTO)
+  if (!frecuencia || !FRECUENCIAS_VALIDAS.has(frecuencia)) {
+    return { ok: false, motivo: '"frecuencia" no es una de las opciones válidas.' }
+  }
+
+  const impacto = texto(d.impacto, LIMITE_CORTO)
+  if (!impacto || !IMPACTOS_VALIDOS.has(impacto)) {
+    return { ok: false, motivo: '"impacto" no es una de las opciones válidas.' }
+  }
+
+  return { ok: true, valor: { nombre, cooperativa, area, problema, frecuencia, impacto } }
+}
