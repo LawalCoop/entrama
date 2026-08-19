@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dinámica FACTTIC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"></script>
+    <style>
+        :root {
+            --color-fondo: #0f172a;
+            --color-card: #1e293b;
+            --color-texto: #f1f5f9;
+            --color-texto-secundario: #94a3b8;
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+            --equipo-actual: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--color-fondo);
+            color: var(--color-texto);
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        /* Pantallas */
+        .pantalla {
+            display: none;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: 1rem;
+        }
+
+        .pantalla.activa {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 1rem 0;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .header p {
+            color: var(--color-texto-secundario);
+            font-size: 0.9rem;
+        }
+
+        /* Timer global */
+        .timer-global {
+            background: var(--color-card);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .timer-global.activo {
+            display: block;
+        }
+
+        .timer-global .tiempo {
+            font-size: 2rem;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-global .tiempo.urgente {
+            color: #ef4444;
+            animation: pulso 1s infinite;
+        }
+
+        @keyframes pulso {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Lista de equipos */
+        .equipos-lista {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 1rem;
+        }
+
+        .equipo-card {
+            background: var(--color-card);
+            border-radius: 16px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-left: 5px solid;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .equipo-card:active {
+            transform: scale(0.98);
+        }
+
+        .equipo-card .equipo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .equipo-card .equipo-nombre {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .equipo-card .equipo-contador {
+            background: rgba(255,255,255,0.1);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .equipo-card .equipo-tema {
+            color: var(--color-texto-secundario);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .equipo-card .equipo-terminado-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: var(--color-success);
+            color: var(--color-fondo);
+            padding: 0.2rem 0.5rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        /* Sugerencia de balanceo */
+        .sugerencia {
+            background: linear-gradient(135deg, #1e3a5f 0%, #1e293b 100%);
+            border: 1px solid var(--color-warning);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .sugerencia.activa {
+            display: block;
+            animation: sugerenciaPulso 0.5s ease-out;
+        }
+
+        @keyframes sugerenciaPulso {
+            0% { transform: scale(0.95); opacity: 0; }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .sugerencia p {
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+
+        .sugerencia .botones {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .sugerencia button {
+            flex: 1;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .sugerencia .btn-aceptar {
+            background: var(--color-warning);
+            color: var(--color-fondo);
+        }
+
+        .sugerencia .btn-rechazar {
+            background: rgba(255,255,255,0.1);
+            color: var(--color-texto);
+        }
+
+        /* Link Google Doc */
+        .btn-google-doc {
+            display: block;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            margin: 1rem 0;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .btn-google-doc:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn-logout {
+            display: block;
+            color: var(--color-texto);
+            font-size: 1rem;
+            text-decoration: none;
+            margin-top: 1.5rem;
+            text-align: center;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Formulario */
+        .formulario {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--color-texto-secundario);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            background: var(--color-card);
+            color: var(--color-texto);
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--equipo-actual);
+        }
+
+        .form-group select option {
+            background: var(--color-card);
+        }
+
+        .equipo-preview {
+            background: var(--color-card);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--equipo-actual);
+        }
+
+        .equipo-preview .nombre {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .equipo-preview .tema {
+            color: var(--color-texto-secundario);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Botones */
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--equipo-actual);
+            color: white;
+        }
+
+        .btn-primary:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--color-texto);
+            margin-top: 0.75rem;
+        }
+
+        .btn-success {
+            background: var(--color-success);
+            color: var(--color-fondo);
+        }
+
+        .btn-warning {
+            background: var(--color-warning);
+            color: var(--color-fondo);
+        }
+
+        /* Pantalla de confirmación */
+        .pantalla-confirmacion {
+            background: var(--equipo-actual);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .pantalla-confirmacion .icono-check {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .pantalla-confirmacion h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pantalla-confirmacion .tema-titulo {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .pantalla-confirmacion .preguntas {
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .pantalla-confirmacion .preguntas h3 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .pantalla-confirmacion .preguntas ul {
+            list-style: none;
+        }
+
+        .pantalla-confirmacion .preguntas li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .pantalla-confirmacion .preguntas li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+        }
+
+        .pantalla-confirmacion .timer-confirmacion {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .pantalla-confirmacion .timer-confirmacion.activo {
+            display: block;
+        }
+
+        .pantalla-confirmacion .timer-confirmacion .tiempo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .pantalla-confirmacion .acciones {
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .pantalla-confirmacion .btn {
+            background: rgba(0,0,0,0.3);
+            color: white;
+            margin-bottom: 0.75rem;
+        }
+
+        .pantalla-confirmacion .btn:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Pantalla cierre (formulario reflexión) */
+        .pantalla-cierre {
+            background: var(--color-fondo);
+        }
+
+        .pantalla-cierre .header {
+            margin-bottom: 1rem;
+        }
+
+        .pantalla-cierre .formulario-cierre {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .pantalla-cierre .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            background: var(--color-card);
+            color: var(--color-texto);
+            font-size: 1rem;
+            min-height: 100px;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .pantalla-cierre .form-group textarea:focus {
+            outline: none;
+            border-color: var(--equipo-actual);
+        }
+
+        .pantalla-cierre .accionables-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .pantalla-cierre .accionable-input {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .pantalla-cierre .accionable-input .numero {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--equipo-actual);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .pantalla-cierre .accionable-input input {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border-radius: 10px;
+            border: 2px solid transparent;
+            background: var(--color-card);
+            color: var(--color-texto);
+            font-size: 0.95rem;
+        }
+
+        .pantalla-cierre .accionable-input input:focus {
+            outline: none;
+            border-color: var(--equipo-actual);
+        }
+
+        .pantalla-cierre .accionable-input input:first-of-type {
+            flex: 2;
+            min-width: 150px;
+        }
+
+        .pantalla-cierre .accionable-input .input-responsable {
+            flex: 1;
+            min-width: 120px;
+            font-size: 0.85rem;
+            padding: 0.75rem 0.875rem;
+        }
+
+        .pantalla-cierre .contador-accionables {
+            text-align: center;
+            color: var(--color-texto-secundario);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .pantalla-cierre .contador-accionables.completo {
+            color: var(--color-success);
+        }
+
+        /* Pantalla terminado */
+        .pantalla-terminado {
+            background: var(--equipo-actual);
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .pantalla-terminado .icono-check {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pantalla-terminado h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pantalla-terminado .equipo-nombre {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        /* Indicador de conexión */
+        .conexion-indicator {
+            position: fixed;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--color-success);
+        }
+
+        .conexion-indicator.desconectado {
+            background: #ef4444;
+            animation: pulso 1s infinite;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--color-texto);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Utilidades */
+        .mb-1 { margin-bottom: 1rem; }
+        .mt-auto { margin-top: auto; }
+        .text-center { text-align: center; }
+
+        /* Alerta de tiempo */
+        .alerta-tiempo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: alertaFade 0.3s ease;
+        }
+
+        .alerta-tiempo.activa {
+            display: flex;
+        }
+
+        .alerta-tiempo.alerta-5min {
+            background: rgba(234, 179, 8, 0.95);
+        }
+
+        .alerta-tiempo.alerta-final {
+            background: rgba(239, 68, 68, 0.95);
+        }
+
+        .alerta-tiempo .alerta-contenido {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .alerta-tiempo .alerta-icono {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .alerta-tiempo .alerta-titulo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .alerta-tiempo .alerta-mensaje {
+            font-size: 1.3rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 1.5rem;
+        }
+
+        .alerta-tiempo .btn-cerrar-alerta {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        @keyframes alertaFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Popup de bienvenida al equipo */
+        .popup-bienvenida {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 2rem;
+            animation: alertaFade 0.3s ease;
+        }
+
+        .popup-bienvenida.activo {
+            display: flex;
+        }
+
+        .popup-bienvenida .popup-contenido {
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .popup-bienvenida .popup-icono {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .popup-bienvenida .popup-titulo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 1.5rem;
+            line-height: 1.3;
+        }
+
+        .popup-bienvenida .popup-mensaje {
+            font-size: 1.2rem;
+            color: rgba(255,255,255,0.9);
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .popup-bienvenida .popup-timer {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 1rem;
+        }
+
+        .popup-bienvenida .btn-cerrar-popup {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="conexion-indicator" id="conexionIndicator"></div>
+
+    <!-- Popup de bienvenida al equipo -->
+    <div class="popup-bienvenida" id="popupBienvenida">
+        <div class="popup-contenido">
+            <div class="popup-icono">📱</div>
+            <div class="popup-titulo" id="popupTitulo">¡Te sumaste!</div>
+            <div class="popup-mensaje">Levantá el celular, mostrá la pantalla y buscá a los de tu color para unirte al equipo</div>
+            <div class="popup-timer" id="popupTimer"></div>
+            <button class="btn-cerrar-popup" onclick="cerrarPopupBienvenida()">¡Entendido!</button>
+        </div>
+    </div>
+
+    <!-- Alerta de tiempo -->
+    <div class="alerta-tiempo" id="alertaTiempo">
+        <div class="alerta-contenido">
+            <div class="alerta-icono" id="alertaIcono">⏰</div>
+            <div class="alerta-titulo" id="alertaTitulo">¡Quedan 5 minutos!</div>
+            <div class="alerta-mensaje" id="alertaMensaje">Es momento de ir cerrando las conclusiones</div>
+            <button class="btn-cerrar-alerta" onclick="cerrarAlerta()">Entendido</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 0: Registro inicial -->
+    <div class="pantalla activa" id="pantallaRegistro">
+        <div class="header">
+            <img src="logo_facttic.png" alt="FACTTIC" style="height: 50px; margin-bottom: 1rem;">
+            <h1>Dinámica de Grupos</h1>
+            <p>Primero contanos quién sos</p>
+        </div>
+
+        <div class="formulario">
+            <div class="form-group">
+                <label for="inputNombreRegistro">Tu nombre</label>
+                <input type="text" id="inputNombreRegistro" placeholder="Ej: Juan Pérez" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="inputCooperativaRegistro">Tu cooperativa</label>
+                <input type="text" id="inputCooperativaRegistro" list="listaCooperativas" placeholder="Escribí para buscar..." autocomplete="off">
+                <datalist id="listaCooperativas"></datalist>
+            </div>
+
+            <div class="mt-auto">
+                <button class="btn btn-primary" id="btnContinuar">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA 1: Selección de equipo -->
+    <div class="pantalla" id="pantallaSeleccion">
+        <div class="header">
+            <img src="logo_facttic.png" alt="FACTTIC" style="height: 40px; margin-bottom: 0.5rem;">
+            <h1>Elegí un equipo</h1>
+            <p id="saludoUsuario">Hola! Elegí un tema para trabajar</p>
+        </div>
+
+        <div class="timer-global" id="timerGlobal">
+            <div class="tiempo" id="timerTiempo">--:--</div>
+        </div>
+
+        <div class="sugerencia" id="sugerencia">
+            <p id="sugerenciaTexto"></p>
+            <div class="botones">
+                <button class="btn-aceptar" id="btnAceptarSugerencia">Ir a ese equipo</button>
+                <button class="btn-rechazar" id="btnRechazarSugerencia">Quedarme acá</button>
+            </div>
+        </div>
+
+        <div class="equipos-lista" id="equiposLista">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+
+        <a href="#" class="btn-logout" id="btnLogout">🚪 Salir y cambiar de persona</a>
+    </div>
+
+    <!-- PANTALLA 3: Confirmación -->
+    <div class="pantalla pantalla-confirmacion" id="pantallaConfirmacion">
+        <div class="icono-check">✓</div>
+        <h2 id="confirmacionEquipo"></h2>
+        <p class="tema-titulo" id="confirmacionTema"></p>
+
+        <div class="timer-confirmacion" id="timerConfirmacion">
+            <div>Tiempo restante</div>
+            <div class="tiempo" id="timerConfirmacionTiempo">--:--</div>
+        </div>
+
+        <div class="preguntas" id="confirmacionPreguntas">
+            <h3>Preguntas disparadoras</h3>
+            <ul id="preguntasLista"></ul>
+        </div>
+
+        <a href="#" id="linkGoogleDoc" target="_blank" class="btn-google-doc" style="display: none;">
+            📄 Abrir documento del equipo
+        </a>
+
+        <div class="acciones">
+            <button class="btn" id="btnCambiarEquipo">Cambiar de equipo</button>
+            <button class="btn btn-success" id="btnTerminamos">Cargar conclusiones ✓</button>
+        </div>
+    </div>
+
+    <!-- PANTALLA 4: Formulario de cierre -->
+    <div class="pantalla pantalla-cierre" id="pantallaCierre">
+        <div class="header">
+            <h1>Cierre del equipo</h1>
+            <p id="cierreEquipoNombre"></p>
+        </div>
+
+        <div class="formulario-cierre">
+            <div class="form-group">
+                <label for="inputReflexion">Reflexión general del grupo</label>
+                <textarea id="inputReflexion" placeholder="¿Cuál fue la conclusión principal del equipo sobre este tema?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Accionables concretos</label>
+                <p style="color: var(--color-texto-secundario); font-size: 0.85rem; margin: -0.5rem 0 0.75rem;">El responsable puede ser un área, espacio, persona, cooperativa, comisión, etc.</p>
+                <div class="accionables-lista">
+                    <div class="accionable-input">
+                        <span class="numero">1</span>
+                        <input type="text" id="accionable1" placeholder="Accionable...">
+                        <input type="text" id="responsable1" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">2</span>
+                        <input type="text" id="accionable2" placeholder="Accionable...">
+                        <input type="text" id="responsable2" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">3</span>
+                        <input type="text" id="accionable3" placeholder="Accionable...">
+                        <input type="text" id="responsable3" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">4</span>
+                        <input type="text" id="accionable4" placeholder="Accionable...">
+                        <input type="text" id="responsable4" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">5</span>
+                        <input type="text" id="accionable5" placeholder="Accionable...">
+                        <input type="text" id="responsable5" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">6</span>
+                        <input type="text" id="accionable6" placeholder="Accionable...">
+                        <input type="text" id="responsable6" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">7</span>
+                        <input type="text" id="accionable7" placeholder="Accionable...">
+                        <input type="text" id="responsable7" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">8</span>
+                        <input type="text" id="accionable8" placeholder="Accionable...">
+                        <input type="text" id="responsable8" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">9</span>
+                        <input type="text" id="accionable9" placeholder="Accionable...">
+                        <input type="text" id="responsable9" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">10</span>
+                        <input type="text" id="accionable10" placeholder="Accionable...">
+                        <input type="text" id="responsable10" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                </div>
+                <div class="contador-accionables" id="contadorAccionables">0 accionables completados</div>
+            </div>
+
+            <div class="mt-auto" style="padding-top: 1rem;">
+                <button class="btn btn-success" id="btnEnviarCierre" disabled>Enviar cierre ✓</button>
+                <button class="btn btn-secondary" id="btnCancelarCierre">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA 5: Terminado -->
+    <div class="pantalla pantalla-terminado" id="pantallaTerminado">
+        <div class="icono-check">✓</div>
+        <h2>¡Listo!</h2>
+        <p class="equipo-nombre" id="terminadoEquipo"></p>
+        <p style="opacity: 0.8; margin-bottom: 2rem;">Tu equipo envió sus conclusiones</p>
+        <button class="btn" id="btnNoTerminamos" style="max-width: 300px;">Editar cierre ↩</button>
+    </div>
+
+    <script>
+        // Configuración Supabase
+        const SUPABASE_URL = 'https://aziyyqvupqaexdzmumvl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6aXl5cXZ1cHFhZXhkem11bXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMDYxOTUsImV4cCI6MjA4MDg4MjE5NX0.Rc_Bom4RPoAcIMoifdWZJIhItsPEBbUHTSyT8SYEcv0';
+
+        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Estado de la aplicación
+        let estado = {
+            deviceId: null,
+            participante: null,
+            equipos: [],
+            cooperativas: [],
+            contadores: {},
+            cooperativasPorEquipo: {},
+            config: null,
+            equipoSeleccionado: null,
+            timerInterval: null,
+            // Datos del registro inicial
+            nombreUsuario: null,
+            cooperativaUsuario: null
+        };
+
+        // Utilidades
+        function generarDeviceId() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('facttic_device_id');
+            if (!deviceId) {
+                deviceId = generarDeviceId();
+                localStorage.setItem('facttic_device_id', deviceId);
+            }
+            return deviceId;
+        }
+
+        // Navegación entre pantallas
+        function mostrarPantalla(id) {
+            document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
+            document.getElementById(id).classList.add('activa');
+        }
+
+        // Actualizar indicador de conexión
+        function setConexion(conectado) {
+            const indicator = document.getElementById('conexionIndicator');
+            indicator.classList.toggle('desconectado', !conectado);
+        }
+
+        // Cargar datos iniciales
+        async function cargarDatos() {
+            try {
+                // Cargar equipos
+                const { data: equipos, error: errorEquipos } = await supabase
+                    .from('equipos')
+                    .select('*')
+                    .eq('activo', true)
+                    .order('orden');
+
+                if (errorEquipos) throw errorEquipos;
+                estado.equipos = equipos || [];
+
+                // Cargar cooperativas
+                const { data: cooperativas, error: errorCoops } = await supabase
+                    .from('cooperativas')
+                    .select('*')
+                    .eq('activa', true)
+                    .order('orden');
+
+                if (errorCoops) throw errorCoops;
+                estado.cooperativas = cooperativas || [];
+
+                // Cargar participantes para contadores
+                const { data: participantes, error: errorParts } = await supabase
+                    .from('participantes')
+                    .select('*');
+
+                if (errorParts) throw errorParts;
+
+                // Calcular contadores
+                calcularContadores(participantes || []);
+
+                // Cargar config
+                const { data: config, error: errorConfig } = await supabase
+                    .from('config')
+                    .select('*')
+                    .eq('id', 1)
+                    .single();
+
+                if (!errorConfig && config) {
+                    estado.config = config;
+                }
+
+                // Verificar si ya hay participante de este dispositivo
+                const miParticipante = (participantes || []).find(p => p.device_id === estado.deviceId);
+                if (miParticipante) {
+                    estado.participante = miParticipante;
+                }
+
+                setConexion(true);
+                return true;
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                setConexion(false);
+                return false;
+            }
+        }
+
+        function calcularContadores(participantes) {
+            estado.contadores = {};
+            estado.cooperativasPorEquipo = {};
+
+            estado.equipos.forEach(e => {
+                estado.contadores[e.id] = 0;
+                estado.cooperativasPorEquipo[e.id] = [];
+            });
+
+            participantes.forEach(p => {
+                if (p.equipo_id && estado.contadores[p.equipo_id] !== undefined) {
+                    estado.contadores[p.equipo_id]++;
+                    if (!estado.cooperativasPorEquipo[p.equipo_id].includes(p.cooperativa)) {
+                        estado.cooperativasPorEquipo[p.equipo_id].push(p.cooperativa);
+                    }
+                }
+            });
+        }
+
+        // Renderizar equipos
+        function renderizarEquipos() {
+            const container = document.getElementById('equiposLista');
+
+            if (estado.equipos.length === 0) {
+                container.innerHTML = '<p class="text-center" style="color: var(--color-texto-secundario);">No hay equipos disponibles</p>';
+                return;
+            }
+
+            // Calcular terminados por equipo
+            const terminadosPorEquipo = {};
+            estado.equipos.forEach(e => terminadosPorEquipo[e.id] = 0);
+
+            container.innerHTML = estado.equipos.map(equipo => {
+                const contador = estado.contadores[equipo.id] || 0;
+                return `
+                    <div class="equipo-card" style="border-color: ${equipo.color}" onclick="seleccionarEquipo('${equipo.id}')">
+                        <div class="equipo-header">
+                            <div class="equipo-nombre" style="color: ${equipo.color}">${equipo.nombre}</div>
+                            <div class="equipo-contador">${contador} personas</div>
+                        </div>
+                        <div class="equipo-tema">${equipo.tema || ''}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Poblar lista de cooperativas
+        function poblarCooperativas() {
+            const datalist = document.getElementById('listaCooperativas');
+            datalist.innerHTML = estado.cooperativas.map(coop =>
+                `<option value="${coop.nombre}">`
+            ).join('');
+        }
+
+        // Lógica de sugerencia de balanceo
+        function verificarBalanceo(equipoId, cooperativa) {
+            const total = Object.values(estado.contadores).reduce((a, b) => a + b, 0);
+            const cantidadEquipos = estado.equipos.length;
+            if (cantidadEquipos === 0 || total === 0) return null;
+
+            const promedio = total / cantidadEquipos;
+            const umbral = promedio * 1.3;
+            const contadorEquipo = estado.contadores[equipoId] || 0;
+
+            // Verificar si el equipo tiene mucha gente
+            if (contadorEquipo > umbral && contadorEquipo > 3) {
+                const equipoMenosGente = estado.equipos
+                    .filter(e => e.id !== equipoId)
+                    .sort((a, b) => (estado.contadores[a.id] || 0) - (estado.contadores[b.id] || 0))[0];
+
+                if (equipoMenosGente) {
+                    return {
+                        tipo: 'balance',
+                        equipo: equipoMenosGente,
+                        mensaje: `Este equipo ya tiene mucha gente. ¿Querés sumarte a "${equipoMenosGente.nombre}" que tiene menos participantes?`
+                    };
+                }
+            }
+
+            // Verificar si ya hay gente de la misma cooperativa
+            if (cooperativa && estado.cooperativasPorEquipo[equipoId]?.includes(cooperativa)) {
+                const equiposSinMiCoope = estado.equipos.filter(e =>
+                    e.id !== equipoId && !estado.cooperativasPorEquipo[e.id]?.includes(cooperativa)
+                );
+
+                if (equiposSinMiCoope.length > 0) {
+                    const equipoSugerido = equiposSinMiCoope[0];
+                    return {
+                        tipo: 'diversidad',
+                        equipo: equipoSugerido,
+                        mensaje: `Ya hay gente de tu cooperativa en este equipo. ¿Querés sumarte a "${equipoSugerido.nombre}" para diversificar?`
+                    };
+                }
+            }
+
+            return null;
+        }
+
+        // Registro inicial
+        function continuarRegistro() {
+            const nombre = document.getElementById('inputNombreRegistro').value.trim();
+            const cooperativa = document.getElementById('inputCooperativaRegistro').value.trim();
+
+            if (!nombre) {
+                alert('Por favor ingresá tu nombre');
+                return;
+            }
+
+            if (!cooperativa) {
+                alert('Por favor ingresá tu cooperativa');
+                return;
+            }
+
+            // Validar que sea una cooperativa de la lista
+            const coopValida = estado.cooperativas.some(c => c.nombre.toLowerCase() === cooperativa.toLowerCase());
+            if (!coopValida) {
+                alert('Por favor seleccioná una cooperativa de la lista');
+                return;
+            }
+
+            // Guardar en estado y localStorage
+            estado.nombreUsuario = nombre;
+            estado.cooperativaUsuario = cooperativa;
+            localStorage.setItem('facttic_nombre', nombre);
+            localStorage.setItem('facttic_cooperativa', cooperativa);
+
+            // Mostrar saludo personalizado
+            document.getElementById('saludoUsuario').textContent = `${nombre}, elegí un tema para trabajar`;
+
+            mostrarPantalla('pantallaSeleccion');
+        }
+
+        // Seleccionar equipo
+        async function seleccionarEquipo(equipoId) {
+            const equipo = estado.equipos.find(e => e.id === equipoId);
+            if (!equipo) return;
+
+            estado.equipoSeleccionado = equipo;
+
+            // Actualizar color
+            document.documentElement.style.setProperty('--equipo-actual', equipo.color);
+
+            // Verificar balanceo antes de confirmar
+            const sugerencia = verificarBalanceo(equipoId, estado.cooperativaUsuario);
+            if (sugerencia) {
+                mostrarSugerencia(sugerencia);
+                return;
+            }
+
+            await registrarParticipante(estado.nombreUsuario, estado.cooperativaUsuario, equipoId);
+        }
+
+        function mostrarSugerencia(sugerencia) {
+            document.getElementById('sugerenciaTexto').textContent = sugerencia.mensaje;
+            document.getElementById('sugerencia').classList.add('activa');
+
+            // Scroll al tope para que se vea la sugerencia
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('sugerencia').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            document.getElementById('btnAceptarSugerencia').onclick = async () => {
+                document.getElementById('sugerencia').classList.remove('activa');
+                estado.equipoSeleccionado = sugerencia.equipo;
+                await registrarParticipante(estado.nombreUsuario, estado.cooperativaUsuario, sugerencia.equipo.id);
+            };
+
+            document.getElementById('btnRechazarSugerencia').onclick = async () => {
+                document.getElementById('sugerencia').classList.remove('activa');
+                await registrarParticipante(estado.nombreUsuario, estado.cooperativaUsuario, estado.equipoSeleccionado.id);
+            };
+        }
+
+        async function registrarParticipante(nombre, cooperativa, equipoId) {
+            // Deshabilitar clicks en equipos mientras se guarda
+            document.querySelectorAll('.equipo-card').forEach(card => {
+                card.style.pointerEvents = 'none';
+                card.style.opacity = '0.5';
+            });
+
+            try {
+                const equipo = estado.equipos.find(e => e.id === equipoId);
+
+                if (estado.participante) {
+                    // Actualizar participante existente
+                    const { error } = await supabase
+                        .from('participantes')
+                        .update({
+                            nombre,
+                            cooperativa,
+                            equipo_id: equipoId,
+                            terminado: false,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', estado.participante.id);
+
+                    if (error) throw error;
+
+                    estado.participante = {
+                        ...estado.participante,
+                        nombre,
+                        cooperativa,
+                        equipo_id: equipoId,
+                        terminado: false
+                    };
+                } else {
+                    // Crear nuevo participante
+                    console.log('Creando participante:', { device_id: estado.deviceId, nombre, cooperativa, equipo_id: equipoId });
+                    const { data, error } = await supabase
+                        .from('participantes')
+                        .insert({
+                            device_id: estado.deviceId,
+                            nombre,
+                            cooperativa,
+                            equipo_id: equipoId,
+                            terminado: false
+                        })
+                        .select()
+                        .single();
+
+                    console.log('Respuesta insert:', { data, error });
+                    if (error) throw error;
+                    if (!data) throw new Error('No se recibió data del insert');
+                    estado.participante = data;
+                }
+
+                estado.equipoSeleccionado = equipo;
+                mostrarConfirmacion(true); // true = mostrar popup de bienvenida
+            } catch (error) {
+                console.error('Error registrando participante:', error);
+                alert('Error al guardar. Intentá de nuevo.');
+                // Rehabilitar clicks
+                document.querySelectorAll('.equipo-card').forEach(card => {
+                    card.style.pointerEvents = '';
+                    card.style.opacity = '';
+                });
+            }
+        }
+
+        function mostrarConfirmacion(esNuevoJoin = false) {
+            const equipo = estado.equipoSeleccionado;
+
+            document.documentElement.style.setProperty('--equipo-actual', equipo.color);
+            document.getElementById('pantallaConfirmacion').style.background = equipo.color;
+
+            document.getElementById('confirmacionEquipo').textContent = equipo.nombre;
+            document.getElementById('confirmacionTema').textContent = equipo.tema || '';
+
+            // Preguntas
+            const preguntasLista = document.getElementById('preguntasLista');
+            if (equipo.preguntas && equipo.preguntas.length > 0) {
+                preguntasLista.innerHTML = equipo.preguntas.map(p => `<li>${p}</li>`).join('');
+                document.getElementById('confirmacionPreguntas').style.display = 'block';
+            } else {
+                document.getElementById('confirmacionPreguntas').style.display = 'none';
+            }
+
+            // Link Google Doc
+            const linkDoc = document.getElementById('linkGoogleDoc');
+            if (equipo.google_doc) {
+                linkDoc.href = equipo.google_doc;
+                linkDoc.style.display = 'block';
+            } else {
+                linkDoc.style.display = 'none';
+            }
+
+            mostrarPantalla('pantallaConfirmacion');
+
+            // Mostrar popup de bienvenida solo si es un nuevo join
+            if (esNuevoJoin) {
+                mostrarPopupBienvenida(equipo);
+            }
+        }
+
+        // Mostrar pantalla de cierre
+        async function mostrarPantallaCierre() {
+            const equipo = estado.equipoSeleccionado;
+            document.documentElement.style.setProperty('--equipo-actual', equipo.color);
+            document.getElementById('cierreEquipoNombre').textContent = equipo.nombre;
+            document.getElementById('cierreEquipoNombre').style.color = equipo.color;
+
+            // Cargar cierre del equipo (si hay)
+            const reflexion = equipo.reflexion || '';
+            const accionables = equipo.accionables || [];
+            const responsables = equipo.responsables || [];
+
+            document.getElementById('inputReflexion').value = reflexion;
+            for (let i = 1; i <= 10; i++) {
+                document.getElementById(`accionable${i}`).value = accionables[i - 1] || '';
+                document.getElementById(`responsable${i}`).value = responsables[i - 1] || '';
+            }
+
+            actualizarContadorAccionables();
+            mostrarPantalla('pantallaCierre');
+        }
+
+        // Actualizar contador de accionables
+        function actualizarContadorAccionables() {
+            let completados = 0;
+            for (let i = 1; i <= 10; i++) {
+                if (document.getElementById(`accionable${i}`).value.trim()) {
+                    completados++;
+                }
+            }
+
+            const contador = document.getElementById('contadorAccionables');
+            contador.textContent = `${completados} accionable${completados !== 1 ? 's' : ''} completado${completados !== 1 ? 's' : ''}`;
+            contador.classList.toggle('completo', completados > 0);
+
+            const reflexion = document.getElementById('inputReflexion').value.trim();
+            const btnEnviar = document.getElementById('btnEnviarCierre');
+            btnEnviar.disabled = !reflexion;
+        }
+
+        // Enviar cierre
+        async function enviarCierre() {
+            if (!estado.equipoSeleccionado) return;
+
+            const reflexion = document.getElementById('inputReflexion').value.trim();
+            const accionables = [];
+            const responsables = [];
+            for (let i = 1; i <= 10; i++) {
+                accionables.push(document.getElementById(`accionable${i}`).value.trim());
+                responsables.push(document.getElementById(`responsable${i}`).value.trim());
+            }
+
+            // Si ya hay cierre, pedir confirmación antes de pisar
+            if (estado.equipoSeleccionado.reflexion && estado.equipoSeleccionado.accionables?.length > 0) {
+                if (!confirm('Ya hay un cierre guardado para este equipo. ¿Querés reemplazarlo?')) {
+                    return;
+                }
+            }
+
+            const btn = document.getElementById('btnEnviarCierre');
+            btn.disabled = true;
+            btn.textContent = 'Enviando...';
+
+            try {
+                // Guardar cierre en el equipo
+                const { error } = await supabase
+                    .from('equipos')
+                    .update({
+                        reflexion,
+                        accionables,
+                        responsables
+                    })
+                    .eq('id', estado.equipoSeleccionado.id);
+
+                if (error) throw error;
+
+                // Actualizar estado local
+                estado.equipoSeleccionado.reflexion = reflexion;
+                estado.equipoSeleccionado.accionables = accionables;
+                estado.equipoSeleccionado.responsables = responsables;
+
+                // Actualizar en la lista de equipos también
+                const equipoIdx = estado.equipos.findIndex(e => e.id === estado.equipoSeleccionado.id);
+                if (equipoIdx >= 0) {
+                    estado.equipos[equipoIdx].reflexion = reflexion;
+                    estado.equipos[equipoIdx].accionables = accionables;
+                    estado.equipos[equipoIdx].responsables = responsables;
+                }
+
+                mostrarPantallaTerminado();
+            } catch (error) {
+                console.error('Error enviando cierre:', error);
+                alert('Error al guardar. Intentá de nuevo.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Enviar cierre ✓';
+                actualizarContadorAccionables();
+            }
+        }
+
+        // Mostrar pantalla terminado
+        function mostrarPantallaTerminado() {
+            const equipo = estado.equipoSeleccionado;
+            document.getElementById('pantallaTerminado').style.background = equipo.color;
+            document.getElementById('terminadoEquipo').textContent = equipo.nombre;
+            mostrarPantalla('pantallaTerminado');
+        }
+
+        // Volver a editar cierre
+        function volverAEditarCierre() {
+            mostrarPantallaCierre();
+        }
+
+        // Cambiar de equipo
+        async function cambiarEquipo() {
+            // Desasociar del equipo actual inmediatamente
+            if (estado.participante) {
+                try {
+                    await supabase
+                        .from('participantes')
+                        .update({
+                            equipo_id: null,
+                            terminado: false,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', estado.participante.id);
+
+                    estado.participante.equipo_id = null;
+                    estado.participante.terminado = false;
+                    estado.equipoSeleccionado = null;
+
+                    // Recargar contadores
+                    const { data: participantes } = await supabase.from('participantes').select('*');
+                    if (participantes) {
+                        calcularContadores(participantes);
+                    }
+                } catch (error) {
+                    console.error('Error al salir del equipo:', error);
+                }
+            }
+
+            mostrarPantalla('pantallaSeleccion');
+            renderizarEquipos();
+        }
+
+        // Logout - salir y permitir registrarse de nuevo
+        async function logout() {
+            if (!confirm('¿Seguro que querés salir? Se borrará tu registro.')) {
+                return;
+            }
+
+            try {
+                // Borrar participante de la base de datos
+                if (estado.participante) {
+                    await supabase
+                        .from('participantes')
+                        .delete()
+                        .eq('id', estado.participante.id);
+                }
+
+                // Limpiar localStorage
+                localStorage.removeItem('facttic_nombre');
+                localStorage.removeItem('facttic_cooperativa');
+                localStorage.removeItem('facttic_device_id');
+
+                // Limpiar estado
+                estado.participante = null;
+                estado.nombreUsuario = null;
+                estado.cooperativaUsuario = null;
+                estado.equipoSeleccionado = null;
+                estado.deviceId = getDeviceId(); // Genera nuevo ID
+
+                // Limpiar inputs
+                document.getElementById('inputNombreRegistro').value = '';
+                document.getElementById('inputCooperativaRegistro').value = '';
+
+                // Recargar contadores
+                const { data: participantes } = await supabase.from('participantes').select('*');
+                if (participantes) {
+                    calcularContadores(participantes);
+                    renderizarEquipos();
+                }
+
+                // Volver a pantalla de registro
+                mostrarPantalla('pantallaRegistro');
+            } catch (error) {
+                console.error('Error al hacer logout:', error);
+                alert('Error al salir. Recargá la página.');
+            }
+        }
+
+        // Control de alertas - usa localStorage para persistir entre recargas
+        function alertaYaMostrada(tipo, timerEnd) {
+            if (!timerEnd) return true; // Si no hay timer, no mostrar
+            const key = `facttic_alerta_${tipo}_${timerEnd}`;
+            return localStorage.getItem(key) === 'true';
+        }
+
+        function marcarAlertaMostrada(tipo, timerEnd) {
+            if (!timerEnd) return;
+            const key = `facttic_alerta_${tipo}_${timerEnd}`;
+            localStorage.setItem(key, 'true');
+        }
+
+        function mostrarAlerta(tipo) {
+            const alerta = document.getElementById('alertaTiempo');
+            const icono = document.getElementById('alertaIcono');
+            const titulo = document.getElementById('alertaTitulo');
+            const mensaje = document.getElementById('alertaMensaje');
+
+            alerta.classList.remove('alerta-5min', 'alerta-final');
+
+            if (tipo === '5min') {
+                alerta.classList.add('alerta-5min');
+                icono.textContent = '⏰';
+                titulo.textContent = '¡Quedan 5 minutos!';
+                mensaje.textContent = 'Es momento de ir cerrando las conclusiones';
+            } else if (tipo === 'final') {
+                alerta.classList.add('alerta-final');
+                icono.textContent = '🔔';
+                titulo.textContent = '¡Tiempo terminado!';
+                mensaje.textContent = 'Completen el cierre con la reflexión y los accionables';
+            }
+
+            alerta.classList.add('activa');
+
+            // Vibrar si está disponible
+            if (navigator.vibrate) {
+                navigator.vibrate(tipo === 'final' ? [200, 100, 200, 100, 200] : [200, 100, 200]);
+            }
+
+            // Sonido de alerta
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+                oscillator.frequency.value = tipo === 'final' ? 880 : 660;
+                oscillator.type = 'sine';
+                gainNode.gain.value = 0.3;
+                oscillator.start();
+                setTimeout(() => {
+                    oscillator.stop();
+                    audioCtx.close();
+                }, tipo === 'final' ? 800 : 500);
+            } catch (e) {
+                console.log('Audio no disponible');
+            }
+        }
+
+        function cerrarAlerta() {
+            document.getElementById('alertaTiempo').classList.remove('activa');
+        }
+
+        // Popup de bienvenida al equipo
+        let popupBienvenidaTimeout = null;
+        let popupBienvenidaInterval = null;
+
+        function mostrarPopupBienvenida(equipo) {
+            const popup = document.getElementById('popupBienvenida');
+            const titulo = document.getElementById('popupTitulo');
+            const timer = document.getElementById('popupTimer');
+
+            // Configurar con el color del equipo
+            popup.style.background = equipo.color;
+            titulo.textContent = `¡Te sumaste a ${equipo.nombre}!`;
+
+            // Mostrar popup
+            popup.classList.add('activo');
+
+            // Countdown de 10 segundos
+            let segundosRestantes = 10;
+            timer.textContent = `Se cierra en ${segundosRestantes}s`;
+
+            popupBienvenidaInterval = setInterval(() => {
+                segundosRestantes--;
+                timer.textContent = `Se cierra en ${segundosRestantes}s`;
+                if (segundosRestantes <= 0) {
+                    clearInterval(popupBienvenidaInterval);
+                }
+            }, 1000);
+
+            // Auto-cerrar después de 10 segundos
+            popupBienvenidaTimeout = setTimeout(() => {
+                cerrarPopupBienvenida();
+            }, 10000);
+
+            // Vibrar
+            if (navigator.vibrate) {
+                navigator.vibrate([100, 50, 100]);
+            }
+        }
+
+        function cerrarPopupBienvenida() {
+            document.getElementById('popupBienvenida').classList.remove('activo');
+            if (popupBienvenidaTimeout) {
+                clearTimeout(popupBienvenidaTimeout);
+                popupBienvenidaTimeout = null;
+            }
+            if (popupBienvenidaInterval) {
+                clearInterval(popupBienvenidaInterval);
+                popupBienvenidaInterval = null;
+            }
+        }
+
+        // Timer
+        function actualizarTimer() {
+            const timerGlobal = document.getElementById('timerGlobal');
+            const timerConfirmacion = document.getElementById('timerConfirmacion');
+            const timerTiempo = document.getElementById('timerTiempo');
+            const timerConfirmacionTiempo = document.getElementById('timerConfirmacionTiempo');
+
+            if (!estado.config || !estado.config.timer_end || estado.config.timer_paused) {
+                timerGlobal.classList.remove('activo');
+                timerConfirmacion.classList.remove('activo');
+                return;
+            }
+
+            const ahora = new Date();
+            const fin = new Date(estado.config.timer_end);
+            const diffReal = Math.floor((fin - ahora) / 1000); // puede ser negativo si ya pasó
+            const diff = Math.max(0, diffReal);
+            const timerEnd = estado.config.timer_end;
+
+            // Solo mostrar alertas si el timer está activo o terminó hace menos de 10 segundos
+            const timerReciente = diffReal >= -10;
+
+            // Alerta de 5 minutos (entre 295 y 300 segundos para evitar falsos positivos)
+            if (timerReciente && diff <= 300 && diff >= 295 && !alertaYaMostrada('5min', timerEnd)) {
+                marcarAlertaMostrada('5min', timerEnd);
+                mostrarAlerta('5min');
+            }
+
+            // Alerta de tiempo terminado (entre 0 y 3 segundos)
+            if (timerReciente && diff <= 3 && diff >= 0 && !alertaYaMostrada('final', timerEnd)) {
+                marcarAlertaMostrada('final', timerEnd);
+                mostrarAlerta('final');
+            }
+
+            if (diff === 0) {
+                timerGlobal.classList.remove('activo');
+                timerConfirmacion.classList.remove('activo');
+                return;
+            }
+
+            const minutos = Math.floor(diff / 60);
+            const segundos = diff % 60;
+            const tiempo = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+
+            timerTiempo.textContent = tiempo;
+            timerConfirmacionTiempo.textContent = tiempo;
+
+            // Urgente cuando quedan menos de 2 minutos
+            const urgente = diff < 120;
+            timerTiempo.classList.toggle('urgente', urgente);
+            timerConfirmacionTiempo.classList.toggle('urgente', urgente);
+
+            timerGlobal.classList.add('activo');
+            timerConfirmacion.classList.add('activo');
+        }
+
+        // Suscripciones realtime
+        function configurarRealtime() {
+            // Suscribirse a cambios en participantes
+            supabase
+                .channel('participantes-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'participantes' }, async () => {
+                    const { data } = await supabase.from('participantes').select('*');
+                    if (data) {
+                        calcularContadores(data);
+                        renderizarEquipos();
+                    }
+                })
+                .subscribe();
+
+            // Suscribirse a cambios en config (timer)
+            supabase
+                .channel('config-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'config' }, async () => {
+                    const { data } = await supabase.from('config').select('*').eq('id', 1).single();
+                    if (data) {
+                        estado.config = data;
+                        actualizarTimer();
+                    }
+                })
+                .subscribe();
+
+            // Suscribirse a cambios en equipos
+            supabase
+                .channel('equipos-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'equipos' }, async () => {
+                    const { data } = await supabase.from('equipos').select('*').eq('activo', true).order('orden');
+                    if (data) {
+                        estado.equipos = data;
+                        renderizarEquipos();
+                    }
+                })
+                .subscribe();
+
+            // Suscribirse a cambios en cooperativas
+            supabase
+                .channel('cooperativas-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'cooperativas' }, async () => {
+                    const { data } = await supabase.from('cooperativas').select('*').eq('activa', true).order('orden');
+                    if (data) {
+                        estado.cooperativas = data;
+                        poblarCooperativas();
+                    }
+                })
+                .subscribe();
+        }
+
+        // Event listeners
+        document.getElementById('btnContinuar').addEventListener('click', continuarRegistro);
+        document.getElementById('btnCambiarEquipo').addEventListener('click', cambiarEquipo);
+        document.getElementById('btnLogout').addEventListener('click', (e) => { e.preventDefault(); logout(); });
+        document.getElementById('btnTerminamos').addEventListener('click', mostrarPantallaCierre);
+        document.getElementById('btnEnviarCierre').addEventListener('click', enviarCierre);
+        document.getElementById('btnCancelarCierre').addEventListener('click', () => mostrarConfirmacion(false));
+        document.getElementById('btnNoTerminamos').addEventListener('click', volverAEditarCierre);
+
+        // Listeners para actualizar contador de accionables
+        document.getElementById('inputReflexion').addEventListener('input', actualizarContadorAccionables);
+        for (let i = 1; i <= 10; i++) {
+            document.getElementById(`accionable${i}`).addEventListener('input', actualizarContadorAccionables);
+        }
+
+
+        // Inicialización
+        async function init() {
+            estado.deviceId = getDeviceId();
+
+            // Recuperar datos del localStorage
+            estado.nombreUsuario = localStorage.getItem('facttic_nombre');
+            estado.cooperativaUsuario = localStorage.getItem('facttic_cooperativa');
+
+            const cargado = await cargarDatos();
+            if (!cargado) {
+                document.getElementById('equiposLista').innerHTML = '<p class="text-center" style="color: #ef4444;">Error de conexión. Recargá la página.</p>';
+                return;
+            }
+
+            renderizarEquipos();
+            poblarCooperativas();
+            configurarRealtime();
+
+            // Precargar inputs si hay datos guardados
+            if (estado.nombreUsuario) {
+                document.getElementById('inputNombreRegistro').value = estado.nombreUsuario;
+            }
+            if (estado.cooperativaUsuario) {
+                document.getElementById('inputCooperativaRegistro').value = estado.cooperativaUsuario;
+            }
+
+            // Timer cada segundo
+            estado.timerInterval = setInterval(actualizarTimer, 1000);
+            actualizarTimer();
+
+            // Polling de config cada 5 segundos como backup (por si Realtime no funciona)
+            setInterval(async () => {
+                const { data } = await supabase.from('config').select('*').eq('id', 1).single();
+                if (data) {
+                    estado.config = data;
+                }
+            }, 5000);
+
+            // Si ya hay participante registrado con equipo, mostrar pantalla correspondiente
+            if (estado.participante && estado.participante.equipo_id) {
+                estado.equipoSeleccionado = estado.equipos.find(e => e.id === estado.participante.equipo_id);
+                // Recuperar nombre y cooperativa del participante
+                estado.nombreUsuario = estado.participante.nombre;
+                estado.cooperativaUsuario = estado.participante.cooperativa;
+
+                if (estado.equipoSeleccionado) {
+                    if (estado.participante.terminado) {
+                        mostrarPantallaTerminado();
+                    } else {
+                        mostrarConfirmacion();
+                    }
+                    return;
+                }
+            }
+
+            // Si ya se registró nombre/coope pero no eligió equipo, ir a selección
+            if (estado.nombreUsuario && estado.cooperativaUsuario) {
+                document.getElementById('saludoUsuario').textContent = `${estado.nombreUsuario}, elegí un tema para trabajar`;
+                mostrarPantalla('pantallaSeleccion');
+                return;
+            }
+
+            // Si no hay nada, mostrar registro (ya es la pantalla por defecto)
+        }
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe del Debate - Plenario FACTTIC 2025</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-fondo: #0a0a0a;
+            --color-card: #141414;
+            --color-card-hover: #1a1a1a;
+            --color-borde: #262626;
+            --color-texto: #fafafa;
+            --color-texto-secundario: #a1a1aa;
+            --color-texto-terciario: #71717a;
+            --color-primario: #3b82f6;
+            --color-primario-soft: rgba(59, 130, 246, 0.1);
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--color-fondo);
+            color: var(--color-texto);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Fondo animado */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Container principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 4rem 2rem;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header img {
+            height: 80px;
+            margin-bottom: 2rem;
+            filter: drop-shadow(0 4px 20px rgba(59, 130, 246, 0.3));
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitulo {
+            font-size: 1.25rem;
+            color: var(--color-texto-secundario);
+            font-weight: 400;
+        }
+
+        .header .ubicacion {
+            color: var(--color-texto-terciario);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .header .fecha {
+            color: var(--color-primario);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Stats grandes */
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin: 3rem 0;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 2rem;
+            background: var(--color-card);
+            border: 1px solid var(--color-borde);
+            border-radius: 20px;
+            min-width: 180px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primario);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+        }
+
+        .stat-numero {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-primario) 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--color-texto-secundario);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+
+        /* Lista de cooperativas */
+        .coops-lista {
+            text-align: center;
+            padding: 2rem;
+            background: var(--color-card);
+            border: 1px solid var(--color-borde);
+            border-radius: 16px;
+            margin-bottom: 4rem;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .coops-lista h3 {
+            color: var(--color-texto-secundario);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .coops-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .coop-tag {
+            background: var(--color-primario-soft);
+            color: var(--color-primario);
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .coop-tag:hover {
+            background: var(--color-primario);
+            color: white;
+        }
+
+        /* Equipos */
+        .equipos-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .equipo-card {
+            background: var(--color-card);
+            border: 1px solid var(--color-borde);
+            border-radius: 20px;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out both;
+            transition: all 0.3s ease;
+        }
+
+        .equipo-card:hover {
+            border-color: var(--color-borde);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .equipo-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--color-borde);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .equipo-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--equipo-color);
+        }
+
+        .equipo-nombre {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--equipo-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .equipo-tema {
+            color: var(--color-texto-secundario);
+            font-size: 1.1rem;
+        }
+
+        .equipo-body {
+            padding: 2rem;
+        }
+
+        .seccion {
+            margin-bottom: 2rem;
+        }
+
+        .seccion:last-child {
+            margin-bottom: 0;
+        }
+
+        .seccion-titulo {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-texto-terciario);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .seccion-titulo::before {
+            content: '';
+            width: 12px;
+            height: 2px;
+            background: var(--equipo-color);
+            border-radius: 2px;
+        }
+
+        /* Preguntas */
+        .preguntas-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .pregunta-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border-left: 3px solid var(--equipo-color);
+        }
+
+        .pregunta-numero {
+            color: var(--equipo-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .pregunta-texto {
+            color: var(--color-texto);
+        }
+
+        /* Participantes */
+        .participantes-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .participante-chip {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--color-texto);
+            border: 1px solid var(--color-borde);
+        }
+
+        .participante-chip .coop {
+            color: var(--color-texto-terciario);
+        }
+
+        /* Cooperativas del equipo */
+        .coops-equipo {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .coop-equipo-tag {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--color-texto-secundario);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        /* Reflexion */
+        .reflexion-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border-left: 4px solid var(--equipo-color);
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--color-texto);
+            white-space: pre-wrap;
+        }
+
+        /* Accionables */
+        .accionables-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .accionable-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: rgba(34, 197, 94, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(34, 197, 94, 0.1);
+        }
+
+        .accionable-numero {
+            background: var(--color-success);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .accionable-content {
+            flex: 1;
+        }
+
+        .accionable-texto {
+            color: var(--color-texto);
+            margin-bottom: 0.5rem;
+        }
+
+        .accionable-responsable {
+            color: var(--color-warning);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .accionable-responsable::before {
+            content: '→';
+        }
+
+        /* Sin datos */
+        .sin-datos {
+            color: var(--color-texto-terciario);
+            font-style: italic;
+            padding: 1rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--color-texto-terciario);
+            font-size: 0.85rem;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: 1.5rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--color-borde);
+            border-top-color: var(--color-primario);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Animaciones al hacer scroll */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .animate-on-scroll.delay-1 { transition-delay: 0.1s; }
+        .animate-on-scroll.delay-2 { transition-delay: 0.2s; }
+        .animate-on-scroll.delay-3 { transition-delay: 0.3s; }
+
+        /* Print styles */
+        @media print {
+            .bg-gradient { display: none; }
+            body { background: white; color: black; }
+            .equipo-card { break-inside: avoid; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .header h1 { font-size: 2rem; }
+            .stats-container { flex-direction: column; gap: 1rem; align-items: center; }
+            .stat-numero { font-size: 3rem; }
+            .equipo-header, .equipo-body { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <div class="container">
+        <div id="contenido">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Cargando informe...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://aziyyqvupqaexdzmumvl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6aXl5cXZ1cHFhZXhkem11bXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMDYxOTUsImV4cCI6MjA4MDg4MjE5NX0.Rc_Bom4RPoAcIMoifdWZJIhItsPEBbUHTSyT8SYEcv0';
+
+        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function cargarDatos() {
+            const [equiposRes, participantesRes] = await Promise.all([
+                supabase.from('equipos').select('*').eq('activo', true).order('orden'),
+                supabase.from('participantes').select('*')
+            ]);
+
+            const equipos = equiposRes.data || [];
+            const participantes = participantesRes.data || [];
+
+            renderizar(equipos, participantes);
+        }
+
+        function renderizar(equipos, participantes) {
+            const fecha = new Date().toLocaleDateString('es-AR', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            // Deduplicar personas (case insensitive)
+            const personasMap = new Map();
+            participantes.forEach(p => {
+                const key = (p.nombre + '|' + p.cooperativa).toLowerCase().trim();
+                if (!personasMap.has(key)) personasMap.set(key, p);
+            });
+            const totalPersonas = personasMap.size;
+
+            // Deduplicar cooperativas (case insensitive)
+            const coopMap = new Map();
+            participantes.forEach(p => {
+                const key = p.cooperativa.toLowerCase().trim();
+                if (!coopMap.has(key)) coopMap.set(key, p.cooperativa);
+            });
+            const todasCooperativas = [...coopMap.values()].sort();
+            const totalCooperativas = todasCooperativas.length;
+
+            let html = `
+                <header class="header">
+                    <img src="logo_facttic.png" alt="FACTTIC">
+                    <h1>Informe del Debate</h1>
+                    <p class="subtitulo">Plenario FACTTIC 2025</p>
+                    <p class="ubicacion">Tandil, Provincia de Buenos Aires</p>
+                    <p class="fecha">${fecha}</p>
+                </header>
+
+                <div class="stats-container animate-on-scroll">
+                    <div class="stat-box">
+                        <div class="stat-numero">${totalPersonas}</div>
+                        <div class="stat-label">Personas</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-numero">${totalCooperativas}</div>
+                        <div class="stat-label">Cooperativas</div>
+                    </div>
+                </div>
+
+                <div class="coops-lista animate-on-scroll">
+                    <h3>Cooperativas participantes</h3>
+                    <div class="coops-tags">
+                        ${todasCooperativas.map(c => `<span class="coop-tag">${c}</span>`).join('')}
+                    </div>
+                </div>
+
+                <div class="equipos-grid">
+            `;
+
+            equipos.forEach((equipo, index) => {
+                const participantesRaw = participantes.filter(p => p.equipo_id === equipo.id);
+
+                // Deduplicar participantes del equipo
+                const partMap = new Map();
+                participantesRaw.forEach(p => {
+                    const key = (p.nombre + '|' + p.cooperativa).toLowerCase().trim();
+                    if (!partMap.has(key)) partMap.set(key, p);
+                });
+                const participantesEquipo = [...partMap.values()];
+
+                // Deduplicar cooperativas del equipo
+                const coopMapEquipo = new Map();
+                participantesEquipo.forEach(p => {
+                    const key = p.cooperativa.toLowerCase().trim();
+                    if (!coopMapEquipo.has(key)) coopMapEquipo.set(key, p.cooperativa);
+                });
+                const cooperativas = [...coopMapEquipo.values()];
+
+                const preguntas = equipo.preguntas || [];
+                const accionables = equipo.accionables || [];
+                const responsables = equipo.responsables || [];
+
+                html += `
+                    <article class="equipo-card animate-on-scroll" style="--equipo-color: ${equipo.color}">
+                        <div class="equipo-header">
+                            <h2 class="equipo-nombre">${equipo.nombre}</h2>
+                            <p class="equipo-tema">${equipo.tema || ''}</p>
+                        </div>
+                        <div class="equipo-body">
+                            <div class="seccion">
+                                <h3 class="seccion-titulo">Preguntas disparadoras</h3>
+                                ${preguntas.length > 0 ? `
+                                    <div class="preguntas-lista">
+                                        ${preguntas.map((p, i) => `
+                                            <div class="pregunta-item">
+                                                <span class="pregunta-numero">${i + 1}.</span>
+                                                <span class="pregunta-texto">${p}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : '<p class="sin-datos">Sin preguntas</p>'}
+                            </div>
+
+                            <div class="seccion">
+                                <h3 class="seccion-titulo">Participantes (${participantesEquipo.length})</h3>
+                                ${participantesEquipo.length > 0 ? `
+                                    <div class="participantes-grid">
+                                        ${participantesEquipo.map(p => `
+                                            <span class="participante-chip">${p.nombre} <span class="coop">(${p.cooperativa})</span></span>
+                                        `).join('')}
+                                    </div>
+                                ` : '<p class="sin-datos">Sin participantes</p>'}
+                            </div>
+
+                            <div class="seccion">
+                                <h3 class="seccion-titulo">Cooperativas (${cooperativas.length})</h3>
+                                ${cooperativas.length > 0 ? `
+                                    <div class="coops-equipo">
+                                        ${cooperativas.map(c => `<span class="coop-equipo-tag">${c}</span>`).join('')}
+                                    </div>
+                                ` : '<p class="sin-datos">Sin cooperativas</p>'}
+                            </div>
+
+                            <div class="seccion">
+                                <h3 class="seccion-titulo">Reflexión del grupo</h3>
+                                ${equipo.reflexion ? `
+                                    <div class="reflexion-box">${equipo.reflexion}</div>
+                                ` : '<p class="sin-datos">Sin reflexión cargada</p>'}
+                            </div>
+
+                            <div class="seccion">
+                                <h3 class="seccion-titulo">Accionables</h3>
+                                ${accionables.filter(a => a && a.trim()).length > 0 ? `
+                                    <div class="accionables-lista">
+                                        ${accionables.map((acc, i) => {
+                                            if (!acc || !acc.trim()) return '';
+                                            return `
+                                                <div class="accionable-item">
+                                                    <span class="accionable-numero">${i + 1}</span>
+                                                    <div class="accionable-content">
+                                                        <p class="accionable-texto">${acc}</p>
+                                                        ${responsables[i] ? `<p class="accionable-responsable">${responsables[i]}</p>` : ''}
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                ` : '<p class="sin-datos">Sin accionables cargados</p>'}
+                            </div>
+                        </div>
+                    </article>
+                `;
+            });
+
+            html += `
+                </div>
+                <footer class="footer">
+                    <p>FACTTIC - Federación Argentina de Cooperativas de Trabajo de Tecnología, Innovación y Conocimiento</p>
+                    <p>Plenario 2025 - Tandil, Provincia de Buenos Aires</p>
+                </footer>
+            `;
+
+            document.getElementById('contenido').innerHTML = html;
+
+            // Activar animaciones al scroll
+            initScrollAnimations();
+        }
+
+        function initScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        cargarDatos();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1737 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encuesta FACTTIC 2025 - Resultados</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/theme/black.css">
+    <style>
+        :root {
+            --verde: #4ade80;
+            --verde-oscuro: #22c55e;
+            --amarillo: #fbbf24;
+            --naranja: #fb923c;
+            --rojo: #f87171;
+            --azul: #60a5fa;
+            --violeta: #a78bfa;
+            --rosa: #f472b6;
+            --cyan: #22d3d3;
+            --fondo: #0f172a;
+            --fondo-card: #1e293b;
+            --texto: #f1f5f9;
+        }
+
+        .reveal {
+            font-size: 28px;
+        }
+
+        .reveal h1 {
+            font-size: 2.5em;
+            color: var(--verde);
+            text-transform: none;
+            margin-bottom: 0.5em;
+        }
+
+        .reveal h2 {
+            font-size: 1.8em;
+            color: var(--texto);
+            text-transform: none;
+            margin-bottom: 0.8em;
+        }
+
+        .reveal h3 {
+            font-size: 1.4em;
+            color: var(--amarillo);
+            text-transform: none;
+        }
+
+        .reveal p, .reveal li {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .reveal ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .reveal li {
+            margin-bottom: 0.5em;
+            padding-left: 1.5em;
+            position: relative;
+        }
+
+        .reveal li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--verde);
+        }
+
+        /* Portada */
+        .portada h1 {
+            font-size: 3em;
+            margin-bottom: 0.3em;
+        }
+
+        .portada .subtitulo {
+            font-size: 1.5em;
+            color: var(--amarillo);
+            margin-bottom: 1em;
+        }
+
+        .portada .fecha {
+            font-size: 1.2em;
+            color: #94a3b8;
+        }
+
+        /* Valores */
+        .valor-card {
+            display: inline-block;
+            background: var(--fondo-card);
+            border-radius: 16px;
+            padding: 1em 1.5em;
+            margin: 0.5em;
+            border-left: 4px solid var(--verde);
+        }
+
+        .valor-card .titulo {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--verde);
+        }
+
+        .valor-card .menciones {
+            font-size: 0.9em;
+            color: #94a3b8;
+        }
+
+        /* Espacios - Tarjetas agrupadas */
+        .espacios-grupo {
+            margin-bottom: 1.5em;
+        }
+
+        .espacios-grupo h3 {
+            margin-bottom: 0.5em;
+            font-size: 1.2em;
+        }
+
+        .espacios-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8em;
+        }
+
+        .espacio-card {
+            background: var(--fondo-card);
+            border-radius: 12px;
+            padding: 0.8em 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .espacio-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .espacio-card:hover .puntaje {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .espacio-card.muy-valorado {
+            border: 2px solid var(--verde);
+        }
+
+        .espacio-card.valoracion-media {
+            border: 2px solid var(--amarillo);
+        }
+
+        .espacio-card.a-fortalecer {
+            border: 2px solid var(--naranja);
+        }
+
+        .espacio-card .nombre {
+            font-weight: bold;
+            font-size: 1em;
+        }
+
+        .espacio-card .puntaje {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-10px);
+            background: var(--verde);
+            color: var(--fondo);
+            padding: 0.3em 0.8em;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            opacity: 0;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .espacio-card.valoracion-media .puntaje {
+            background: var(--amarillo);
+        }
+
+        .espacio-card.a-fortalecer .puntaje {
+            background: var(--naranja);
+        }
+
+        /* Aportes */
+        .aporte-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8em;
+            background: var(--fondo-card);
+            border-radius: 10px;
+            padding: 0.8em 1em;
+        }
+
+        .aporte-item .texto {
+            flex: 1;
+            font-size: 1.1em;
+        }
+
+        .aporte-item .cantidad {
+            background: var(--verde);
+            color: var(--fondo);
+            padding: 0.3em 0.8em;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 1em;
+        }
+
+        /* Nudos */
+        .nudo-slide {
+            text-align: left;
+        }
+
+        .nudo-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1em;
+        }
+
+        .nudo-numero {
+            font-size: 3em;
+            font-weight: bold;
+            margin-right: 0.5em;
+            opacity: 0.3;
+        }
+
+        .nudo-titulo {
+            font-size: 1.6em;
+            color: var(--naranja);
+        }
+
+        .nudo-stats {
+            display: flex;
+            gap: 1em;
+            margin-bottom: 1em;
+        }
+
+        .nudo-stat {
+            background: var(--fondo-card);
+            padding: 0.5em 1em;
+            border-radius: 8px;
+        }
+
+        .nudo-stat .numero {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--naranja);
+        }
+
+        .nudo-stat .label {
+            font-size: 0.85em;
+            color: #94a3b8;
+        }
+
+        .nudo-puntos {
+            margin: 1em 0;
+        }
+
+        .nudo-puntos li {
+            margin-bottom: 0.6em;
+        }
+
+        .nudo-puntos li::before {
+            color: var(--naranja);
+        }
+
+        /* Citas */
+        .citas-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5em;
+            margin-top: 1em;
+        }
+
+        .cita-chip {
+            background: var(--fondo-card);
+            border: 1px solid #475569;
+            padding: 0.4em 0.8em;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.2s ease;
+        }
+
+        .cita-chip:hover {
+            background: var(--naranja);
+            color: var(--fondo);
+            border-color: var(--naranja);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 2em;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--fondo-card);
+            border-radius: 20px;
+            padding: 2em 3em;
+            max-width: 900px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            border: 2px solid var(--naranja);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1em;
+            right: 1em;
+            background: none;
+            border: none;
+            color: var(--texto);
+            font-size: 2em;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+        }
+
+        .modal-cita-id {
+            font-size: 0.9em;
+            color: var(--naranja);
+            margin-bottom: 0.5em;
+        }
+
+        .modal-cita-texto {
+            font-size: 1.8em;
+            line-height: 1.5;
+            color: var(--texto);
+        }
+
+        /* Modal preguntas disparadoras */
+        .modal-preguntas-content {
+            max-width: 1000px;
+            text-align: left;
+        }
+
+        .modal-preguntas-titulo {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 1em;
+            padding-bottom: 0.5em;
+            border-bottom: 2px solid;
+        }
+
+        .modal-preguntas-titulo.nudo-1 { color: #ef4444; border-color: #ef4444; }
+        .modal-preguntas-titulo.nudo-2 { color: #f97316; border-color: #f97316; }
+        .modal-preguntas-titulo.nudo-3 { color: #eab308; border-color: #eab308; }
+        .modal-preguntas-titulo.nudo-4 { color: #22c55e; border-color: #22c55e; }
+        .modal-preguntas-titulo.nudo-5 { color: #3b82f6; border-color: #3b82f6; }
+        .modal-preguntas-titulo.nudo-6 { color: #8b5cf6; border-color: #8b5cf6; }
+
+        .modal-preguntas-lista {
+            list-style: none;
+            padding: 0;
+        }
+
+        .modal-preguntas-lista .pregunta {
+            font-size: 1.4em;
+            line-height: 1.6;
+            margin-bottom: 1em;
+            padding: 0.8em 1em;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            border-left: 4px solid var(--amarillo);
+            color: var(--texto);
+        }
+
+        .modal-preguntas-lista .pregunta::before {
+            content: "→ ";
+            color: var(--amarillo);
+            font-weight: bold;
+        }
+
+        .modal-preguntas-content {
+            background: var(--fondo-card);
+            color: var(--texto);
+        }
+
+        /* Animaciones modernas */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Aplicar animaciones a elementos */
+        .reveal .slides section.present h1,
+        .reveal .slides section.present h2 {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .reveal .slides section.present p {
+            animation: fadeInUp 0.6s ease-out 0.1s both;
+        }
+
+        .reveal .slides section.present ul {
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        .reveal .slides section.present li {
+            animation: slideInLeft 0.5s ease-out both;
+        }
+
+        .reveal .slides section.present li:nth-child(1) { animation-delay: 0.1s; }
+        .reveal .slides section.present li:nth-child(2) { animation-delay: 0.2s; }
+        .reveal .slides section.present li:nth-child(3) { animation-delay: 0.3s; }
+        .reveal .slides section.present li:nth-child(4) { animation-delay: 0.4s; }
+        .reveal .slides section.present li:nth-child(5) { animation-delay: 0.5s; }
+
+        .reveal .slides section.present .valor-card {
+            animation: fadeInScale 0.5s ease-out both;
+        }
+
+        .reveal .slides section.present .valor-card:nth-child(1) { animation-delay: 0.1s; }
+        .reveal .slides section.present .valor-card:nth-child(2) { animation-delay: 0.2s; }
+        .reveal .slides section.present .valor-card:nth-child(3) { animation-delay: 0.3s; }
+        .reveal .slides section.present .valor-card:nth-child(4) { animation-delay: 0.4s; }
+
+        .reveal .slides section.present .espacio-card {
+            animation: fadeInScale 0.4s ease-out both;
+        }
+
+        .reveal .slides section.present .espacios-grupo:nth-child(1) .espacio-card { animation-delay: 0.1s; }
+        .reveal .slides section.present .espacios-grupo:nth-child(2) .espacio-card { animation-delay: 0.3s; }
+        .reveal .slides section.present .espacios-grupo:nth-child(3) .espacio-card { animation-delay: 0.5s; }
+
+        .reveal .slides section.present .aporte-item {
+            animation: slideInRight 0.5s ease-out both;
+        }
+
+        .reveal .slides section.present .aporte-item:nth-child(1) { animation-delay: 0.1s; }
+        .reveal .slides section.present .aporte-item:nth-child(2) { animation-delay: 0.2s; }
+        .reveal .slides section.present .aporte-item:nth-child(3) { animation-delay: 0.3s; }
+        .reveal .slides section.present .aporte-item:nth-child(4) { animation-delay: 0.4s; }
+        .reveal .slides section.present .aporte-item:nth-child(5) { animation-delay: 0.5s; }
+
+        .reveal .slides section.present .nudo-resumen-card {
+            animation: fadeInScale 0.4s ease-out both;
+        }
+
+        .reveal .slides section.present .nudo-resumen-card:nth-child(1) { animation-delay: 0.1s; }
+        .reveal .slides section.present .nudo-resumen-card:nth-child(2) { animation-delay: 0.15s; }
+        .reveal .slides section.present .nudo-resumen-card:nth-child(3) { animation-delay: 0.2s; }
+        .reveal .slides section.present .nudo-resumen-card:nth-child(4) { animation-delay: 0.25s; }
+        .reveal .slides section.present .nudo-resumen-card:nth-child(5) { animation-delay: 0.3s; }
+        .reveal .slides section.present .nudo-resumen-card:nth-child(6) { animation-delay: 0.35s; }
+
+        .reveal .slides section.present .grupo-card {
+            animation: fadeInScale 0.4s ease-out both;
+            cursor: pointer;
+        }
+
+        .reveal .slides section.present .grupo-card:nth-child(1) { animation-delay: 0.1s; }
+        .reveal .slides section.present .grupo-card:nth-child(2) { animation-delay: 0.15s; }
+        .reveal .slides section.present .grupo-card:nth-child(3) { animation-delay: 0.2s; }
+        .reveal .slides section.present .grupo-card:nth-child(4) { animation-delay: 0.25s; }
+        .reveal .slides section.present .grupo-card:nth-child(5) { animation-delay: 0.3s; }
+        .reveal .slides section.present .grupo-card:nth-child(6) { animation-delay: 0.35s; }
+
+        .reveal .slides section.present .cita-chip {
+            animation: fadeInScale 0.3s ease-out both;
+        }
+
+        /* Hover mejorados con transiciones suaves */
+        .valor-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .valor-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 10px 40px rgba(74, 222, 128, 0.2);
+        }
+
+        .espacio-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .aporte-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .aporte-item:hover {
+            transform: translateX(10px);
+            background: rgba(74, 222, 128, 0.1);
+        }
+
+        .nudo-resumen-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nudo-resumen-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .grupo-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .grupo-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .cita-chip {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .cita-chip:hover {
+            transform: scale(1.1);
+        }
+
+        /* Logo animado en portada */
+        .portada img {
+            animation: fadeInScale 0.8s ease-out, float 3s ease-in-out 1s infinite;
+        }
+
+        /* Glow en números importantes */
+        .nudo-stat .numero {
+            transition: all 0.3s ease;
+        }
+
+        .nudo-stat:hover .numero {
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        /* Modal animaciones */
+        .modal-overlay.active {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-overlay.active .modal-content {
+            animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        /* Animación especial para la portada */
+        .portada h1 {
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .portada .subtitulo {
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .portada .fecha {
+            animation: fadeInUp 0.8s ease-out 0.6s both;
+        }
+
+        /* Resumen nudos */
+        .nudos-resumen {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1em;
+        }
+
+        .nudo-resumen-card {
+            background: var(--fondo-card);
+            border-radius: 12px;
+            padding: 1em;
+            border-left: 4px solid;
+            text-align: left;
+        }
+
+        .nudo-resumen-card.nudo-1 { border-color: #ef4444; }
+        .nudo-resumen-card.nudo-2 { border-color: #f97316; }
+        .nudo-resumen-card.nudo-3 { border-color: #eab308; }
+        .nudo-resumen-card.nudo-4 { border-color: #22c55e; }
+        .nudo-resumen-card.nudo-5 { border-color: #3b82f6; }
+        .nudo-resumen-card.nudo-6 { border-color: #8b5cf6; }
+
+        .nudo-resumen-card .titulo {
+            font-weight: bold;
+            font-size: 1em;
+            margin-bottom: 0.3em;
+        }
+
+        .nudo-resumen-card .porcentaje {
+            font-size: 1.8em;
+            font-weight: bold;
+            opacity: 0.8;
+        }
+
+        /* Dinámica grupos */
+        .grupos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1em;
+        }
+
+        .grupo-card {
+            background: var(--fondo-card);
+            border-radius: 16px;
+            padding: 1.2em;
+            text-align: center;
+            border: 3px solid;
+        }
+
+        .grupo-card.nudo-1 { border-color: #ef4444; }
+        .grupo-card.nudo-2 { border-color: #f97316; }
+        .grupo-card.nudo-3 { border-color: #eab308; }
+        .grupo-card.nudo-4 { border-color: #22c55e; }
+        .grupo-card.nudo-5 { border-color: #3b82f6; }
+        .grupo-card.nudo-6 { border-color: #8b5cf6; }
+
+        .grupo-card .grupo-nombre {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 0.3em;
+        }
+
+        .grupo-card .grupo-coopes {
+            font-size: 0.9em;
+            color: #94a3b8;
+        }
+
+        /* Colores nudos para títulos */
+        .color-nudo-1 { color: #ef4444; }
+        .color-nudo-2 { color: #f97316; }
+        .color-nudo-3 { color: #eab308; }
+        .color-nudo-4 { color: #22c55e; }
+        .color-nudo-5 { color: #3b82f6; }
+        .color-nudo-6 { color: #8b5cf6; }
+
+        /* Transición */
+        .transicion h2 {
+            font-size: 2.5em;
+        }
+
+        /* Highlight */
+        .highlight {
+            color: var(--verde);
+            font-weight: bold;
+        }
+
+        .highlight-warning {
+            color: var(--naranja);
+            font-weight: bold;
+        }
+
+        /* Metodología */
+        .metodologia-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.8em;
+            max-width: 850px;
+            margin: 0.5em auto;
+        }
+
+        .metodologia-fase {
+            background: var(--fondo-card);
+            border-radius: 10px;
+            padding: 0.8em 1em;
+            text-align: left;
+            border-top: 3px solid var(--verde);
+            transition: all 0.3s ease;
+        }
+
+        .metodologia-fase:nth-child(2) {
+            border-top-color: var(--azul);
+        }
+
+        .metodologia-fase:nth-child(3) {
+            border-top-color: var(--amarillo);
+        }
+
+        .metodologia-fase:nth-child(4) {
+            border-top-color: var(--violeta);
+        }
+
+        .metodologia-fase:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        .fase-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.4em;
+        }
+
+        .fase-icon {
+            font-size: 1.2em;
+            margin-right: 0.4em;
+        }
+
+        .fase-titulo {
+            font-size: 1em;
+            font-weight: bold;
+            color: var(--texto);
+        }
+
+        .fase-desc {
+            font-size: 0.8em;
+            color: #94a3b8;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .reveal .slides section.present .metodologia-fase {
+            animation: fadeInScale 0.5s ease-out both;
+        }
+
+        .reveal .slides section.present .metodologia-fase:nth-child(1) { animation-delay: 0.1s; }
+        .reveal .slides section.present .metodologia-fase:nth-child(2) { animation-delay: 0.2s; }
+        .reveal .slides section.present .metodologia-fase:nth-child(3) { animation-delay: 0.3s; }
+        .reveal .slides section.present .metodologia-fase:nth-child(4) { animation-delay: 0.4s; }
+
+        /* EJES */
+        .ejes-intro {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .ejes-intro p {
+            color: #94a3b8;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .eje-card {
+            background: var(--fondo-card);
+            border-radius: 20px;
+            padding: 2em;
+            max-width: 700px;
+            margin: 1em auto;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px solid;
+            text-align: center;
+        }
+
+        .eje-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+
+        .eje-card.eje-comercial {
+            border-color: var(--verde);
+        }
+
+        .eje-card.eje-fortalecimiento {
+            border-color: var(--azul);
+        }
+
+        .eje-card.eje-vinculacion {
+            border-color: var(--violeta);
+        }
+
+        .eje-icon {
+            font-size: 3em;
+            margin-bottom: 0.3em;
+        }
+
+        .eje-titulo {
+            font-size: 1.6em;
+            font-weight: bold;
+            margin-bottom: 0.5em;
+        }
+
+        .eje-card.eje-comercial .eje-titulo { color: var(--verde); }
+        .eje-card.eje-fortalecimiento .eje-titulo { color: var(--azul); }
+        .eje-card.eje-vinculacion .eje-titulo { color: var(--violeta); }
+
+        .eje-desc {
+            color: #94a3b8;
+            font-size: 1em;
+            line-height: 1.5;
+        }
+
+        .eje-cta {
+            margin-top: 1em;
+            font-size: 0.9em;
+            color: #64748b;
+        }
+
+        .reveal .slides section.present .eje-card {
+            animation: fadeInScale 0.6s ease-out both;
+        }
+
+        /* Modal ejes */
+        .modal-eje-content {
+            max-width: 95vw;
+            width: 1100px;
+            text-align: left;
+            max-height: 90vh;
+            padding: 2.5rem 3.5rem;
+        }
+
+        .modal-eje-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5em;
+            padding-bottom: 0.8em;
+            border-bottom: 3px solid;
+        }
+
+        .modal-eje-header.eje-comercial { border-color: var(--verde); }
+        .modal-eje-header.eje-fortalecimiento { border-color: var(--azul); }
+        .modal-eje-header.eje-vinculacion { border-color: var(--violeta); }
+
+        .modal-eje-icon {
+            font-size: 3em;
+            margin-right: 0.5em;
+        }
+
+        .modal-eje-titulo {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .modal-eje-header.eje-comercial .modal-eje-titulo { color: var(--verde); }
+        .modal-eje-header.eje-fortalecimiento .modal-eje-titulo { color: var(--azul); }
+        .modal-eje-header.eje-vinculacion .modal-eje-titulo { color: var(--violeta); }
+
+        .modal-eje-importancia {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1.2em 1.5em;
+            margin-bottom: 1.5em;
+            font-size: 1.3em;
+            line-height: 1.6;
+            color: #cbd5e1;
+        }
+
+        .modal-eje-objetivos-titulo {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 0.8em;
+            color: var(--amarillo);
+        }
+
+        .modal-eje-objetivos {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .modal-eje-objetivos li {
+            padding: 0.8em 0;
+            padding-left: 2em;
+            position: relative;
+            font-size: 1.3em;
+            line-height: 1.5;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            color: #e2e8f0;
+        }
+
+        .modal-eje-objetivos li:last-child {
+            border-bottom: none;
+        }
+
+        .modal-eje-objetivos li::before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--verde);
+        }
+
+        .modal-eje-header.eje-fortalecimiento + .modal-eje-importancia + .modal-eje-objetivos-titulo + .modal-eje-objetivos li::before,
+        .eje-fortalecimiento ~ .modal-eje-objetivos li::before {
+            color: var(--azul);
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- SLIDE 1: Portada -->
+            <section class="portada">
+                <img src="logo_facttic.png" alt="FACTTIC" style="width: 200px; margin-bottom: 1em;">
+                <h1>Encuesta FACTTIC 2025</h1>
+                <p class="subtitulo">Resultados y Reflexiones</p>
+                <p class="fecha">Plenario de la Federación</p>
+            </section>
+
+            <!-- SLIDE 2: Contexto -->
+            <section>
+                <h2>Sobre esta encuesta</h2>
+                <div style="text-align: left; max-width: 700px; margin: 0 auto;">
+                    <p><span class="highlight">~29 cooperativas</span> respondieron</p>
+                    <p style="margin-top: 1em;">Preguntas sobre:</p>
+                    <ul>
+                        <li>Identidad y valores</li>
+                        <li>Aportes de FACTTIC</li>
+                        <li>Valoración de espacios</li>
+                        <li>Obstáculos y dificultades</li>
+                        <li>Prioridades de mejora</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SLIDE 3: Metodología -->
+            <section>
+                <h2 style="margin-bottom: 0.3em;">Metodología de análisis</h2>
+                <div class="metodologia-container">
+                    <div class="metodologia-fase">
+                        <div class="fase-header">
+                            <span class="fase-icon">📋</span>
+                            <span class="fase-titulo">Recolección</span>
+                        </div>
+                        <p class="fase-desc">Encuesta a todas las cooperativas con preguntas abiertas y cerradas.</p>
+                    </div>
+                    <div class="metodologia-fase">
+                        <div class="fase-header">
+                            <span class="fase-icon">👥</span>
+                            <span class="fase-titulo">Sistematización</span>
+                        </div>
+                        <p class="fase-desc">Anonimización de datos. Cada respuesta asignada a una persona para lectura profunda.</p>
+                    </div>
+                    <div class="metodologia-fase">
+                        <div class="fase-header">
+                            <span class="fase-icon">🔍</span>
+                            <span class="fase-titulo">Análisis temático</span>
+                        </div>
+                        <p class="fase-desc">Identificación de temas frecuentes y convergencias.</p>
+                    </div>
+                    <div class="metodologia-fase">
+                        <div class="fase-header">
+                            <span class="fase-icon">🎯</span>
+                            <span class="fase-titulo">Síntesis</span>
+                        </div>
+                        <p class="fase-desc">Agrupación por ejes temáticos y ordenamiento por prioridad.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 3: Transición - Lo que nos une -->
+            <section class="transicion">
+                <h2>Lo que nos une</h2>
+                <p style="color: #94a3b8; font-size: 1.3em;">Identidad y valores compartidos</p>
+            </section>
+
+            <!-- SLIDE 4: Valores -->
+            <section>
+                <h2>Valores que nos representan</h2>
+                <div style="margin-top: 1em;">
+                    <div class="valor-card">
+                        <div class="titulo">INTERCOOPERACIÓN</div>
+                        <div class="menciones">10 menciones</div>
+                    </div>
+                    <div class="valor-card">
+                        <div class="titulo">SOLIDARIDAD</div>
+                        <div class="menciones">10 menciones</div>
+                    </div>
+                </div>
+                <div style="margin-top: 0.5em;">
+                    <div class="valor-card">
+                        <div class="titulo">CONTRAHEGEMONÍA</div>
+                        <div class="menciones">Modelo alternativo de trabajo</div>
+                    </div>
+                    <div class="valor-card">
+                        <div class="titulo">SOBERANÍA TECNOLÓGICA</div>
+                        <div class="menciones">Cultura libre</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 5: Motivaciones -->
+            <section>
+                <h2>¿Por qué participamos en FACTTIC?</h2>
+                <ul style="max-width: 800px; margin: 1em auto; text-align: left;">
+                    <li><strong>Construcción colectiva</strong> - Aportar a algo más grande que nuestra coope</li>
+                    <li><strong>Fortaleza grupal</strong> - Escala para sobrellevar crisis</li>
+                    <li><strong>Transformación social</strong> - Impulsar cambios en el modelo de trabajo</li>
+                    <li><strong>Intercooperación</strong> - Proyectos conjuntos, complementariedad</li>
+                    <li><strong>Formación y aprendizaje</strong> - Intercambio de experiencias</li>
+                </ul>
+            </section>
+
+            <!-- SLIDE 6: Qué aporta FACTTIC -->
+            <section>
+                <h2>¿Qué aporta FACTTIC a las cooperativas?</h2>
+                <div style="max-width: 750px; margin: 1em auto;">
+                    <div class="aporte-item">
+                        <span class="texto">Red de fortalecimiento e intercooperación</span>
+                        <span class="cantidad">13</span>
+                    </div>
+                    <div class="aporte-item">
+                        <span class="texto">Comercialización y desarrollo económico</span>
+                        <span class="cantidad">13</span>
+                    </div>
+                    <div class="aporte-item">
+                        <span class="texto">Formación, conocimiento y experiencias</span>
+                        <span class="cantidad">8</span>
+                    </div>
+                    <div class="aporte-item">
+                        <span class="texto">Acompañamiento, contención y sostén</span>
+                        <span class="cantidad">5</span>
+                    </div>
+                    <div class="aporte-item">
+                        <span class="texto">Visibilidad y representatividad</span>
+                        <span class="cantidad">4</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 7: Valoración de espacios -->
+            <section>
+                <h2>Cómo vivieron las cooperativas los distintos espacios</h2>
+                <p style="color: #94a3b8; font-size: 0.9em; margin-bottom: 1em;">Pasá el mouse para ver el puntaje</p>
+
+                <div class="espacios-grupo">
+                    <h3 style="color: var(--verde);">Espacios con mayor impacto para las cooperativas</h3>
+                    <div class="espacios-container">
+                        <div class="espacio-card muy-valorado">
+                            <div class="nombre">PLENARIO</div>
+                            <div class="puntaje">8.68</div>
+                        </div>
+                        <div class="espacio-card muy-valorado">
+                            <div class="nombre">GCU</div>
+                            <div class="puntaje">7.50</div>
+                        </div>
+                        <div class="espacio-card muy-valorado">
+                            <div class="nombre">COMUNICACIÓN</div>
+                            <div class="puntaje">6.88</div>
+                        </div>
+                        <div class="espacio-card muy-valorado">
+                            <div class="nombre">ASAMBLEA MENSUAL</div>
+                            <div class="puntaje">6.79</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="espacios-grupo">
+                    <h3 style="color: var(--amarillo);">Espacios con valoración media</h3>
+                    <div class="espacios-container">
+                        <div class="espacio-card valoracion-media">
+                            <div class="nombre">ENDECONSTRUCCIÓN</div>
+                            <div class="puntaje">6.48</div>
+                        </div>
+                        <div class="espacio-card valoracion-media">
+                            <div class="nombre">IA4COOPS</div>
+                            <div class="puntaje">6.13</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="espacios-grupo">
+                    <h3 style="color: var(--naranja);">Espacios con menor impacto percibido</h3>
+                    <div class="espacios-container">
+                        <div class="espacio-card a-fortalecer">
+                            <div class="nombre">CONSEJO</div>
+                            <div class="puntaje">5.96</div>
+                        </div>
+                        <div class="espacio-card a-fortalecer">
+                            <div class="nombre">INFRATTIC</div>
+                            <div class="puntaje">5.50</div>
+                        </div>
+                        <div class="espacio-card a-fortalecer">
+                            <div class="nombre">CAPACITACIONES</div>
+                            <div class="puntaje">5.46</div>
+                        </div>
+                        <div class="espacio-card a-fortalecer">
+                            <div class="nombre">PLATAF. COOP</div>
+                            <div class="puntaje">4.36</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 8: Transición - Nudos -->
+            <section class="transicion">
+                <h2>Puntos de dolor</h2>
+                <p style="color: #94a3b8; font-size: 1.3em;">¿Qué nos frena o dificulta?</p>
+            </section>
+
+            <!-- SLIDE 9: Resumen de Nudos -->
+            <section>
+                <h2>6 nudos identificados</h2>
+                <div class="nudos-resumen">
+                    <div class="nudo-resumen-card nudo-1">
+                        <div class="titulo">Tiempo, Recursos y Motivación</div>
+                        <div class="porcentaje">59%</div>
+                    </div>
+                    <div class="nudo-resumen-card nudo-2">
+                        <div class="titulo">Representatividad y Poder</div>
+                        <div class="porcentaje">34%</div>
+                    </div>
+                    <div class="nudo-resumen-card nudo-3">
+                        <div class="titulo">Objetivos y Planificación</div>
+                        <div class="porcentaje">31%</div>
+                    </div>
+                    <div class="nudo-resumen-card nudo-4">
+                        <div class="titulo">Fragmentación y Comunicación</div>
+                        <div class="porcentaje">24%</div>
+                    </div>
+                    <div class="nudo-resumen-card nudo-5">
+                        <div class="titulo">Identificación Sectorial</div>
+                        <div class="porcentaje">17%</div>
+                    </div>
+                    <div class="nudo-resumen-card nudo-6">
+                        <div class="titulo">Posicionamiento Político</div>
+                        <div class="porcentaje">14%</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLIDE 10: Nudo 1 -->
+            <section class="nudo-slide">
+                <div class="nudo-header">
+                    <span class="nudo-numero color-nudo-1">1</span>
+                    <span class="nudo-titulo color-nudo-1">Tiempo, Recursos y Motivación Interna</span>
+                </div>
+                <div class="nudo-stats">
+                    <div class="nudo-stat">
+                        <div class="numero">17</div>
+                        <div class="label">cooperativas</div>
+                    </div>
+                    <div class="nudo-stat">
+                        <div class="numero">59%</div>
+                        <div class="label">del total</div>
+                    </div>
+                </div>
+                <ul class="nudo-puntos">
+                    <li>Tensión entre sostenibilidad económica y participación</li>
+                    <li>Priorización de proyectos productivos sobre militancia</li>
+                    <li>Dificultad para transmitir el valor de FACTTIC internamente</li>
+                </ul>
+                <div class="citas-container" id="citas-nudo-1">
+                    <!-- Se llenan con JS -->
+                </div>
+            </section>
+
+            <!-- SLIDE 11: Nudo 2 -->
+            <section class="nudo-slide">
+                <div class="nudo-header">
+                    <span class="nudo-numero color-nudo-2">2</span>
+                    <span class="nudo-titulo color-nudo-2">Representatividad y Poder</span>
+                </div>
+                <div class="nudo-stats">
+                    <div class="nudo-stat">
+                        <div class="numero">10</div>
+                        <div class="label">cooperativas</div>
+                    </div>
+                    <div class="nudo-stat">
+                        <div class="numero">34%</div>
+                        <div class="label">del total</div>
+                    </div>
+                </div>
+                <ul class="nudo-puntos">
+                    <li>Construcciones personalistas e inorgánicas</li>
+                    <li>Uso de la federación para intereses puntuales</li>
+                    <li>Verticalismo en espacios de decisión</li>
+                </ul>
+                <div class="citas-container" id="citas-nudo-2">
+                </div>
+            </section>
+
+            <!-- SLIDE 12: Nudo 3 -->
+            <section class="nudo-slide">
+                <div class="nudo-header">
+                    <span class="nudo-numero color-nudo-3">3</span>
+                    <span class="nudo-titulo color-nudo-3">Falta de Objetivos y Planificación</span>
+                </div>
+                <div class="nudo-stats">
+                    <div class="nudo-stat">
+                        <div class="numero">9</div>
+                        <div class="label">cooperativas</div>
+                    </div>
+                    <div class="nudo-stat">
+                        <div class="numero">31%</div>
+                        <div class="label">del total</div>
+                    </div>
+                </div>
+                <ul class="nudo-puntos">
+                    <li>No hay un proyecto común claro</li>
+                    <li>Federación reactiva, sin plan estratégico</li>
+                    <li>Falta de conducción y dirección</li>
+                </ul>
+                <div class="citas-container" id="citas-nudo-3">
+                </div>
+            </section>
+
+            <!-- SLIDE 13: Nudo 4 -->
+            <section class="nudo-slide">
+                <div class="nudo-header">
+                    <span class="nudo-numero color-nudo-4">4</span>
+                    <span class="nudo-titulo color-nudo-4">Fragmentación, Comunicación y Transparencia</span>
+                </div>
+                <div class="nudo-stats">
+                    <div class="nudo-stat">
+                        <div class="numero">7</div>
+                        <div class="label">cooperativas</div>
+                    </div>
+                    <div class="nudo-stat">
+                        <div class="numero">24%</div>
+                        <div class="label">del total</div>
+                    </div>
+                </div>
+                <ul class="nudo-puntos">
+                    <li>No se comparte información, falta colectivización</li>
+                    <li>Roles y responsabilidades poco claros</li>
+                    <li>Falta de cohesión, "no tiramos para el mismo lado"</li>
+                </ul>
+                <div class="citas-container" id="citas-nudo-4">
+                </div>
+            </section>
+
+            <!-- SLIDE 14: Nudo 5 -->
+            <section class="nudo-slide">
+                <div class="nudo-header">
+                    <span class="nudo-numero color-nudo-5">5</span>
+                    <span class="nudo-titulo color-nudo-5">Identificación Sectorial</span>
+                </div>
+                <div class="nudo-stats">
+                    <div class="nudo-stat">
+                        <div class="numero">5</div>
+                        <div class="label">cooperativas</div>
+                    </div>
+                    <div class="nudo-stat">
+                        <div class="numero">17%</div>
+                        <div class="label">del total</div>
+                    </div>
+                </div>
+                <ul class="nudo-puntos">
+                    <li>Coopes no-software no se sienten representadas</li>
+                    <li>Temas muy centrados en desarrollo</li>
+                    <li>Dificultad para participar en discusiones técnicas</li>
+                </ul>
+                <div class="citas-container" id="citas-nudo-5">
+                </div>
+            </section>
+
+            <!-- SLIDE 15: Nudo 6 -->
+            <section class="nudo-slide">
+                <div class="nudo-header">
+                    <span class="nudo-numero color-nudo-6">6</span>
+                    <span class="nudo-titulo color-nudo-6">Posicionamiento Político</span>
+                </div>
+                <div class="nudo-stats">
+                    <div class="nudo-stat">
+                        <div class="numero">4</div>
+                        <div class="label">cooperativas</div>
+                    </div>
+                    <div class="nudo-stat">
+                        <div class="numero">14%</div>
+                        <div class="label">del total</div>
+                    </div>
+                </div>
+                <ul class="nudo-puntos">
+                    <li>Falta de expresión ante el contexto actual</li>
+                    <li>Desconexión con los territorios</li>
+                    <li>Ausencia de posicionamiento institucional</li>
+                </ul>
+                <div class="citas-container" id="citas-nudo-6">
+                </div>
+            </section>
+
+            <!-- SLIDE 16: Prioridades -->
+            <section>
+                <h2>Prioridades identificadas</h2>
+                <p style="color: #94a3b8; margin-bottom: 1em;">Si FACTTIC pudiera enfocarse en pocos cambios...</p>
+                <ul style="max-width: 800px; margin: 0 auto; text-align: left;">
+                    <li><strong>Organización:</strong> objetivos comunes, plan de trabajo estratégico</li>
+                    <li><strong>Comercial:</strong> seguir fortaleciendo desde el área comercial</li>
+                    <li><strong>Político:</strong> posicionamiento claro</li>
+                    <li><strong>Formaciones:</strong> aprovechar herramientas construidas</li>
+                </ul>
+            </section>
+
+            <!-- SLIDE 17: Transición EJES -->
+            <section class="transicion">
+                <h2>Organizando el trabajo</h2>
+                <p style="color: var(--amarillo); font-size: 1.5em; margin-bottom: 0.5em;">EJES ESTRATÉGICOS</p>
+                <p style="color: #94a3b8; font-size: 1.1em; max-width: 700px; margin: 0 auto;">
+                    Proponemos organizar el trabajo de la federación en <strong>ejes</strong>, cada uno con objetivos claros que se cumplen a través de los espacios existentes.
+                </p>
+            </section>
+
+            <!-- SLIDE 18: Eje 1 - Comercialización -->
+            <section>
+                <h2>Eje 1</h2>
+                <div class="eje-card eje-comercial" onclick="mostrarEje('comercial')">
+                    <div class="eje-icon">💼</div>
+                    <div class="eje-titulo">Generación de Trabajo / Comercialización</div>
+                    <div class="eje-desc">
+                        Garantizar la sustentabilidad de las cooperativas, impulsar el crecimiento económico y fomentar la intercooperación.
+                    </div>
+                    <div class="eje-cta">Click para ver objetivos →</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 19: Eje 2 - Fortalecimiento -->
+            <section>
+                <h2>Eje 2</h2>
+                <div class="eje-card eje-fortalecimiento" onclick="mostrarEje('fortalecimiento')">
+                    <div class="eje-icon">⚖️</div>
+                    <div class="eje-titulo">Democratización, Fortalecimiento y Derechos</div>
+                    <div class="eje-desc">
+                        Mejorar la calidad de vida de les asociades, fortalecer la democracia interna y asegurar un futuro más justo y equitativo.
+                    </div>
+                    <div class="eje-cta">Click para ver objetivos →</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 20: Eje 3 - Vinculación -->
+            <section>
+                <h2>Eje 3</h2>
+                <div class="eje-card eje-vinculacion" onclick="mostrarEje('vinculacion')">
+                    <div class="eje-icon">🌐</div>
+                    <div class="eje-titulo">Vinculación y Posicionamiento</div>
+                    <div class="eje-desc">
+                        Construir una organización con base sólida y principios comunes, desarrollar vinculaciones duraderas con otras organizaciones.
+                    </div>
+                    <div class="eje-cta">Click para ver objetivos →</div>
+                </div>
+            </section>
+
+            <!-- SLIDE 18: Cierre -->
+            <section>
+                <img src="logo_facttic.png" alt="FACTTIC" style="width: 150px; margin-bottom: 1em;">
+                <h2>Gracias</h2>
+                <p style="font-size: 1.5em; color: var(--verde); margin-top: 1em;">
+                    Construyamos juntes
+                </p>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- Modal para citas -->
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="cerrarModal()">&times;</button>
+            <div class="modal-cita-id" id="modal-id"></div>
+            <div class="modal-cita-texto" id="modal-texto"></div>
+        </div>
+    </div>
+
+    <!-- Modal para preguntas disparadoras -->
+    <div class="modal-overlay" id="modal-preguntas">
+        <div class="modal-content modal-preguntas-content">
+            <button class="modal-close" onclick="cerrarModalPreguntas()">&times;</button>
+            <div class="modal-preguntas-titulo" id="modal-preguntas-titulo"></div>
+            <div class="modal-preguntas-lista" id="modal-preguntas-lista"></div>
+        </div>
+    </div>
+
+    <!-- Modal para ejes -->
+    <div class="modal-overlay" id="modal-eje">
+        <div class="modal-content modal-eje-content">
+            <button class="modal-close" onclick="cerrarModalEje()">&times;</button>
+            <div class="modal-eje-header" id="modal-eje-header">
+                <span class="modal-eje-icon" id="modal-eje-icon"></span>
+                <span class="modal-eje-titulo" id="modal-eje-titulo"></span>
+            </div>
+            <div class="modal-eje-importancia" id="modal-eje-importancia"></div>
+            <div class="modal-eje-objetivos-titulo">Objetivos</div>
+            <ul class="modal-eje-objetivos" id="modal-eje-objetivos"></ul>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@4.5.0/dist/reveal.js"></script>
+    <script>
+        // Datos de citas por nudo
+        const citasData = {
+            nudo1: [
+                { id: "Cita 1", texto: "Muchas veces el tiempo y los recursos." },
+                { id: "Cita 2", texto: "Somos una cooperativa chica que muy fácilmente los perfiles quedamos sin disponibilidad y por eso el mayor obstáculo de participación es que tenemos que aportar nuestras horas a proyectos y no nos queda mucho margen." },
+                { id: "Cita 3", texto: "Fragmentación de la federación en la actualidad. Dificultad para transmitir en la cooperativa el valor de pertenecer a Facttic" },
+                { id: "Cita 4", texto: "interes, representacion" },
+                { id: "Cita 5", texto: "Recursos limitados por ser pocas personas en nuestra coope" },
+                { id: "Cita 6", texto: "El interés no es de todes les socies y la participación cuando es una sola persona se complica por tiempos y a veces por falta de recursos." },
+                { id: "Cita 7", texto: "Recursos humanos de INDEPI para participar de los distintos espacios" },
+                { id: "Cita 8", texto: "Hoy las dificultades para participar son principalemente internas: falta de tiempo para construir espacios gremiales frente al apremio de destinar horas a trabajos remunerados." },
+                { id: "Cita 9", texto: "Los tiempos y las preocupaciones propias de nuestra cooperativa que se encuentra en un momento difícil." },
+                { id: "Cita 10", texto: "Creo que desde el consejo de nuestra coope estamos fallando un poco en la 'bajada de línea' para conscientizar lo importante que es la participación en este tipo de espacios. Como autocrítica, nuestra coope se centra muchísimo en lo laboral, y a veces dejamos de lado el contacto con nuestro ecosistema." },
+                { id: "Cita 11", texto: "tiempo, temas de interes" },
+                { id: "Cita 12", texto: "nos resulta dificil la asignación de tiempos porque a veces estamos muy exigidos por la diaria en clientes." },
+                { id: "Cita 13", texto: "Tiempo / recursos, que están vinculados + conocimiento de cómo funciona la federación y de qué forma nos podemos retroalimentar" },
+                { id: "Cita 14", texto: "Recursos y tiempos" },
+                { id: "Cita 15", texto: "Recursos, espacios donde se trabaje la responsabilidad social y la sustentabilidad." },
+                { id: "Cita 16", texto: "Gran parte de nuestra energía está puesta en mantener la estabilidad de nuestra cooperativa, que se vio afectada en gran medida por el proceso de separación vivido recientemente." },
+                { id: "Cita 17", texto: "Tenemos una participación bastante acotada a lo comercial. Nos cuesta sostener otros espacios, tal vez falta de interés y de motivación. Nos parece que a veces las discusiones se estiran de más, se vuelve medio lento el proceso y eso va desacelerando el active." },
+                { id: "Cita 18", texto: "En este momento, nuestro mayor obstáculo es la situación financiera de nuestra cooperativa que no nos permite destinar tiempo a los espacios de FACTTIC." }
+            ],
+            nudo2: [
+                { id: "Cita 1", texto: "La rosca que genera que no se comparta cierta información o se clarifiquien los roles (individualismo). Por suerte es una parte pequeña todavía pero nos preocupa mucho la tendencia." },
+                { id: "Cita 2", texto: "Desde la salida antes de término de la presidencia de Fiqus hacia aquí se han dado muchas situaciones de representatividad, de no claridad, de división, de construcción de poder individual o de grupos que en mayor o menor medida han desalentado la participación." },
+                { id: "Cita 3", texto: "Consideramos que en los últimos años se a afianzado un tipo de construcción más personalista, inorgánica en la que no prima la colectivización de la información" },
+                { id: "Cita 4", texto: "Falta de reglas claras para la distribución de las responsabilidades y sobre todo de las representaciones que hace que el gran trabajo de la federación no logre objetivos grandes." },
+                { id: "Cita 5", texto: "Fragmentación de la federación, falta un proyecto común y se usa la federación para intereses puntuales de algunas cooperativas." },
+                { id: "Cita 6", texto: "No hay unidad. Somos 5 y no tiramos para el mismo lado. Hay formas de construir poder cuestionables. Algunas basadas en el cargo y otras en la capacidad de generar trabajo o ingresos para otras coopes." },
+                { id: "Cita 7", texto: "Los valores y la moral cooperativa no están siendo concurrente con algunos espacios dentro de la federación. Ejemplo presidencia o cláusulas dentro de los servicios profesionales, esto conlleva no defender espacios de trabajo conseguidos mediante la labor cooperativa, dando lugar al oportunismo individual." },
+                { id: "Cita 8", texto: "Creemos que FACTTIC atraviesa una crisis de representatividad que se manifiesta en distintos planos: la falta de cohesión interna, la debilidad del trabajo colectivo y la ausencia de una visión compartida. La participación de FACTTIC en diversos eventos se percibe personalista y poco representativa." },
+                { id: "Cita 9", texto: "La falta de objetivos claros y puntuales sobre los cuales construir. La poca comunicación y articulación entre los espacios internos de facttic. La falta de organización, planificación y comunicación para la representación de FACTTIC en eventos externos, sentimos que muchas veces la 'chapa' de la federación es utilizada para beneficios personales." },
+                { id: "Cita 10", texto: "Se perdió un poco el desinterés que había por hacer crecer a la federación, ayudar a que todas las cooperativas estemos bien, trabajando e intercooperando. Cada vez más se ve acumulación de poder en personas y espacios, lo cual nos aleja." },
+                { id: "Cita 11", texto: "Nos parece que el Consejo tiene una lógica bastante verticalista, en especial la presidencia del mismo. Que muchas veces más que fomentar procesos los obstaculiza y burocratiza." }
+            ],
+            nudo3: [
+                { id: "Cita 1", texto: "Algunos planes muy ambiciosos, poca recaudación, desorden." },
+                { id: "Cita 2", texto: "Fragmentación de la federación, falta un proyecto común y se usa la federación para intereses puntuales de algunas cooperativas." },
+                { id: "Cita 3", texto: "Es difícil ver los planes a largo plazo y que estos estén consensuados. La federación es más reactiva a lo que va sucediendo o a los deseos de algún grupo." },
+                { id: "Cita 4", texto: "Lo que hay es muy valioso. Para dar un paso más, hace falta algún objetivo común que se materialice en acciones, partir de un punto común y evitar dispersión." },
+                { id: "Cita 5", texto: "Creemos que es un contexto difícil en el que se busca resolver lo productivo para que las cooperativas funcionen y que deja poco margen para otro tipo de actividades. Por otro lado, tal vez falten cuadros que organicen y lideren las tareas en los diferentes espacios y que las impulsen, como una falta de dirección." },
+                { id: "Cita 6", texto: "no hay objetivos, ni conducción, ni organización, ni confianza" },
+                { id: "Cita 7", texto: "participé de muy pocas instancias como para tener un diagnóstico claro pero pienso que parece que hay muchos frentes abiertos y no se percibe a simple vista un eje conductor prioritario." },
+                { id: "Cita 8", texto: "Consideramos que la federación tiene debilidades en el alcance de sus espacios y en las planificaciones estratégicas que se realizan. Definir mejor los objetivos puede ayudar a la delimitación de espacios de manera funcional para fortalecer las cooperativas asociadas." },
+                { id: "Cita 9", texto: "La falta de objetivos claros y puntuales sobre los cuales construir. La poca comunicación y articulación entre los espacios internos de facttic." }
+            ],
+            nudo4: [
+                { id: "Cita 1", texto: "La rosca que genera que no se comparta cierta información o se clarifiquen los roles (individualismo)." },
+                { id: "Cita 2", texto: "Fragmentación de la federación en la actualidad. Dificultad para transmitir en la cooperativa el valor de pertenecer a Facttic" },
+                { id: "Cita 3", texto: "Desde la salida antes de término de la presidencia de Fiqus hacia aquí se han dado muchas situaciones de representatividad, de no claridad, de división, de construcción de poder individual o de grupos." },
+                { id: "Cita 4", texto: "Desarticulación de los espacios y falta de comunicación entre las personas que representan a la Federación." },
+                { id: "Cita 5", texto: "Fragmentación de la federación, falta un proyecto común." },
+                { id: "Cita 6", texto: "No hay unidad. Somos 5 y no tiramos para el mismo lado." },
+                { id: "Cita 7", texto: "Quizás dificultad en la comunicación entre referentes, falta de participación de las coopes que somos más nuevas" },
+                { id: "Cita 8", texto: "Creemos que FACTTIC atraviesa una crisis de representatividad que se manifiesta en distintos planos: la falta de cohesión interna, la debilidad del trabajo colectivo y la ausencia de una visión compartida que oriente a las cooperativas hacia proyectos comunes." }
+            ],
+            nudo5: [
+                { id: "Cita 1", texto: "Hoy las dificultades para participar son principalmente internas: falta de tiempo para construir espacios gremiales frente al apremio de destinar horas a trabajos remunerados. Por otro lado, nuestra cooperativa es de servicios profesionales y algunxs asociadxs no están directamente vinculados a la tecnología y no terminan de sentirse representadxs por la federación por este motivo." },
+                { id: "Cita 2", texto: "Disponibilidad de tiempos, distancia respecto a los temas que se suelen hablar más vinculados al desarrollo." },
+                { id: "Cita 3", texto: "En este momento, nuestro mayor obstáculo es la situación financiera de nuestra cooperativa. También reconocemos que el objeto de nuestra cooperativa no llega a encajar del todo con las discusiones que se tienen en los espacios. Es un obstáculo que nos hemos planteado superar, pero vemos que al no brindar servicios de desarrollo o programación no encajamos en muchas de las discusiones o propuestas." },
+                { id: "Cita 4", texto: "Una dificultad es lo que mencionamos arriba, que el desarrollo de software es la actividad prioritaria de la mayor parte de las coopes de facttic y quienes trabajamos en otras áreas por momentos no encontramos representación en algunas discusiones." },
+                { id: "Cita 5", texto: "foco en otros intereses o problemas que no tienen que ver con nosotros." }
+            ],
+            nudo6: [
+                { id: "Cita 1", texto: "Creo que hoy son varios. Por un lado la falta de expresión política ante la avanzada fascista, es muy desmotivante. Por otro lado, las herramientas utilizadas son absolutamente de nicho, y la Federación inició un camino de apertura que no fue acompañado por la habilitación de medios más masivos. Por otro lado hay una dificultad en la democratización de los procesos y las oportunidades de representación." },
+                { id: "Cita 2", texto: "Hoy estamos participando activamente y con buena representatividad. Sin embargo, creemos que algunos detalles hacen que los tiempos de militancia política de otros compañeros/as vayan directamente al territorio. La falta de un plan de trabajo general, que motive a los asociados a comprometerse con algún espacio específico de la federación. La desconexión con los territorios, y por ende la falta de propuestas federadas." },
+                { id: "Cita 3", texto: "Cómo decía antes, el tema del uso de las aplicaciones de nicho (Telegram, mattermost etc). Por otro lado creo que hay una debilidad manifiesta en cuanto a los posicionamientos políticos de nuestro sector." },
+                { id: "Cita 4", texto: "Una dificultad es lo que mencionamos arriba, que el desarrollo de software es la actividad prioritaria de la mayor parte de las coopes de facttic. Nos preocupa que la federación pueda llevar adelante acciones más concretas para proteger y garantizar la continuidad de las cooperativas que se encuentran en crisis frente a los embates del gobierno nacional tanto a nivel económico como político. Un posicionamiento público más claro frente a estos embates nos resulta importante." }
+            ]
+        };
+
+        // Función para mostrar modal
+        function mostrarCita(nudo, index) {
+            const cita = citasData[nudo][index];
+            document.getElementById('modal-id').textContent = cita.id;
+            document.getElementById('modal-texto').textContent = cita.texto;
+            document.getElementById('modal').classList.add('active');
+        }
+
+        // Función para cerrar modal
+        function cerrarModal() {
+            document.getElementById('modal').classList.remove('active');
+        }
+
+        // Cerrar modal con Escape o click afuera
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                cerrarModal();
+                cerrarModalPreguntas();
+                cerrarModalEje();
+            }
+        });
+
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target.id === 'modal') cerrarModal();
+        });
+
+        document.getElementById('modal-preguntas').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-preguntas') cerrarModalPreguntas();
+        });
+
+        document.getElementById('modal-eje').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-eje') cerrarModalEje();
+        });
+
+        // Preguntas disparadoras por nudo
+        const preguntasData = {
+            nudo1: {
+                titulo: "Tiempo, Recursos y Motivación Interna",
+                clase: "nudo-1",
+                preguntas: [
+                    "¿Cómo podemos reducir la tensión entre la sostenibilidad económica de las cooperativas y la participación en FACTTIC?",
+                    "¿Qué mecanismos podría implementar FACTTIC para facilitar la participación de cooperativas con pocos recursos?",
+                    "¿Cómo transmitimos mejor el valor de participar en la federación hacia adentro de cada cooperativa?",
+                    "¿Es posible pensar formas de participación que no requieran tanto tiempo? ¿Cuáles?"
+                ]
+            },
+            nudo2: {
+                titulo: "Representatividad y Poder",
+                clase: "nudo-2",
+                preguntas: [
+                    "¿Cómo podemos construir una federación donde el poder esté más distribuido?",
+                    "¿Qué mecanismos de control y transparencia necesitamos para evitar construcciones personalistas?",
+                    "¿Cómo garantizamos que las representaciones externas de FACTTIC sean realmente colectivas?",
+                    "¿Qué cambios en la estructura de gobierno de FACTTIC propondrían?"
+                ]
+            },
+            nudo3: {
+                titulo: "Falta de Objetivos y Planificación",
+                clase: "nudo-3",
+                preguntas: [
+                    "¿Cuáles deberían ser los 3 objetivos prioritarios de FACTTIC para el próximo año?",
+                    "¿Cómo pasamos de ser una federación reactiva a una con plan estratégico?",
+                    "¿Qué tipo de conducción necesita FACTTIC? ¿Cómo debería funcionar?",
+                    "¿Cómo articulamos mejor los distintos espacios para que no haya dispersión?"
+                ]
+            },
+            nudo4: {
+                titulo: "Fragmentación, Comunicación y Transparencia",
+                clase: "nudo-4",
+                preguntas: [
+                    "¿Qué información debería circular obligatoriamente entre todas las cooperativas?",
+                    "¿Cómo mejoramos la comunicación entre los distintos espacios de FACTTIC?",
+                    "¿Qué herramientas o canales necesitamos para que la información fluya mejor?",
+                    "¿Cómo construimos mayor cohesión y sentido de 'tirar para el mismo lado'?"
+                ]
+            },
+            nudo5: {
+                titulo: "Identificación Sectorial",
+                clase: "nudo-5",
+                preguntas: [
+                    "¿Cómo hacemos para que las cooperativas que no son de software se sientan parte?",
+                    "¿Qué espacios o actividades podríamos crear para integrar otros perfiles?",
+                    "¿Debería FACTTIC ampliar su alcance más allá del desarrollo de software? ¿Cómo?",
+                    "¿Qué temas deberíamos incorporar en las discusiones que hoy no están presentes?"
+                ]
+            },
+            nudo6: {
+                titulo: "Posicionamiento Político",
+                clase: "nudo-6",
+                preguntas: [
+                    "¿Qué posicionamientos políticos debería tomar FACTTIC ante el contexto actual?",
+                    "¿Cómo conectamos mejor con los territorios y las luchas locales?",
+                    "¿Qué rol debería tener FACTTIC en la defensa del cooperativismo frente a los ataques del gobierno?",
+                    "¿Cómo articulamos con otros sectores de la economía social y solidaria?"
+                ]
+            }
+        };
+
+        // Función para mostrar preguntas disparadoras
+        function mostrarPreguntas(nudo) {
+            const data = preguntasData[nudo];
+            const tituloEl = document.getElementById('modal-preguntas-titulo');
+            const listaEl = document.getElementById('modal-preguntas-lista');
+
+            tituloEl.textContent = data.titulo;
+            tituloEl.className = 'modal-preguntas-titulo ' + data.clase;
+
+            listaEl.innerHTML = data.preguntas.map(p =>
+                `<div class="pregunta">${p}</div>`
+            ).join('');
+
+            document.getElementById('modal-preguntas').classList.add('active');
+        }
+
+        // Función para cerrar modal de preguntas
+        function cerrarModalPreguntas() {
+            document.getElementById('modal-preguntas').classList.remove('active');
+        }
+
+        // Datos de ejes estratégicos
+        const ejesData = {
+            comercial: {
+                icon: '💼',
+                titulo: 'Generación de Trabajo / Comercialización',
+                clase: 'eje-comercial',
+                importancia: 'La generación de trabajo para las cooperativas de la federación garantiza la sustentabilidad de las mismas, impulsa el crecimiento económico, brinda a les socies la posibilidad de desarrollar sus habilidades profesionales, y fomenta un sentido de comunidad y colaboración. Es un elemento clave para el éxito a largo plazo de la federación.',
+                objetivos: [
+                    'Fortalecer los vínculos a través del trabajo intercooperativo',
+                    'Brindar apoyo a las cooperativas que coyunturalmente están atravesando un mal momento',
+                    'Generar un esquema colectivo de servicios de comercialización',
+                    'Ofrecer cartera de productos y servicios de las cooperativas para verticales específicos',
+                    'Trabajar conjuntamente la gestión de staffing intercooperativo',
+                    'Brindar apoyo al desarrollo de nuevas líneas de negocios: desarrollo de productos / servicios, comercialización de productos / servicios',
+                    'Generar dispositivos para formación / desarrollo de capacidades'
+                ]
+            },
+            fortalecimiento: {
+                icon: '⚖️',
+                titulo: 'Democratización, Fortalecimiento y Derechos',
+                clase: 'eje-fortalecimiento',
+                importancia: 'El fortalecimiento de las cooperativas mejora la calidad de vida de sus asociades, impulsa el desarrollo económico local, mejora la competitividad, y fomenta la democracia económica. Al fortalecer las cooperativas, la federación asegura un futuro más justo y equitativo desde una perspectiva de derechos.',
+                objetivos: [
+                    'Promover y fomentar la equidad de género',
+                    'Impulsar la federalización de FACTTIC',
+                    'Monitorear la situación de las cooperativas',
+                    'Debatir, explicitar y monitorear el dispositivo de gestión en la federación',
+                    'Garantizar acceso a la información',
+                    'Generar dispositivos para la incubación de Cooperativas',
+                    'Fortalecer la sostenibilidad de las cooperativas de la federación (gestión, institucional)'
+                ]
+            },
+            vinculacion: {
+                icon: '🌐',
+                titulo: 'Vinculación y Posicionamiento',
+                clase: 'eje-vinculacion',
+                importancia: 'Acordar posiciones políticas en el conjunto diverso de cooperativas es un desafío importante porque construye una organización con base sólida y principios comunes. Basándonos en los principios cooperativos, buscamos desarrollar vinculaciones sólidas y duraderas con otras organizaciones, basadas en la solidaridad, reciprocidad y la construcción de un horizonte compartido.',
+                objetivos: [
+                    'Definir ejes de posicionamiento político, social y económico',
+                    'Definir estrategias de incidencia en políticas públicas',
+                    'Posicionarnos como referentes técnicos (desde el cooperativismo)',
+                    'Construir un mapa de vinculaciones, nacional e internacional, en función de los objetivos estratégicos de la federación',
+                    'Participar en eventos, nacionales e internacionales, que aporten a los objetivos estratégicos de la federación'
+                ]
+            }
+        };
+
+        // Función para mostrar modal de eje
+        function mostrarEje(eje) {
+            const data = ejesData[eje];
+            document.getElementById('modal-eje-header').className = 'modal-eje-header ' + data.clase;
+            document.getElementById('modal-eje-icon').textContent = data.icon;
+            document.getElementById('modal-eje-titulo').textContent = data.titulo;
+            document.getElementById('modal-eje-importancia').textContent = data.importancia;
+
+            const objetivosEl = document.getElementById('modal-eje-objetivos');
+            objetivosEl.innerHTML = data.objetivos.map(obj => `<li>${obj}</li>`).join('');
+
+            document.getElementById('modal-eje').classList.add('active');
+        }
+
+        // Función para cerrar modal de eje
+        function cerrarModalEje() {
+            document.getElementById('modal-eje').classList.remove('active');
+        }
+
+        // Generar chips de citas
+        function generarChips() {
+            Object.keys(citasData).forEach(nudo => {
+                const container = document.getElementById(`citas-${nudo.replace('nudo', 'nudo-')}`);
+                if (container) {
+                    citasData[nudo].forEach((cita, index) => {
+                        const chip = document.createElement('span');
+                        chip.className = 'cita-chip';
+                        chip.textContent = cita.id;
+                        chip.onclick = () => mostrarCita(nudo, index);
+                        container.appendChild(chip);
+                    });
+                }
+            });
+        }
+
+        // Inicializar Reveal.js
+        Reveal.initialize({
+            hash: true,
+            slideNumber: true,
+            transition: 'fade',
+            transitionSpeed: 'fast',
+            width: 1280,
+            height: 720,
+            margin: 0.1,
+        });
+
+        // Generar chips al cargar
+        generarChips();
+    </script>
+</body>
+</html>

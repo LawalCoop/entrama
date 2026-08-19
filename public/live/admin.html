@@ -1,0 +1,2358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Dinámica FACTTIC</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"></script>
+    <style>
+        :root {
+            --color-fondo: #0f172a;
+            --color-card: #1e293b;
+            --color-texto: #f1f5f9;
+            --color-texto-secundario: #94a3b8;
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-primary: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-fondo);
+            color: var(--color-texto);
+            min-height: 100vh;
+        }
+
+        /* Login */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .login-box {
+            background: var(--color-card);
+            border-radius: 16px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-box h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            background: var(--color-fondo);
+            color: var(--color-texto);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .login-box button {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 8px;
+            border: none;
+            background: var(--color-primary);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .login-error {
+            color: var(--color-danger);
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        /* Admin Panel */
+        .admin-container {
+            display: none;
+            padding: 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .admin-container.activo {
+            display: block;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .admin-header h1 {
+            font-size: 1.5rem;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            background: var(--color-card);
+            color: var(--color-texto-secundario);
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .tab.activo {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.activo {
+            display: block;
+        }
+
+        /* Timer Control */
+        .timer-control {
+            background: var(--color-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .timer-control h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .timer-display {
+            font-size: 3rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-display.urgente {
+            color: var(--color-danger);
+        }
+
+        .timer-inputs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .timer-inputs input {
+            flex: 1;
+            min-width: 100px;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: none;
+            background: var(--color-fondo);
+            color: var(--color-texto);
+            font-size: 1rem;
+        }
+
+        .timer-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        /* Equipos Grid */
+        .equipos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .equipo-admin-card {
+            background: var(--color-card);
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 5px solid;
+        }
+
+        .equipo-admin-card .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.5rem;
+        }
+
+        .equipo-admin-card .nombre {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .equipo-admin-card .contador {
+            font-size: 2rem;
+            font-weight: bold;
+            opacity: 0.8;
+        }
+
+        .equipo-admin-card .tema {
+            color: var(--color-texto-secundario);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .equipo-admin-card .stats {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--color-texto-secundario);
+        }
+
+        .equipo-admin-card .terminados {
+            color: var(--color-success);
+        }
+
+        .equipo-admin-card .actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        /* Participantes por equipo */
+        .participantes-lista {
+            margin-top: 0.75rem;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+        }
+
+        .participante-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .participante-item .nombre {
+            font-weight: 500;
+        }
+
+        .participante-item .coope {
+            color: var(--color-texto-secundario);
+        }
+
+        .participante-item.terminado {
+            opacity: 0.5;
+        }
+
+        .participante-item.terminado::after {
+            content: " ✓";
+            color: var(--color-success);
+        }
+
+        /* Forms */
+        .form-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            z-index: 100;
+        }
+
+        .form-modal.activo {
+            display: flex;
+        }
+
+        .form-content {
+            background: var(--color-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .form-content h2 {
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--color-texto-secundario);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            background: var(--color-fondo);
+            color: var(--color-texto);
+            font-size: 1rem;
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--color-warning);
+            color: black;
+        }
+
+        .btn-danger {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: var(--color-texto);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Lista de items (cooperativas) */
+        .items-lista {
+            background: var(--color-card);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-row .nombre {
+            font-weight: 500;
+        }
+
+        .item-row .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Vista proyectable */
+        .vista-proyectable {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--color-fondo);
+            display: none;
+            padding: 1rem 1.5rem;
+            z-index: 200;
+            overflow: hidden;
+        }
+
+        .vista-proyectable.activo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .vista-proyectable .controles-proyectable {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .vista-proyectable .switch-tema {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .vista-proyectable .switch-tema input {
+            display: none;
+        }
+
+        .vista-proyectable .switch-tema .slider {
+            width: 44px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            position: relative;
+            transition: background 0.3s;
+        }
+
+        .vista-proyectable .switch-tema .slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: transform 0.3s;
+        }
+
+        .vista-proyectable .switch-tema input:checked + .slider {
+            background: var(--color-primary);
+        }
+
+        .vista-proyectable .switch-tema input:checked + .slider::before {
+            transform: translateX(20px);
+        }
+
+        .vista-proyectable .switch-tema .switch-label {
+            font-size: 0.9rem;
+            color: var(--color-texto-secundario);
+        }
+
+        /* Modo claro */
+        .vista-proyectable.modo-claro {
+            background: #f1f5f9;
+        }
+
+        .vista-proyectable.modo-claro h1,
+        .vista-proyectable.modo-claro .switch-label {
+            color: #1e293b;
+        }
+
+        .vista-proyectable.modo-claro .equipo-proyectable {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .vista-proyectable.modo-claro .equipo-proyectable .contador-label,
+        .vista-proyectable.modo-claro .equipo-proyectable .cooperativas-lista {
+            color: #64748b;
+        }
+
+        .vista-proyectable.modo-claro .equipo-proyectable .btn-ver-descripcion,
+        .vista-proyectable.modo-claro .equipo-proyectable .btn-google-doc-proyectable {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .vista-proyectable.modo-claro .equipo-proyectable .btn-ver-descripcion:hover,
+        .vista-proyectable.modo-claro .equipo-proyectable .btn-google-doc-proyectable:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modo claro - Modales */
+        .modal-resultados.modo-claro,
+        .modal-descripcion.modo-claro {
+            background: #f1f5f9;
+        }
+
+        .modal-resultados.modo-claro .equipo-titulo,
+        .modal-resultados.modo-claro .seccion h3,
+        .modal-descripcion.modo-claro .equipo-titulo,
+        .modal-descripcion.modo-claro .seccion h3 {
+            color: #1e293b;
+        }
+
+        .modal-resultados.modo-claro .equipo-tema,
+        .modal-resultados.modo-claro .accionable-item .responsable,
+        .modal-descripcion.modo-claro .seccion h3 {
+            color: #64748b;
+        }
+
+        .modal-resultados.modo-claro .reflexion-texto,
+        .modal-resultados.modo-claro .accionable-item,
+        .modal-descripcion.modo-claro .descripcion-texto,
+        .modal-descripcion.modo-claro .preguntas-lista li {
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-resultados.modo-claro .accionable-item .texto,
+        .modal-descripcion.modo-claro .descripcion-texto {
+            color: #1e293b;
+        }
+
+        .modal-resultados.modo-claro .cerrar-modal,
+        .modal-descripcion.modo-claro .cerrar-modal {
+            background: rgba(0, 0, 0, 0.1);
+            color: #1e293b;
+        }
+
+        .vista-proyectable.modo-claro .header-proyectable img {
+            background: #1e293b;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .vista-proyectable .header-proyectable {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            flex-shrink: 0;
+            margin-bottom: 1rem;
+        }
+
+        .vista-proyectable h1 {
+            font-size: 1.8rem;
+            margin: 0;
+        }
+
+        .vista-proyectable .timer-grande {
+            font-size: 2.5rem;
+            font-weight: bold;
+            font-variant-numeric: tabular-nums;
+            color: var(--color-primary);
+        }
+
+        .vista-proyectable .timer-grande.urgente {
+            color: var(--color-danger);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .vista-proyectable .equipos-proyectable {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 1rem;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .vista-proyectable .equipo-proyectable {
+            background: var(--color-card);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 3px solid;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .vista-proyectable .equipo-proyectable .equipo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        .vista-proyectable .equipo-proyectable .nombre {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .vista-proyectable .equipo-proyectable .contador-container {
+            text-align: center;
+        }
+
+        .vista-proyectable .equipo-proyectable .contador {
+            font-size: 4rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .vista-proyectable .equipo-proyectable .contador-label {
+            font-size: 0.9rem;
+            color: var(--color-texto-secundario);
+            margin-top: 0.25rem;
+        }
+
+        .vista-proyectable .equipo-proyectable.todos-terminados {
+            position: relative;
+        }
+
+        .vista-proyectable .equipo-proyectable .overlay-terminado {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            z-index: 10;
+        }
+
+        .vista-proyectable .equipo-proyectable .overlay-terminado .listo-equipo-nombre {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .vista-proyectable .equipo-proyectable .overlay-terminado .listo-texto {
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .vista-proyectable .equipo-proyectable .overlay-terminado .btn-ver-resultados-overlay {
+            background: rgba(255, 255, 255, 0.25);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .vista-proyectable .equipo-proyectable .overlay-terminado .btn-ver-resultados-overlay:hover {
+            background: rgba(255, 255, 255, 0.35);
+        }
+
+        .vista-proyectable .equipo-proyectable.todos-terminados .equipo-header,
+        .vista-proyectable .equipo-proyectable.todos-terminados .cooperativas-lista,
+        .vista-proyectable .equipo-proyectable.todos-terminados .btn-ver-resultados {
+            opacity: 0.2;
+        }
+
+        .vista-proyectable .equipo-proyectable .cooperativas-lista {
+            margin-top: 0.5rem;
+            font-size: 1.1rem;
+            color: var(--color-texto);
+            line-height: 1.6;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.25rem;
+        }
+
+        .vista-proyectable .equipo-proyectable .cooperativas-lista::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .vista-proyectable .equipo-proyectable .cooperativas-lista::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 2px;
+        }
+
+        .vista-proyectable .equipo-proyectable .cooperativas-lista::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+        }
+
+        .vista-proyectable .equipo-proyectable .btn-ver-resultados {
+            margin-top: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .vista-proyectable .equipo-proyectable .btn-ver-resultados:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .vista-proyectable .equipo-proyectable .estado-debatiendo {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+            animation: pulso 2s ease-in-out infinite;
+        }
+
+        @keyframes pulso {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Modal resultados - Estilo slide */
+        .modal-resultados {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--color-fondo);
+            display: none;
+            z-index: 300;
+            padding: 2rem 4rem;
+        }
+
+        .modal-resultados.activo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-resultados .cerrar-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .modal-resultados .slide-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            flex-shrink: 0;
+        }
+
+        .modal-resultados .equipo-titulo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-resultados .equipo-tema {
+            color: var(--color-texto-secundario);
+            font-size: 1.2rem;
+        }
+
+        .modal-resultados .slide-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .modal-resultados .seccion {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .modal-resultados .seccion h3 {
+            font-size: 1.3rem;
+            color: var(--color-texto-secundario);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+
+        .modal-resultados .reflexion-texto {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            font-size: 1.4rem;
+            line-height: 1.7;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .modal-resultados .accionables-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .modal-resultados .accionable-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .modal-resultados .accionable-item .numero {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            color: white;
+        }
+
+        .modal-resultados .accionable-item .texto-container {
+            flex: 1;
+        }
+
+        .modal-resultados .accionable-item .texto {
+            font-size: 1.4rem;
+            line-height: 1.4;
+        }
+
+        .modal-resultados .accionable-item .responsable {
+            font-size: 1rem;
+            color: #94a3b8;
+            margin-top: 0.25rem;
+        }
+
+        /* Botones en vista proyectable */
+        .vista-proyectable .equipo-proyectable .botones-equipo {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+
+        .vista-proyectable .equipo-proyectable .btn-ver-descripcion,
+        .vista-proyectable .equipo-proyectable .btn-google-doc-proyectable {
+            padding: 0.4rem 0.75rem;
+            background: transparent;
+            border: 2px solid;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        .vista-proyectable .equipo-proyectable .btn-ver-descripcion:hover,
+        .vista-proyectable .equipo-proyectable .btn-google-doc-proyectable:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Modal Descripción */
+        .modal-descripcion {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--color-fondo);
+            display: none;
+            z-index: 400;
+            padding: 2rem 4rem;
+            flex-direction: column;
+        }
+
+        .modal-descripcion.activo {
+            display: flex;
+        }
+
+        .modal-descripcion .cerrar-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-descripcion .slide-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .modal-descripcion .equipo-titulo {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .modal-descripcion .descripcion-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .modal-descripcion .seccion {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .modal-descripcion .seccion h3 {
+            font-size: 1.3rem;
+            color: var(--color-texto-secundario);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            flex-shrink: 0;
+        }
+
+        .modal-descripcion .descripcion-texto {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            font-size: 1.4rem;
+            line-height: 1.7;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .modal-descripcion .preguntas-lista {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .modal-descripcion .preguntas-lista li {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+            font-size: 1.2rem;
+            line-height: 1.5;
+        }
+
+        /* Modal Informe */
+        .modal-informe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--color-fondo);
+            display: none;
+            z-index: 500;
+            padding: 2rem;
+            flex-direction: column;
+        }
+
+        .modal-informe.activo {
+            display: flex;
+        }
+
+        .modal-informe .informe-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .modal-informe .informe-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .modal-informe .informe-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .modal-informe .informe-content {
+            flex: 1;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .modal-informe .equipo-seccion {
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-informe .equipo-seccion:last-child {
+            border-bottom: none;
+        }
+
+        .modal-informe .equipo-titulo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-informe .equipo-tema {
+            color: var(--color-texto-secundario);
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .modal-informe .seccion-titulo {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--color-texto-secundario);
+            margin: 1.5rem 0 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .modal-informe .lista-items {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .modal-informe .lista-items li {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+
+        .modal-informe .reflexion-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            line-height: 1.6;
+        }
+
+        .modal-informe .accionable-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-informe .accionable-item .responsable {
+            color: var(--color-texto-secundario);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .modal-informe .sin-datos {
+            color: var(--color-texto-secundario);
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .tabs {
+                width: 100%;
+                overflow-x: auto;
+            }
+
+            .timer-display {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-box">
+            <img src="logo_facttic.png" alt="FACTTIC" style="height: 50px; display: block; margin: 0 auto 1rem;">
+            <h1>Admin FACTTIC</h1>
+            <input type="password" id="passwordInput" placeholder="Contraseña">
+            <button onclick="login()">Ingresar</button>
+            <p class="login-error" id="loginError">Contraseña incorrecta</p>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-container" id="adminContainer">
+        <div class="admin-header">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <img src="logo_facttic.png" alt="FACTTIC" style="height: 40px;">
+                <h1>Panel de Administración</h1>
+            </div>
+            <div class="admin-actions">
+                <a href="index.html" target="_blank" class="btn btn-secondary">📊 Ver Informe</a>
+                <button class="btn btn-success" onclick="generarInformeDebate()">📋 Informe Debate</button>
+                <button class="btn btn-primary" onclick="abrirVistaProyectable()">📺 Vista Proyectable</button>
+                <button class="btn btn-secondary" onclick="logout()">Salir</button>
+            </div>
+        </div>
+
+        <!-- Timer Control -->
+        <div class="timer-control">
+            <h2>⏱️ Control de Timer</h2>
+            <div class="timer-display" id="timerDisplay">--:--</div>
+            <div class="timer-inputs">
+                <input type="number" id="timerMinutos" placeholder="Minutos" min="1" max="120" value="15">
+            </div>
+            <div class="timer-buttons">
+                <button class="btn btn-success" onclick="iniciarTimer()">▶️ Iniciar</button>
+                <button class="btn btn-warning" onclick="pausarTimer()">⏸️ Pausar</button>
+                <button class="btn btn-danger" onclick="resetearTimer()">⏹️ Resetear</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab activo" onclick="cambiarTab('dashboard')">📊 Dashboard</button>
+            <button class="tab" onclick="cambiarTab('equipos')">🏷️ Equipos</button>
+            <button class="tab" onclick="cambiarTab('cooperativas')">🏢 Cooperativas</button>
+            <button class="tab" onclick="cambiarTab('participantes')">👥 Participantes</button>
+        </div>
+
+        <!-- Tab: Dashboard -->
+        <div class="tab-content activo" id="tab-dashboard">
+            <div class="equipos-grid" id="equiposGrid">
+                <!-- Se llena con JS -->
+            </div>
+        </div>
+
+        <!-- Tab: Equipos -->
+        <div class="tab-content" id="tab-equipos">
+            <button class="btn btn-primary" onclick="abrirFormEquipo()" style="margin-bottom: 1rem;">+ Nuevo Equipo</button>
+            <div class="equipos-grid" id="equiposAdminGrid">
+                <!-- Se llena con JS -->
+            </div>
+        </div>
+
+        <!-- Tab: Cooperativas -->
+        <div class="tab-content" id="tab-cooperativas">
+            <button class="btn btn-primary" onclick="abrirFormCooperativa()" style="margin-bottom: 1rem;">+ Nueva Cooperativa</button>
+            <div class="items-lista" id="cooperativasLista">
+                <!-- Se llena con JS -->
+            </div>
+        </div>
+
+        <!-- Tab: Participantes -->
+        <div class="tab-content" id="tab-participantes">
+            <button class="btn btn-danger" onclick="limpiarParticipantes()" style="margin-bottom: 1rem;">🗑️ Limpiar todos los participantes</button>
+            <div class="items-lista" id="participantesLista">
+                <!-- Se llena con JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Equipo -->
+    <div class="form-modal" id="modalEquipo">
+        <div class="form-content">
+            <h2 id="modalEquipoTitulo">Nuevo Equipo</h2>
+            <input type="hidden" id="equipoId">
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="equipoNombre" placeholder="Ej: Equipo 1">
+            </div>
+            <div class="form-group">
+                <label>Tema</label>
+                <input type="text" id="equipoTema" placeholder="Ej: Tiempo y Recursos">
+            </div>
+            <div class="form-group">
+                <label>Color</label>
+                <input type="color" id="equipoColor" value="#3b82f6">
+            </div>
+            <div class="form-group">
+                <label>Preguntas disparadoras (una por línea)</label>
+                <textarea id="equipoPreguntas" placeholder="¿Pregunta 1?&#10;¿Pregunta 2?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Link Google Doc (minutas)</label>
+                <input type="url" id="equipoGoogleDoc" placeholder="https://docs.google.com/...">
+            </div>
+            <div class="form-group">
+                <label>Orden</label>
+                <input type="number" id="equipoOrden" value="0" min="0">
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary btn-block" onclick="guardarEquipo()">Guardar</button>
+                <button class="btn btn-secondary btn-block" onclick="cerrarModal('modalEquipo')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Cooperativa -->
+    <div class="form-modal" id="modalCooperativa">
+        <div class="form-content">
+            <h2 id="modalCooperativaTitulo">Nueva Cooperativa</h2>
+            <input type="hidden" id="cooperativaId">
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="cooperativaNombre" placeholder="Ej: Fiqus">
+            </div>
+            <div class="form-group">
+                <label>Orden</label>
+                <input type="number" id="cooperativaOrden" value="0" min="0">
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary btn-block" onclick="guardarCooperativa()">Guardar</button>
+                <button class="btn btn-secondary btn-block" onclick="cerrarModal('modalCooperativa')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vista Proyectable -->
+    <div class="vista-proyectable" id="vistaProyectable">
+        <div class="controles-proyectable">
+            <label class="switch-tema">
+                <input type="checkbox" id="switchModoClaro" onchange="toggleModoClaro()">
+                <span class="slider"></span>
+                <span class="switch-label">☀️ Modo claro</span>
+            </label>
+            <button class="btn btn-secondary cerrar" onclick="cerrarVistaProyectable()">✕ Cerrar</button>
+        </div>
+        <div class="header-proyectable">
+            <img src="logo_facttic.png" alt="FACTTIC" style="height: 50px;">
+            <h1>Dinámica de Grupos</h1>
+            <div class="timer-grande" id="timerProyectable">--:--</div>
+        </div>
+        <div class="equipos-proyectable" id="equiposProyectable">
+            <!-- Se llena con JS -->
+        </div>
+    </div>
+
+    <!-- Modal Resultados - Estilo Slide -->
+    <div class="modal-resultados" id="modalResultados">
+        <button class="cerrar-modal" onclick="cerrarModalResultados()">✕</button>
+
+        <div class="slide-header">
+            <div class="equipo-titulo" id="resultadosTitulo"></div>
+            <div class="equipo-tema" id="resultadosTema"></div>
+        </div>
+
+        <div class="slide-content">
+            <div class="seccion">
+                <h3>💭 Reflexión del grupo</h3>
+                <div class="reflexion-texto" id="resultadosReflexion"></div>
+            </div>
+
+            <div class="seccion">
+                <h3>✅ Accionables</h3>
+                <div class="accionables-lista" id="resultadosAccionables">
+                    <!-- Se llena con JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Descripción -->
+    <div class="modal-descripcion" id="modalDescripcion">
+        <button class="cerrar-modal" onclick="cerrarModalDescripcion()">✕</button>
+
+        <div class="slide-header">
+            <div class="equipo-titulo" id="descripcionTitulo"></div>
+        </div>
+
+        <div class="descripcion-content">
+            <div class="seccion">
+                <h3>📋 Descripción del tema</h3>
+                <div class="descripcion-texto" id="descripcionTexto"></div>
+            </div>
+
+            <div class="seccion">
+                <h3>❓ Preguntas disparadoras</h3>
+                <ul class="preguntas-lista" id="descripcionPreguntas">
+                    <!-- Se llena con JS -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Informe Debate -->
+    <div class="modal-informe" id="modalInforme">
+        <div class="informe-header">
+            <h1>📋 Informe del Debate</h1>
+            <div class="informe-actions">
+                <button class="btn btn-success" onclick="exportarPDF()">📄 Exportar PDF</button>
+                <button class="btn btn-primary" onclick="copiarInforme()">📋 Copiar texto</button>
+                <button class="btn btn-secondary" onclick="cerrarInforme()">✕ Cerrar</button>
+            </div>
+        </div>
+        <div class="informe-content" id="informeContent">
+            <!-- Se llena con JS -->
+        </div>
+    </div>
+
+    <script>
+        // Configuración Supabase
+        const SUPABASE_URL = 'https://aziyyqvupqaexdzmumvl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6aXl5cXZ1cHFhZXhkem11bXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMDYxOTUsImV4cCI6MjA4MDg4MjE5NX0.Rc_Bom4RPoAcIMoifdWZJIhItsPEBbUHTSyT8SYEcv0';
+
+        var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // Estado
+        let estado = {
+            equipos: [],
+            cooperativas: [],
+            participantes: [],
+            config: null,
+            timerInterval: null
+        };
+
+        // Login
+        async function login() {
+            const password = document.getElementById('passwordInput').value;
+
+            const { data, error } = await supabase
+                .from('config')
+                .select('admin_password')
+                .eq('id', 1)
+                .single();
+
+            if (error || !data) {
+                document.getElementById('loginError').style.display = 'block';
+                return;
+            }
+
+            if (password === data.admin_password) {
+                localStorage.setItem('facttic_admin', 'true');
+                mostrarAdmin();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('facttic_admin');
+            location.reload();
+        }
+
+        function mostrarAdmin() {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('adminContainer').classList.add('activo');
+            cargarDatos();
+            configurarRealtime();
+            estado.timerInterval = setInterval(actualizarTimer, 1000);
+        }
+
+        // Cargar datos
+        async function cargarDatos() {
+            const [equiposRes, coopRes, partsRes, configRes] = await Promise.all([
+                supabase.from('equipos').select('*').order('orden'),
+                supabase.from('cooperativas').select('*').order('orden'),
+                supabase.from('participantes').select('*').order('created_at'),
+                supabase.from('config').select('*').eq('id', 1).single()
+            ]);
+
+            estado.equipos = equiposRes.data || [];
+            estado.cooperativas = coopRes.data || [];
+            estado.participantes = partsRes.data || [];
+            estado.config = configRes.data;
+
+            renderizarTodo();
+        }
+
+        function renderizarTodo() {
+            renderizarDashboard();
+            renderizarEquiposAdmin();
+            renderizarCooperativas();
+            renderizarParticipantes();
+            renderizarVistaProyectable();
+        }
+
+        // Dashboard
+        function renderizarDashboard() {
+            const container = document.getElementById('equiposGrid');
+
+            container.innerHTML = estado.equipos.filter(e => e.activo).map(equipo => {
+                const participantesEquipo = estado.participantes.filter(p => p.equipo_id === equipo.id);
+                const total = participantesEquipo.length;
+                const equipoListo = equipo.reflexion && equipo.accionables && equipo.accionables.length > 0;
+
+                return `
+                    <div class="equipo-admin-card" style="border-color: ${equipo.color}">
+                        <div class="header">
+                            <div class="nombre" style="color: ${equipo.color}">${equipo.nombre}</div>
+                            <div class="contador">${total}</div>
+                        </div>
+                        <div class="tema">${equipo.tema || ''}</div>
+                        ${equipo.google_doc ? `<a href="${equipo.google_doc}" target="_blank" style="color: var(--color-primary); font-size: 0.85rem;">📄 Google Doc</a>` : ''}
+                        <div class="stats">
+                            ${equipoListo ? '<span class="terminados">✓ LISTO</span>' : '<span style="color: var(--color-texto-secundario);">En progreso...</span>'}
+                        </div>
+                        <div class="participantes-lista">
+                            ${participantesEquipo.map(p => `
+                                <div class="participante-item">
+                                    <span class="nombre">${p.nombre}</span>
+                                    <span class="coope">${p.cooperativa}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Equipos Admin
+        function renderizarEquiposAdmin() {
+            const container = document.getElementById('equiposAdminGrid');
+
+            container.innerHTML = estado.equipos.map(equipo => `
+                <div class="equipo-admin-card" style="border-color: ${equipo.color}; opacity: ${equipo.activo ? 1 : 0.5}">
+                    <div class="header">
+                        <div class="nombre" style="color: ${equipo.color}">${equipo.nombre}</div>
+                    </div>
+                    <div class="tema">${equipo.tema || ''}</div>
+                    <div class="actions">
+                        <button class="btn btn-sm btn-secondary" onclick="editarEquipo('${equipo.id}')">✏️</button>
+                        <button class="btn btn-sm btn-${equipo.activo ? 'warning' : 'success'}" onclick="toggleEquipo('${equipo.id}')">
+                            ${equipo.activo ? '🔒' : '🔓'}
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarEquipo('${equipo.id}')">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function abrirFormEquipo(equipo = null) {
+            document.getElementById('modalEquipoTitulo').textContent = equipo ? 'Editar Equipo' : 'Nuevo Equipo';
+            document.getElementById('equipoId').value = equipo?.id || '';
+            document.getElementById('equipoNombre').value = equipo?.nombre || '';
+            document.getElementById('equipoTema').value = equipo?.tema || '';
+            document.getElementById('equipoColor').value = equipo?.color || '#3b82f6';
+            document.getElementById('equipoPreguntas').value = (equipo?.preguntas || []).join('\n');
+            document.getElementById('equipoGoogleDoc').value = equipo?.google_doc || '';
+            document.getElementById('equipoOrden').value = equipo?.orden || 0;
+            document.getElementById('modalEquipo').classList.add('activo');
+        }
+
+        function editarEquipo(id) {
+            const equipo = estado.equipos.find(e => e.id === id);
+            if (equipo) abrirFormEquipo(equipo);
+        }
+
+        async function guardarEquipo() {
+            const id = document.getElementById('equipoId').value;
+            const data = {
+                nombre: document.getElementById('equipoNombre').value,
+                tema: document.getElementById('equipoTema').value,
+                color: document.getElementById('equipoColor').value,
+                preguntas: document.getElementById('equipoPreguntas').value.split('\n').filter(p => p.trim()),
+                google_doc: document.getElementById('equipoGoogleDoc').value.trim() || null,
+                orden: parseInt(document.getElementById('equipoOrden').value) || 0
+            };
+
+            if (!data.nombre) {
+                alert('El nombre es requerido');
+                return;
+            }
+
+            try {
+                if (id) {
+                    await supabase.from('equipos').update(data).eq('id', id);
+                } else {
+                    data.activo = true;
+                    await supabase.from('equipos').insert(data);
+                }
+                cerrarModal('modalEquipo');
+                await cargarDatos();
+            } catch (error) {
+                console.error(error);
+                alert('Error al guardar');
+            }
+        }
+
+        async function toggleEquipo(id) {
+            const equipo = estado.equipos.find(e => e.id === id);
+            if (!equipo) return;
+
+            await supabase.from('equipos').update({ activo: !equipo.activo }).eq('id', id);
+            await cargarDatos();
+        }
+
+        async function eliminarEquipo(id) {
+            if (!confirm('¿Eliminar este equipo?')) return;
+            await supabase.from('equipos').delete().eq('id', id);
+            await cargarDatos();
+        }
+
+        // Cooperativas
+        function renderizarCooperativas() {
+            const container = document.getElementById('cooperativasLista');
+
+            if (estado.cooperativas.length === 0) {
+                container.innerHTML = '<p style="padding: 1rem; color: var(--color-texto-secundario);">No hay cooperativas</p>';
+                return;
+            }
+
+            container.innerHTML = estado.cooperativas.map(coop => `
+                <div class="item-row" style="opacity: ${coop.activa ? 1 : 0.5}">
+                    <span class="nombre">${coop.nombre}</span>
+                    <div class="actions">
+                        <button class="btn btn-sm btn-secondary" onclick="editarCooperativa('${coop.id}')">✏️</button>
+                        <button class="btn btn-sm btn-${coop.activa ? 'warning' : 'success'}" onclick="toggleCooperativa('${coop.id}')">
+                            ${coop.activa ? '🔒' : '🔓'}
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarCooperativa('${coop.id}')">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function abrirFormCooperativa(coop = null) {
+            document.getElementById('modalCooperativaTitulo').textContent = coop ? 'Editar Cooperativa' : 'Nueva Cooperativa';
+            document.getElementById('cooperativaId').value = coop?.id || '';
+            document.getElementById('cooperativaNombre').value = coop?.nombre || '';
+            document.getElementById('cooperativaOrden').value = coop?.orden || 0;
+            document.getElementById('modalCooperativa').classList.add('activo');
+        }
+
+        function editarCooperativa(id) {
+            const coop = estado.cooperativas.find(c => c.id === id);
+            if (coop) abrirFormCooperativa(coop);
+        }
+
+        async function guardarCooperativa() {
+            const id = document.getElementById('cooperativaId').value;
+            const data = {
+                nombre: document.getElementById('cooperativaNombre').value,
+                orden: parseInt(document.getElementById('cooperativaOrden').value) || 0
+            };
+
+            if (!data.nombre) {
+                alert('El nombre es requerido');
+                return;
+            }
+
+            try {
+                if (id) {
+                    await supabase.from('cooperativas').update(data).eq('id', id);
+                } else {
+                    data.activa = true;
+                    await supabase.from('cooperativas').insert(data);
+                }
+                cerrarModal('modalCooperativa');
+                await cargarDatos();
+            } catch (error) {
+                console.error(error);
+                alert('Error al guardar');
+            }
+        }
+
+        async function toggleCooperativa(id) {
+            const coop = estado.cooperativas.find(c => c.id === id);
+            if (!coop) return;
+
+            await supabase.from('cooperativas').update({ activa: !coop.activa }).eq('id', id);
+            await cargarDatos();
+        }
+
+        async function eliminarCooperativa(id) {
+            if (!confirm('¿Eliminar esta cooperativa?')) return;
+            await supabase.from('cooperativas').delete().eq('id', id);
+            await cargarDatos();
+        }
+
+        // Participantes
+        function renderizarParticipantes() {
+            const container = document.getElementById('participantesLista');
+
+            if (estado.participantes.length === 0) {
+                container.innerHTML = '<p style="padding: 1rem; color: var(--color-texto-secundario);">No hay participantes</p>';
+                return;
+            }
+
+            container.innerHTML = estado.participantes.map(p => {
+                const equipo = estado.equipos.find(e => e.id === p.equipo_id);
+                return `
+                    <div class="item-row">
+                        <div>
+                            <span class="nombre">${p.nombre}</span>
+                            <span style="color: var(--color-texto-secundario); margin-left: 0.5rem;">${p.cooperativa}</span>
+                            ${equipo ? `<span style="color: ${equipo.color}; margin-left: 0.5rem;">→ ${equipo.nombre}</span>` : ''}
+                            ${p.terminado ? '<span style="color: var(--color-success); margin-left: 0.5rem;">✓</span>' : ''}
+                        </div>
+                        <button class="btn btn-sm btn-danger" onclick="eliminarParticipante('${p.id}')">🗑️</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function eliminarParticipante(id) {
+            if (!confirm('¿Eliminar este participante?')) return;
+            await supabase.from('participantes').delete().eq('id', id);
+            await cargarDatos();
+        }
+
+        async function limpiarParticipantes() {
+            if (!confirm('¿Eliminar TODOS los participantes? Esta acción no se puede deshacer.')) return;
+            await supabase.from('participantes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            await cargarDatos();
+        }
+
+        async function resetearParticipantes() {
+            if (!confirm('⚠️ ¿Resetear TODOS los participantes?\n\nEsto eliminará todos los registros de participantes.\nEsta acción no se puede deshacer.')) return;
+
+            try {
+                await supabase.from('participantes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                await cargarDatos();
+                alert('✅ Todos los participantes han sido eliminados');
+            } catch (error) {
+                console.error('Error al resetear participantes:', error);
+                alert('❌ Error al resetear participantes');
+            }
+        }
+
+        // Timer
+        function actualizarTimer() {
+            const display = document.getElementById('timerDisplay');
+            const proyectable = document.getElementById('timerProyectable');
+
+            if (!estado.config || !estado.config.timer_end || estado.config.timer_paused) {
+                display.textContent = '--:--';
+                proyectable.textContent = '--:--';
+                display.classList.remove('urgente');
+                proyectable.classList.remove('urgente');
+                return;
+            }
+
+            const ahora = new Date();
+            const fin = new Date(estado.config.timer_end);
+            const diff = Math.max(0, Math.floor((fin - ahora) / 1000));
+
+            const minutos = Math.floor(diff / 60);
+            const segundos = diff % 60;
+            const tiempo = `${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+
+            display.textContent = tiempo;
+            proyectable.textContent = tiempo;
+
+            const esUrgente = diff < 120 && diff > 0;
+            display.classList.toggle('urgente', esUrgente);
+            proyectable.classList.toggle('urgente', esUrgente);
+        }
+
+        async function iniciarTimer() {
+            const minutos = parseInt(document.getElementById('timerMinutos').value) || 15;
+            const fin = new Date(Date.now() + minutos * 60 * 1000);
+
+            await supabase.from('config').update({
+                timer_end: fin.toISOString(),
+                timer_duration: minutos,
+                timer_paused: false,
+                timer_paused_remaining: null
+            }).eq('id', 1);
+
+            estado.config.timer_end = fin.toISOString();
+            estado.config.timer_paused = false;
+        }
+
+        async function pausarTimer() {
+            if (!estado.config?.timer_end) return;
+
+            const ahora = new Date();
+            const fin = new Date(estado.config.timer_end);
+            const remaining = Math.max(0, Math.floor((fin - ahora) / 1000));
+
+            await supabase.from('config').update({
+                timer_paused: true,
+                timer_paused_remaining: remaining
+            }).eq('id', 1);
+
+            estado.config.timer_paused = true;
+            estado.config.timer_paused_remaining = remaining;
+        }
+
+        async function resetearTimer() {
+            await supabase.from('config').update({
+                timer_end: null,
+                timer_paused: false,
+                timer_paused_remaining: null
+            }).eq('id', 1);
+
+            estado.config.timer_end = null;
+            estado.config.timer_paused = false;
+        }
+
+        // Vista proyectable
+        function renderizarVistaProyectable() {
+            const container = document.getElementById('equiposProyectable');
+
+            container.innerHTML = estado.equipos.filter(e => e.activo).map(equipo => {
+                const participantesRaw = estado.participantes.filter(p => p.equipo_id === equipo.id);
+                // Deduplicar participantes (case insensitive)
+                const partMap = new Map();
+                participantesRaw.forEach(p => {
+                    const key = (p.nombre + '|' + p.cooperativa).toLowerCase().trim();
+                    if (!partMap.has(key)) partMap.set(key, p);
+                });
+                const participantesEquipo = [...partMap.values()];
+                const total = participantesEquipo.length;
+
+                // Deduplicar cooperativas (case insensitive)
+                const coopMap = new Map();
+                participantesEquipo.forEach(p => {
+                    const key = p.cooperativa.toLowerCase().trim();
+                    if (!coopMap.has(key)) coopMap.set(key, p.cooperativa);
+                });
+                const cooperativas = [...coopMap.values()];
+
+                // Un equipo está LISTO si tiene cierre (reflexion + accionables)
+                const equipoListo = equipo.reflexion && equipo.accionables && equipo.accionables.length > 0;
+
+                const debatiendo = total > 0 && !equipoListo;
+
+                return `
+                    <div class="equipo-proyectable ${equipoListo ? 'todos-terminados' : ''} ${debatiendo ? 'debatiendo' : ''}" style="border-color: ${equipo.color}">
+                        ${equipoListo ? `
+                            <div class="overlay-terminado" style="background: ${equipo.color}">
+                                <div class="listo-equipo-nombre">${equipo.nombre}</div>
+                                <div class="listo-texto">✓ LISTO</div>
+                                <button class="btn-ver-resultados-overlay" onclick="event.stopPropagation(); mostrarResultados('${equipo.id}')">Ver resultados</button>
+                            </div>
+                        ` : ''}
+                        <div class="equipo-header">
+                            <div class="nombre" style="color: ${equipo.color}">${equipo.nombre}</div>
+                            <div class="contador-container">
+                                <div class="contador" style="color: ${equipo.color}">${total}</div>
+                                <div class="contador-label">personas</div>
+                            </div>
+                        </div>
+                        ${debatiendo ? `<div class="estado-debatiendo" style="color: ${equipo.color}">💬 Debatiendo...</div>` : ''}
+                        <div class="cooperativas-lista">${cooperativas.join(', ') || '-'}</div>
+                        <div class="botones-equipo">
+                            <button class="btn-ver-descripcion" onclick="event.stopPropagation(); mostrarDescripcion('${equipo.id}')" style="border-color: ${equipo.color}; color: ${equipo.color}">Ver descripción</button>
+                            ${equipo.google_doc ? `<a href="${equipo.google_doc}" target="_blank" class="btn-google-doc-proyectable" style="border-color: ${equipo.color}; color: ${equipo.color}">📄 Doc</a>` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function abrirVistaProyectable() {
+            document.getElementById('vistaProyectable').classList.add('activo');
+            renderizarVistaProyectable();
+        }
+
+        function cerrarVistaProyectable() {
+            document.getElementById('vistaProyectable').classList.remove('activo');
+        }
+
+        function toggleModoClaro() {
+            const checkbox = document.getElementById('switchModoClaro');
+            const elementos = [
+                document.getElementById('vistaProyectable'),
+                document.getElementById('modalResultados'),
+                document.getElementById('modalDescripcion')
+            ];
+            elementos.forEach(el => el.classList.toggle('modo-claro', checkbox.checked));
+            localStorage.setItem('facttic_modo_claro', checkbox.checked);
+        }
+
+        // Inicializar modo claro desde localStorage
+        function initModoClaro() {
+            const modoClaro = localStorage.getItem('facttic_modo_claro') === 'true';
+            const checkbox = document.getElementById('switchModoClaro');
+            checkbox.checked = modoClaro;
+            if (modoClaro) {
+                toggleModoClaro();
+            }
+        }
+        initModoClaro();
+
+        // Modal de resultados
+        function mostrarResultados(equipoId) {
+            const equipo = estado.equipos.find(e => e.id === equipoId);
+            if (!equipo) return;
+
+            // Verificar que el equipo tiene cierre
+            if (!equipo.reflexion || !equipo.accionables) return;
+
+            // Llenar el modal
+            document.getElementById('resultadosTitulo').textContent = equipo.nombre;
+            document.getElementById('resultadosTitulo').style.color = equipo.color;
+            document.getElementById('resultadosTema').textContent = equipo.tema || '';
+            document.getElementById('resultadosReflexion').textContent = equipo.reflexion;
+
+            // Accionables - solo mostrar los que tienen contenido
+            const accionablesContainer = document.getElementById('resultadosAccionables');
+            const responsables = equipo.responsables || [];
+            const accionablesConContenido = equipo.accionables
+                .map((acc, i) => ({ acc, responsable: responsables[i], index: i }))
+                .filter(item => item.acc && item.acc.trim());
+
+            accionablesContainer.innerHTML = accionablesConContenido.map((item, displayIndex) => `
+                <div class="accionable-item">
+                    <div class="numero" style="background: ${equipo.color}">${displayIndex + 1}</div>
+                    <div class="texto-container">
+                        <div class="texto">${item.acc}</div>
+                        ${item.responsable ? `<div class="responsable">→ ${item.responsable}</div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('modalResultados').classList.add('activo');
+        }
+
+        function cerrarModalResultados() {
+            document.getElementById('modalResultados').classList.remove('activo');
+        }
+
+        // Modal de descripción
+        function mostrarDescripcion(equipoId) {
+            const equipo = estado.equipos.find(e => e.id === equipoId);
+            if (!equipo) return;
+
+            document.getElementById('descripcionTitulo').textContent = equipo.nombre;
+            document.getElementById('descripcionTitulo').style.color = equipo.color;
+            document.getElementById('descripcionTexto').textContent = equipo.tema || 'Sin descripción';
+
+            // Preguntas
+            const preguntasContainer = document.getElementById('descripcionPreguntas');
+            const preguntas = equipo.preguntas || [];
+            preguntasContainer.innerHTML = preguntas.map(p => `<li>${p}</li>`).join('') || '<li>Sin preguntas</li>';
+
+            document.getElementById('modalDescripcion').classList.add('activo');
+        }
+
+        function cerrarModalDescripcion() {
+            document.getElementById('modalDescripcion').classList.remove('activo');
+        }
+
+        // Informe del debate
+        function generarInformeDebate() {
+            const container = document.getElementById('informeContent');
+            const fecha = new Date().toLocaleDateString('es-AR', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            // Calcular totales generales (normalizando mayúsculas/minúsculas)
+            const personasMap = new Map();
+            estado.participantes.forEach(p => {
+                const key = (p.nombre + '|' + p.cooperativa).toLowerCase().trim();
+                if (!personasMap.has(key)) personasMap.set(key, p);
+            });
+            const totalPersonas = personasMap.size;
+            const coopMap = new Map();
+            estado.participantes.forEach(p => {
+                const key = p.cooperativa.toLowerCase().trim();
+                if (!coopMap.has(key)) coopMap.set(key, p.cooperativa);
+            });
+            const todasCooperativas = [...coopMap.values()];
+            const totalCooperativas = todasCooperativas.length;
+
+            let html = `<div style="margin-bottom: 2rem; text-align: center;">
+                <h2 style="margin: 0;">FACTTIC - Plenario 2025</h2>
+                <p style="color: var(--color-texto-secundario);">Tandil, Provincia de Buenos Aires</p>
+                <p style="color: var(--color-texto-secundario);">${fecha}</p>
+                <div style="display: flex; justify-content: center; gap: 3rem; margin-top: 1.5rem;">
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: bold; color: var(--color-primario);">${totalPersonas}</div>
+                        <div style="color: var(--color-texto-secundario); font-size: 0.9rem;">personas</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: bold; color: var(--color-primario);">${totalCooperativas}</div>
+                        <div style="color: var(--color-texto-secundario); font-size: 0.9rem;">cooperativas</div>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem; color: var(--color-texto-secundario); font-size: 0.85rem;">
+                    ${todasCooperativas.sort().join(' • ')}
+                </div>
+            </div>`;
+
+            estado.equipos.filter(e => e.activo).forEach(equipo => {
+                const participantesRaw = estado.participantes.filter(p => p.equipo_id === equipo.id);
+                // Deduplicar participantes por nombre+cooperativa (case insensitive)
+                const partMap = new Map();
+                participantesRaw.forEach(p => {
+                    const key = (p.nombre + '|' + p.cooperativa).toLowerCase().trim();
+                    if (!partMap.has(key)) partMap.set(key, p);
+                });
+                const participantes = [...partMap.values()];
+                // Deduplicar cooperativas (case insensitive)
+                const coopMapEquipo = new Map();
+                participantes.forEach(p => {
+                    const key = p.cooperativa.toLowerCase().trim();
+                    if (!coopMapEquipo.has(key)) coopMapEquipo.set(key, p.cooperativa);
+                });
+                const cooperativas = [...coopMapEquipo.values()];
+                const personas = participantes.map(p => `${p.nombre} (${p.cooperativa})`);
+                const preguntas = equipo.preguntas || [];
+                const accionables = equipo.accionables || [];
+                const responsables = equipo.responsables || [];
+
+                html += `
+                <div class="equipo-seccion">
+                    <div class="equipo-titulo" style="color: ${equipo.color}">${equipo.nombre}</div>
+                    <div class="equipo-tema">${equipo.tema || ''}</div>
+
+                    <div class="seccion-titulo">Preguntas disparadoras</div>
+                    ${preguntas.length > 0 ? `
+                        <ul class="lista-items">
+                            ${preguntas.map(p => `<li>${p}</li>`).join('')}
+                        </ul>
+                    ` : '<p class="sin-datos">Sin preguntas</p>'}
+
+                    <div class="seccion-titulo">Participantes (${participantes.length})</div>
+                    ${personas.length > 0 ? `
+                        <ul class="lista-items">
+                            ${personas.map(p => `<li>${p}</li>`).join('')}
+                        </ul>
+                    ` : '<p class="sin-datos">Sin participantes</p>'}
+
+                    <div class="seccion-titulo">Cooperativas (${cooperativas.length})</div>
+                    ${cooperativas.length > 0 ? `
+                        <p>${cooperativas.join(', ')}</p>
+                    ` : '<p class="sin-datos">Sin cooperativas</p>'}
+
+                    <div class="seccion-titulo">Reflexión del grupo</div>
+                    ${equipo.reflexion ? `
+                        <div class="reflexion-box">${equipo.reflexion}</div>
+                    ` : '<p class="sin-datos">Sin reflexión cargada</p>'}
+
+                    <div class="seccion-titulo">Accionables</div>
+                    ${accionables.filter(a => a && a.trim()).length > 0 ? `
+                        <div>
+                            ${accionables.map((acc, i) => {
+                                if (!acc || !acc.trim()) return '';
+                                return `<div class="accionable-item">
+                                    <strong>${i + 1}.</strong> ${acc}
+                                    ${responsables[i] ? `<div class="responsable">→ ${responsables[i]}</div>` : ''}
+                                </div>`;
+                            }).join('')}
+                        </div>
+                    ` : '<p class="sin-datos">Sin accionables cargados</p>'}
+                </div>`;
+            });
+
+            container.innerHTML = html;
+            document.getElementById('modalInforme').classList.add('activo');
+        }
+
+        function cerrarInforme() {
+            document.getElementById('modalInforme').classList.remove('activo');
+        }
+
+        function copiarInforme() {
+            const content = document.getElementById('informeContent');
+
+            // Generar texto plano
+            let texto = 'FACTTIC - Plenario 2025\n';
+            texto += new Date().toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + '\n\n';
+            texto += '='.repeat(50) + '\n\n';
+
+            estado.equipos.filter(e => e.activo).forEach(equipo => {
+                const participantesRaw = estado.participantes.filter(p => p.equipo_id === equipo.id);
+                // Deduplicar participantes por nombre+cooperativa (case insensitive)
+                const partMap = new Map();
+                participantesRaw.forEach(p => {
+                    const key = (p.nombre + '|' + p.cooperativa).toLowerCase().trim();
+                    if (!partMap.has(key)) partMap.set(key, p);
+                });
+                const participantes = [...partMap.values()];
+                // Deduplicar cooperativas (case insensitive)
+                const coopMapEquipo = new Map();
+                participantes.forEach(p => {
+                    const key = p.cooperativa.toLowerCase().trim();
+                    if (!coopMapEquipo.has(key)) coopMapEquipo.set(key, p.cooperativa);
+                });
+                const cooperativas = [...coopMapEquipo.values()];
+                const personas = participantes.map(p => `${p.nombre} (${p.cooperativa})`);
+                const preguntas = equipo.preguntas || [];
+                const accionables = equipo.accionables || [];
+                const responsables = equipo.responsables || [];
+
+                texto += `📌 ${equipo.nombre.toUpperCase()}\n`;
+                texto += `${equipo.tema || ''}\n\n`;
+
+                texto += `PREGUNTAS DISPARADORAS:\n`;
+                preguntas.forEach((p, i) => texto += `  ${i + 1}. ${p}\n`);
+                texto += '\n';
+
+                texto += `PARTICIPANTES (${participantes.length}):\n`;
+                personas.forEach(p => texto += `  • ${p}\n`);
+                texto += '\n';
+
+                texto += `COOPERATIVAS: ${cooperativas.join(', ')}\n\n`;
+
+                texto += `REFLEXIÓN:\n${equipo.reflexion || 'Sin reflexión'}\n\n`;
+
+                texto += `ACCIONABLES:\n`;
+                accionables.forEach((acc, i) => {
+                    if (acc && acc.trim()) {
+                        texto += `  ${i + 1}. ${acc}`;
+                        if (responsables[i]) texto += ` → ${responsables[i]}`;
+                        texto += '\n';
+                    }
+                });
+
+                texto += '\n' + '='.repeat(50) + '\n\n';
+            });
+
+            navigator.clipboard.writeText(texto).then(() => {
+                alert('Informe copiado al portapapeles');
+            }).catch(() => {
+                alert('Error al copiar. Seleccioná el texto manualmente.');
+            });
+        }
+
+        function exportarPDF() {
+            const fecha = new Date().toLocaleDateString('es-AR', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+            });
+
+            // Calcular totales generales (normalizando mayúsculas/minúsculas)
+            const personasMap = new Map();
+            estado.participantes.forEach(p => {
+                const key = (p.nombre + '|' + p.cooperativa).toLowerCase().trim();
+                if (!personasMap.has(key)) personasMap.set(key, p);
+            });
+            const totalPersonas = personasMap.size;
+            const coopMap = new Map();
+            estado.participantes.forEach(p => {
+                const key = p.cooperativa.toLowerCase().trim();
+                if (!coopMap.has(key)) coopMap.set(key, p.cooperativa);
+            });
+            const todasCooperativas = [...coopMap.values()];
+            const totalCooperativas = todasCooperativas.length;
+
+            let contenidoEquipos = '';
+
+            estado.equipos.filter(e => e.activo).forEach(equipo => {
+                const participantesRaw = estado.participantes.filter(p => p.equipo_id === equipo.id);
+                // Deduplicar participantes por nombre+cooperativa (case insensitive)
+                const partMap = new Map();
+                participantesRaw.forEach(p => {
+                    const key = (p.nombre + '|' + p.cooperativa).toLowerCase().trim();
+                    if (!partMap.has(key)) partMap.set(key, p);
+                });
+                const participantes = [...partMap.values()];
+                // Deduplicar cooperativas (case insensitive)
+                const coopMapEquipo = new Map();
+                participantes.forEach(p => {
+                    const key = p.cooperativa.toLowerCase().trim();
+                    if (!coopMapEquipo.has(key)) coopMapEquipo.set(key, p.cooperativa);
+                });
+                const cooperativas = [...coopMapEquipo.values()];
+                const personas = participantes.map(p => `${p.nombre} (${p.cooperativa})`);
+                const preguntas = equipo.preguntas || [];
+                const accionables = equipo.accionables || [];
+                const responsables = equipo.responsables || [];
+
+                contenidoEquipos += `
+                <div class="equipo-seccion">
+                    <h2 style="color: ${equipo.color}; border-bottom: 3px solid ${equipo.color}; padding-bottom: 0.5rem;">${equipo.nombre}</h2>
+                    <p class="tema">${equipo.tema || ''}</p>
+
+                    <h3>Preguntas disparadoras</h3>
+                    ${preguntas.length > 0 ? `<ol>${preguntas.map(p => `<li>${p}</li>`).join('')}</ol>` : '<p class="sin-datos">Sin preguntas</p>'}
+
+                    <h3>Participantes (${participantes.length})</h3>
+                    ${personas.length > 0 ? `<ul>${personas.map(p => `<li>${p}</li>`).join('')}</ul>` : '<p class="sin-datos">Sin participantes</p>'}
+
+                    <h3>Cooperativas participantes</h3>
+                    <p>${cooperativas.length > 0 ? cooperativas.join(' • ') : 'Sin cooperativas'}</p>
+
+                    <h3>Reflexión del grupo</h3>
+                    ${equipo.reflexion ? `<div class="reflexion-box">${equipo.reflexion}</div>` : '<p class="sin-datos">Sin reflexión cargada</p>'}
+
+                    <h3>Accionables</h3>
+                    ${accionables.filter(a => a && a.trim()).length > 0 ? `
+                        <table class="accionables-table">
+                            <thead><tr><th>#</th><th>Accionable</th><th>Responsable</th></tr></thead>
+                            <tbody>
+                                ${accionables.map((acc, i) => {
+                                    if (!acc || !acc.trim()) return '';
+                                    return `<tr><td>${i + 1}</td><td>${acc}</td><td>${responsables[i] || '-'}</td></tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    ` : '<p class="sin-datos">Sin accionables cargados</p>'}
+                </div>`;
+            });
+
+            const ventana = window.open('', '_blank');
+            ventana.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Informe Debate FACTTIC - Plenario 2025</title>
+                    <style>
+                        * { box-sizing: border-box; }
+                        body {
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                            max-width: 900px;
+                            margin: 0 auto;
+                            padding: 2rem;
+                            color: #1e293b;
+                            line-height: 1.6;
+                        }
+                        .header {
+                            text-align: center;
+                            margin-bottom: 3rem;
+                            padding-bottom: 2rem;
+                            border-bottom: 2px solid #e2e8f0;
+                        }
+                        .header img {
+                            height: 60px;
+                        }
+                        .header h1 {
+                            margin: 1rem 0 0.5rem;
+                            color: #1e293b;
+                        }
+                        .header .fecha {
+                            color: #64748b;
+                        }
+                        .header .ubicacion {
+                            color: #64748b;
+                            margin: 0.25rem 0;
+                        }
+                        .stats {
+                            display: flex;
+                            justify-content: center;
+                            gap: 4rem;
+                            margin-top: 1.5rem;
+                        }
+                        .stat-numero {
+                            font-size: 2.5rem;
+                            font-weight: bold;
+                            color: #3b82f6;
+                        }
+                        .stat-label {
+                            color: #64748b;
+                            font-size: 0.9rem;
+                        }
+                        .lista-coops {
+                            margin-top: 1.5rem;
+                            color: #64748b;
+                            font-size: 0.85rem;
+                        }
+                        .equipo-seccion {
+                            margin-bottom: 3rem;
+                            page-break-inside: avoid;
+                        }
+                        .equipo-seccion h2 {
+                            margin-top: 0;
+                        }
+                        .equipo-seccion .tema {
+                            color: #64748b;
+                            font-style: italic;
+                            margin-bottom: 1.5rem;
+                        }
+                        .equipo-seccion h3 {
+                            color: #475569;
+                            font-size: 1rem;
+                            text-transform: uppercase;
+                            letter-spacing: 1px;
+                            margin: 1.5rem 0 0.5rem;
+                            border-bottom: 1px solid #e2e8f0;
+                            padding-bottom: 0.25rem;
+                        }
+                        ul, ol {
+                            margin: 0.5rem 0;
+                            padding-left: 1.5rem;
+                        }
+                        li { margin-bottom: 0.25rem; }
+                        .reflexion-box {
+                            background: #f8fafc;
+                            padding: 1rem;
+                            border-radius: 8px;
+                            border-left: 4px solid #3b82f6;
+                        }
+                        .accionables-table {
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin-top: 0.5rem;
+                        }
+                        .accionables-table th, .accionables-table td {
+                            border: 1px solid #e2e8f0;
+                            padding: 0.75rem;
+                            text-align: left;
+                        }
+                        .accionables-table th {
+                            background: #f1f5f9;
+                            font-weight: 600;
+                        }
+                        .accionables-table td:first-child {
+                            width: 40px;
+                            text-align: center;
+                        }
+                        .sin-datos {
+                            color: #94a3b8;
+                            font-style: italic;
+                        }
+                        @media print {
+                            body { padding: 0; }
+                            .equipo-seccion { page-break-inside: avoid; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <img src="https://facttic.org.ar/wp-content/uploads/2018/11/logo-facttic_1-e1542743219955.png" alt="FACTTIC">
+                        <h1>Informe del Debate</h1>
+                        <p class="subtitulo">Plenario FACTTIC 2025</p>
+                        <p class="ubicacion">Tandil, Provincia de Buenos Aires</p>
+                        <p class="fecha">${fecha}</p>
+                        <div class="stats">
+                            <div>
+                                <div class="stat-numero">${totalPersonas}</div>
+                                <div class="stat-label">personas</div>
+                            </div>
+                            <div>
+                                <div class="stat-numero">${totalCooperativas}</div>
+                                <div class="stat-label">cooperativas</div>
+                            </div>
+                        </div>
+                        <p class="lista-coops">${todasCooperativas.sort().join(' • ')}</p>
+                    </div>
+                    ${contenidoEquipos}
+                </body>
+                </html>
+            `);
+            ventana.document.close();
+
+            // Esperar a que cargue y abrir diálogo de impresión
+            setTimeout(() => {
+                ventana.print();
+            }, 500);
+        }
+
+        // Tabs
+        function cambiarTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('activo'));
+
+            document.querySelector(`.tab[onclick="cambiarTab('${tab}')"]`).classList.add('activo');
+            document.getElementById(`tab-${tab}`).classList.add('activo');
+        }
+
+        // Modales
+        function cerrarModal(id) {
+            document.getElementById(id).classList.remove('activo');
+        }
+
+        // Realtime
+        function configurarRealtime() {
+            supabase
+                .channel('admin-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'participantes' }, () => cargarDatos())
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'equipos' }, () => cargarDatos())
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'cooperativas' }, () => cargarDatos())
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'config' }, async () => {
+                    const { data } = await supabase.from('config').select('*').eq('id', 1).single();
+                    if (data) estado.config = data;
+                })
+                .subscribe();
+
+            // Polling cada 3 segundos como backup (por si Realtime no funciona)
+            setInterval(async () => {
+                const { data: participantes } = await supabase.from('participantes').select('*').order('created_at');
+                const { data: equipos } = await supabase.from('equipos').select('*').order('orden');
+                if (participantes) estado.participantes = participantes;
+                if (equipos) estado.equipos = equipos;
+                renderizarDashboard();
+                renderizarParticipantes();
+                renderizarVistaProyectable();
+            }, 3000);
+        }
+
+        // Enter para login
+        document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') login();
+        });
+
+        // Inicialización
+        if (localStorage.getItem('facttic_admin') === 'true') {
+            mostrarAdmin();
+        }
+    </script>
+</body>
+</html>

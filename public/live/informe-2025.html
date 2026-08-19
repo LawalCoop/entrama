@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe del Debate - Plenario FACTTIC 2025</title>
+    <!-- Informe congelado del Plenario FACTTIC 2025 (Tandil, 12-12-2025).
+         Datos embebidos: no depende de Supabase.
+         Los nombres de participantes fueron omitidos deliberadamente. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-fondo: #0a0a0a;
+            --color-card: #141414;
+            --color-card-hover: #1a1a1a;
+            --color-borde: #262626;
+            --color-texto: #fafafa;
+            --color-texto-secundario: #a1a1aa;
+            --color-texto-terciario: #71717a;
+            --color-primario: #3b82f6;
+            --color-primario-soft: rgba(59, 130, 246, 0.1);
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--color-fondo);
+            color: var(--color-texto);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Fondo animado */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Container principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 4rem 2rem;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .header img {
+            height: 80px;
+            margin-bottom: 2rem;
+            filter: drop-shadow(0 4px 20px rgba(59, 130, 246, 0.3));
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .subtitulo {
+            font-size: 1.25rem;
+            color: var(--color-texto-secundario);
+            font-weight: 400;
+        }
+
+        .header .ubicacion {
+            color: var(--color-texto-terciario);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .header .fecha {
+            color: var(--color-primario);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Stats grandes */
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            margin: 3rem 0;
+            animation: fadeInUp 0.8s ease-out 0.2s both;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 2rem;
+            background: var(--color-card);
+            border: 1px solid var(--color-borde);
+            border-radius: 20px;
+            min-width: 180px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-box:hover {
+            transform: translateY(-5px);
+            border-color: var(--color-primario);
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+        }
+
+        .stat-numero {
+            font-size: 4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-primario) 0%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: var(--color-texto-secundario);
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 500;
+        }
+
+        /* Lista de cooperativas */
+        .coops-lista {
+            text-align: center;
+            padding: 2rem;
+            background: var(--color-card);
+            border: 1px solid var(--color-borde);
+            border-radius: 16px;
+            margin-bottom: 4rem;
+            animation: fadeInUp 0.8s ease-out 0.4s both;
+        }
+
+        .coops-lista h3 {
+            color: var(--color-texto-secundario);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .coops-tags {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .coop-tag {
+            background: var(--color-primario-soft);
+            color: var(--color-primario);
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .coop-tag:hover {
+            background: var(--color-primario);
+            color: white;
+        }
+
+        /* Equipos */
+        .equipos-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .equipo-card {
+            background: var(--color-card);
+            border: 1px solid var(--color-borde);
+            border-radius: 20px;
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out both;
+            transition: all 0.3s ease;
+        }
+
+        .equipo-card:hover {
+            border-color: var(--color-borde);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        .equipo-header {
+            padding: 2rem;
+            border-bottom: 1px solid var(--color-borde);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .equipo-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--equipo-color);
+        }
+
+        .equipo-nombre {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--equipo-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .equipo-tema {
+            color: var(--color-texto-secundario);
+            font-size: 1.1rem;
+        }
+
+        .equipo-body {
+            padding: 2rem;
+        }
+
+        .seccion {
+            margin-bottom: 2rem;
+        }
+
+        .seccion:last-child {
+            margin-bottom: 0;
+        }
+
+        .seccion-titulo {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--color-texto-terciario);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .seccion-titulo::before {
+            content: '';
+            width: 12px;
+            height: 2px;
+            background: var(--equipo-color);
+            border-radius: 2px;
+        }
+
+        /* Preguntas */
+        .preguntas-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .pregunta-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+            border-left: 3px solid var(--equipo-color);
+        }
+
+        .pregunta-numero {
+            color: var(--equipo-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .pregunta-texto {
+            color: var(--color-texto);
+        }
+
+        /* Participantes */
+        .participantes-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .participante-chip {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--color-texto);
+            border: 1px solid var(--color-borde);
+        }
+
+        .participante-chip .coop {
+            color: var(--color-texto-terciario);
+        }
+
+        /* Cooperativas del equipo */
+        .coops-equipo {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .coop-equipo-tag {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--color-texto-secundario);
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        /* Reflexion */
+        .reflexion-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border-left: 4px solid var(--equipo-color);
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--color-texto);
+            white-space: pre-wrap;
+        }
+
+        /* Accionables */
+        .accionables-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .accionable-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: rgba(34, 197, 94, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(34, 197, 94, 0.1);
+        }
+
+        .accionable-numero {
+            background: var(--color-success);
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .accionable-content {
+            flex: 1;
+        }
+
+        .accionable-texto {
+            color: var(--color-texto);
+            margin-bottom: 0.5rem;
+        }
+
+        .accionable-responsable {
+            color: var(--color-warning);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .accionable-responsable::before {
+            content: '→';
+        }
+
+        /* Sin datos */
+        .sin-datos {
+            color: var(--color-texto-terciario);
+            font-style: italic;
+            padding: 1rem;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 12px;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--color-texto-terciario);
+            font-size: 0.85rem;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: 1.5rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--color-borde);
+            border-top-color: var(--color-primario);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Animaciones al hacer scroll */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .animate-on-scroll.delay-1 { transition-delay: 0.1s; }
+        .animate-on-scroll.delay-2 { transition-delay: 0.2s; }
+        .animate-on-scroll.delay-3 { transition-delay: 0.3s; }
+
+        /* Print styles */
+        @media print {
+            .bg-gradient { display: none; }
+            body { background: white; color: black; }
+            .equipo-card { break-inside: avoid; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            .header h1 { font-size: 2rem; }
+            .stats-container { flex-direction: column; gap: 1rem; align-items: center; }
+            .stat-numero { font-size: 3rem; }
+            .equipo-header, .equipo-body { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <div class="container">
+        <div id="contenido">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Cargando informe...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const EQUIPOS = [{"id": "a914821e-0976-44f5-8c9a-44b6a4aad218", "nombre": "Generación de trabajo", "color": "#22c55e", "tema": "El GCU es uno de los espacios más activos y valorados de la Federación. Se están llevando a cabo acciones por verticales, charlas, gestión conjunta de staffing y acciones para   mejorar la sostenibilidad de cooperativas. En plenarios anteriores se discutieron iniciativas como la creación de un consorcio, contratación de vendedor por comisión, consultorías en   marketing y productos propios.", "preguntas": ["¿Qué acciones concretas pueden potenciar la venta conjunta de productos y servicios de FACTTIC? ¿Cómo y quiénes las llevarían a cabo? ¿Cómo podrían financiarse?", "¿Qué acciones pueden impulsar la federación para el desarrollo de capacidades que generen mayores oportunidades laborales?", "¿Cómo se puede priorizar a las cooperativas que más lo necesitan?", "¿Cómo podemos identificar qué lenguajes o nichos son más prometedores en términos de mercado?", "¿Cómo articular acciones comerciales con cooperativas de la federación que no se dedican al software?"], "activo": true, "orden": 1, "reflexion": "La charla dejó en evidencia que existe una fuerte voluntad colectiva de profesionalizar, ordenar y potenciar la capacidad comercial de las cooperativas dentro de la federación. Los ejes planteados —desde la exploración de un consorcio hasta la construcción de bases de datos, el desarrollo de materiales conjuntos, la capacitación en ventas, el relevamiento de prácticas comerciales y la planificación anual del GCU— conforman un conjunto de iniciativas coherentes orientadas a un mismo objetivo: generar más y mejores oportunidades de trabajo para todas las cooperativas.\n\nPara avanzar, será indispensable contar con recursos, definir responsables y establecer un plan operativo que permita transformar estas ideas en acciones concretas. La articulación entre cooperativas, el intercambio de información y la unificación de criterios serán claves para consolidar una estrategia comercial federada, sostenible y capaz de incrementar el impacto de nuestro sector en el mercado.", "accionables": ["Exploración de un modelo de Consorcio", "Desarrollo de una Base de Datos de clientes, productos, servicios y perfiles", "Seguir impulsando el armado y la creación de Materiales, herramientas e insumos para la comercialización", "Relevamiento de prácticas comerciales dentro de las cooperativas", "Capacitación y asesoría en ventas", "Planificación anual del GCU", "Necesidad de financiamiento", "", "", ""], "google_doc": "https://docs.google.com/document/d/1YL1HfjT08HsnUb9a3tk0QXNwIANTz_YcxEJDkXTz6_U/edit?usp=sharing", "responsables": ["GCU", "GCU", "GCU", "GCU", "GCU", "GCU", "GCU", "", "", ""]}, {"id": "f6e9623b-8d8c-4232-b409-bba46c9eba67", "nombre": "Representatividad y poder", "color": "#f97316", "tema": "Abordamos los eventos de la Federación y las coopes que la representan. Hay muchas instancias valiosas de participación que queremos que sigan y aumenten. Sin embargo, en torno a   las representaciones se sucedieron fricciones este año, que esperamos despejar construyendo mecanismos más claros, transparentes y validados en conjunto.", "preguntas": ["¿Qué criterios podrían establecerse para las participaciones en eventos?", "¿Qué mecanismos y procedimientos para la selección y priorización de eventos?", "¿Cómo establecer una agenda anticipada?", "¿A través de qué mecanismos podría trabajarse y compartirse la información recolectada en los eventos?", "¿Qué mecanismos nos damos para ampliar y abrir las participaciones?", "¿Cómo puede colaborar cada cooperativa para construir un archivo y material compartido disponible en las instancias de representación?"], "activo": true, "orden": 2, "reflexion": "CONCLUSIONES\n\nLa participación en eventos no es solo una cuestión de presencia o visibilidad: es una forma concreta de construir poder colectivo, tejer alianzas y disputar sentidos desde el cooperativismo tecnológico. Cuando estas participaciones no se planifican, no se comparten o no se sistematizan, el esfuerzo queda fragmentado, se pierde memoria organizacional y se debilita la capacidad de la federación para proyectarse estratégicamente.\n\nOrdenar cómo, dónde y para qué participamos implica asumir que la representación es una responsabilidad colectiva, no individual. Supone pasar de una lógica reactiva —ir cuando se puede— a una lógica propositiva: definir agendas, mensajes y alianzas en función de un horizonte común. También implica reconocer el valor del trabajo invisible que sucede en esos espacios: conversaciones, contactos, aprendizajes, tensiones y oportunidades que solo cobran sentido si se transforman en memoria compartida.\n\nFortalecer mecanismos de planificación, registro y devolución no busca burocratizar la acción, sino ampliarla y democratizarla, abriendo las participaciones y permitiendo que más cooperativas se apropien de los vínculos construidos. En ese camino, la federación no solo llega a más espacios: se vuelve más coherente, más estratégica y más capaz de sostener en el tiempo un proyecto político común.\n\n\n### 1. Definir criterios comunes para la participación en eventos\n\nEstablecer criterios políticos, estratégicos y operativos para decidir en qué eventos participa la federación alineados a los objetivos y plan estratégico de la misma.\n\n#### Distinguir:\n\nAliados estratégicos (vínculos de largo plazo, incidencia política, construcción sectorial).\n\nAliados tácticos (acciones puntuales, visibilidad, proyectos concretos).\n\n#### Evaluar cada evento según:\n\nTipo de alianza que habilita.\n\nMensaje que FACTTIC quiere llevar.\n\nValor colectivo para la federación y las cooperativas.\n\n### 2. Construir un roadmap colectivo de eventos\n\nCrear un listado anticipado de eventos relevantes (roadmap anual o semestral).\n\n#### Para cada evento registrar:\n\nEje temático.\n\nObjetivo político/comunicacional.\n\nCooperativas interesadas o involucradas.\n\nTipo de alianza que se busca construir o fortalecer.\n\n*Esto permite planificación anticipada, evitar superposiciones y ampliar la participación.*\n\n### 3. Sistematizar la información que nos representa\n\n##### Armar un kit de representación común:\n\nQué es FACTTIC.\n\nQué decimos como federación.\n\nQué experiencias, posiciones y líneas políticas llevamos a los eventos.\n\nEste material debe ser compartido, editable y actualizado colectivamente, disponible para quienes representen a la federación.\n\n### 4. Sistematizar resultados y aprendizajes post-evento\n\n#### Para eventos impulsados colectivamente por FACTTIC (donde es impulsados económico):\n\nRegistrar resultados, alianzas, contactos, impresiones y oportunidades detectadas.\n\nCargar contactos en una planilla común con historial de vínculo.\n\nDejar notas de posibles seguimientos (reuniones, propuestas, articulaciones).\n\nIncluir siempre una instancia post-evento de devolución y memoria colectiva.\n\n### 5. Cuidar y hacer circular los contactos estratégicos\n\nConstruir y mantener un archivo común de contactos de la federación.\n\nCuidar el historial del vínculo y su contexto.\n\nFomentar que los contactos circulen orgánicamente entre cooperativas cuando sea estratégico para FACTTIC, no como capital individual.\n\n### 6. Mecanismos organizativos y herramientas\n\n#### Implementar herramientas simples para:\n\nCargar eventos en los que se participa o se propone participar.\n\nRegistrar quién va, en nombre de quién y con qué objetivo.\n\nIncorporar de forma estable en las asambleas un ítem:\n\n“Vinculaciones y representación”, donde se informe:\n\nRecordar el uso del calendario.\n\nEventos realizados.\n\nEventos próximos.\n\nResultados y aprendizajes.", "accionables": ["Definir criterios comunes para la participación en eventos  Establecer criterios políticos, estratégicos y operativos para decidir en qué eventos participa la federación alineados a los objetivos y plan estratégico de la misma. Distinguir:  Aliados estratégicos (vínculos de largo plazo, incidencia política, construcción sectorial).  Aliados tácticos (acciones puntuales, visibilidad, proyectos concretos).", "Construir un roadmap colectivo de eventos  Crear un listado anticipado de eventos relevantes (roadmap anual o semestral). Para cada evento registrar:  Eje temático.  Objetivo político/comunicacional.  Cooperativas interesadas o involucradas.  Tipo de alianza que se busca construir o fortalecer.", "Sistematizar la información que nos representa Armar un kit de representación común:  Qué es FACTTIC.  Qué decimos como federación.  Qué experiencias, posiciones y líneas políticas llevamos a los eventos.  Este material debe ser compartido, editable y actualizado colectivamente, disponible para quienes representen a la federación.", "Sistematizar resultados y aprendizajes post-evento Para eventos impulsados colectivamente por FACTTIC (donde es impulsados económico):  Registrar resultados, alianzas, contactos, impresiones y oportunidades detectadas.  Cargar contactos en una planilla común con historial de vínculo.  Dejar notas de posibles seguimientos (reuniones, propuestas, articulaciones).  Incluir siempre una instancia post-evento de devolución y memoria colectiva.", "Cuidar y hacer circular los contactos estratégicos  Construir y mantener un archivo común de contactos de la federación.  Cuidar el historial del vínculo y su contexto.  Fomentar que los contactos circulen orgánicamente entre cooperativas cuando sea estratégico para FACTTIC, no como capital individual.", "Mecanismos organizativos y herramientas Implementar herramientas simples para:  Cargar eventos en los que se participa o se propone participar.  Registrar quién va, en nombre de quién y con qué objetivo.  Incorporar de forma estable en las asambleas un ítem:  “Vinculaciones y representación”, donde se informe:  Recordar el uso del calendario.  Eventos realizados.  Eventos próximos.  Resultados y aprendizajes.", "", "", "", ""], "google_doc": "https://docs.google.com/document/d/1_gbJOBXvUbIw378ebpvPM-vLd07fPOneV46hHHg7Whw/edit?usp=sharing", "responsables": ["", "", "", "", "", "", "", "", "", ""]}, {"id": "c4485d24-9579-4308-aa93-1a61b7204def", "nombre": "Posicionamiento Político", "color": "#eab308", "tema": "En algún momento en la Federación se trabajó sobre un manifiesto que no fue publicado. Este año se trabajaron temas coyunturales en grupos temporales y reuniones específicas, y se   debatió en asamblea. Sin embargo fuimos reactivos y fueron encuentros esporádicos.", "preguntas": ["¿Qué acciones y mecanismos concretos podemos crear para llegar a posicionamientos políticos de la manera más democrática posible?", "¿Cuáles son las temáticas generales sobre las que tenemos consenso? ¿Cómo trabajar sobre aquello en lo cuál no tenemos consenso?", "¿Quiénes podrían hacerse cargo de las diferentes instancias? ¿Una coope, un grupo de coopes, una comisión ad-hoc, un espacio?", "¿Cómo se validará el trabajo en las diferentes instancias?", "¿Cómo se procede con las situaciones urgentes?"], "activo": true, "orden": 3, "reflexion": "2 ejes de posicionamiento:\n\nCoyuntura local\nTemas sectoriales \n\nFACTTIC como herramienta para conocer los problemas de sector y del movimiento cooperativo\nEspacio de debate e incidencia territorial \nConsensos básicos \nEducación pública \nSalud pública \nUniversidad y ciencia\nIndustricidio\nFederalismo \nEtc…\n\nConsenso en defender o atacar políticas e ideas, no partidos o personas\nDebatimos sobre el rol de INAES en este contexto y se planteó la necesidad de exigir que cumpla su rol de institución de fomento y no de persecución.\nSe intercambió sobre las dificultades de generar el debate al interior de cada coope\nSe mencionó la necesidad de que la federación fomente el acercamiento a las problemáticas generales del sector trayendo al debate las realidades de las cooperativas de otros rubros, de las recuperadas, las coopes de liberades, de las organizaciones sociales, de la economía popular, etc.\nIntercambiamos sobre los vínculos de cada coope con sus territorios y el movimiento cooperativo local\n\n\nlineas: \n- algunas posiciones consensuadas claras y que conozcamos todos (manifiesto?)\n- acercarno a las coopertivas de todo tipo en cada region\n\nconsensos\n1ejer:\n- mejores condiciones para el trabajador \n- fomento del coop como alternativa\n- queremps un pais con industria local\n- educacion gratuida y publica\n- salud publica\n\n2do eje: \n- soberania y proteccion de datos\n- soberania tecnologica", "accionables": ["Generar una comisión de trabajo que se encargue de plantear ejes de consensos básicos de la federación en torno a puntos clave: educación pública, industricidio, universidad y ciencia, federalismo, etc", "Que la comisión proponga actividades de debate y acercamiento a las realidades de otras cooperativas como las recuperadas, de liberades, de organizaciones sociales, etc", "Que la comisión genere material para el debate interno en las cooperativas", "", "", "", "", "", "", ""], "google_doc": "https://docs.google.com/document/d/1LdTTfY0YRmu4g-Hiix5RmvEn7v_E0dojLXqxKJqfwu4/edit?usp=sharing", "responsables": ["Cooperativas", "Cooperativas y consejo", "Cooperativas", "", "", "", "", "", "", ""]}, {"id": "c50fc26f-55b2-4632-8493-853559ce8db7", "nombre": "Democratización, fortalecimiento y derechos", "color": "#3b82f6", "tema": "Los temas de este eje surgieron en la última encuesta de diagnóstico y en plenarios anteriores. Abarca equidad de género, federalización, acceso a la información y clarificación del   funcionamiento de la federación.", "preguntas": ["¿Qué acciones se pueden llevar a cabo para promover y fomentar la equidad de género? ¿Quiénes podrían llevarlas a cabo? ¿Cómo involucrar a la mayor cantidad de cooperativas?", "¿Qué acciones se pueden llevar a cabo para la federalización de FACTTIC? ¿Quiénes podrían ejecutarlas?", "¿Qué mecanismos y acciones establecer para garantizar el acceso a la información? Pensar un responsable para cada mecanismo o acción.", "¿Qué procedimientos hace falta debatir y/o explicitar para un mejor entendimiento del funcionamiento de la federación?"], "activo": true, "orden": 4, "reflexion": "Que necesitamos más tiempo.\nQue tenemos que generar este tipo de encuentros/instancias más seguido. Quizá por región, Pero jornadas completas o largas que nos permitan enfocarnos en la federación.", "accionables": ["Suerte de balance social anual digital (distribución sociodemográficas, balance, horas militancia) - fácil acceso, información no sensible", "Apoyar a las cooperativas para que puedan sumar disidencias y géneros no varones cis (becas? U otras facilidades)", "Fomentar las carreras TIC a géneros no varones cis", "Gestionar encuentros/capacitaciones/sensibilizaciónes sobre temáticas de genero", "Fomentar AIRBNB cooperativo - CoopSurfing", "Difundir existencia de FACTTIC a todo el país (mini puntocoops, plenarios distribuidos, flisoles) poniendo el foco en potenciales focos cooperativos", "Necesitamos repasar los canales de comunicación y tener un documento que explique como está organizada (upgrade de protocolo de aterrizaje). Garantizar que al menos una persona de cada coope recibe la info institucional y que entiende este documento de organización", "", "", ""], "google_doc": "https://docs.google.com/document/d/1os25r-Iw6iNbakBCVfp1ZChtwCtqa7NLjCZcqbRmUks/edit?usp=sharing", "responsables": ["Espacio/comisión de democratizacion o alguna coope capacitada o consejo", "Consejo", "Espacio de generos", "Espacio de generos", "", "", "Comunicación/consejo", "", "", ""]}, {"id": "4012c2f8-79c9-4084-90bc-f57637271271", "nombre": "Posicionamiento sectorial y apertura", "color": "#8b5cf6", "tema": "Los temas de este eje surgieron en la última encuesta de diagnóstico y en plenarios anteriores. Se enfoca en posicionar a FACTTIC como referente del sector y abrir el juego a   cooperativas que no son del sector informático.", "preguntas": ["¿Qué acciones se pueden llevar a cabo para posicionarnos como referentes del sector?", "¿Quiénes podrían tomarlas?", "¿Qué acciones y mecanismos se pueden realizar y definir para abrir el juego a cooperativas que no son del sector informático?", "¿Quiénes podrían tomarlas?"], "activo": true, "orden": 5, "reflexion": "Que podemos hacer para que empresas mas grandes lleven a facttic\n\nBuscar nuevas formas de hacerse ver, ejemplo polos tecnológicos \n\nHacerse ver en espacios ajenos que movilicen mucha gente. Ejemplo de publicidad de Geneos en equipos privados de futbol.\n\nA donde nos quisiéramos posicionar?\n\nAbanicos de soluciones que puede ofrecer facttic\n\nFacttic se vea tambien como un proveedor además de un espacio que nuclea cooperativas \n\nPriorizar la página como acción directa al posicionamiento en el sector \n\nUna pagina que esté viva, que deje de ser una página institucional \n\nBuscar eventos que sean de valor para el posicionamiento \n\nCalendarizar eventos \n\nHacer balances de vinculaciones anuales\n\n—-\n\nRevisar la planilla de cooperativas dentro de inaes \n\nHaciendo mas publicidad de facttic\n\nSiempre cooperativismo que no se alejen mucho del sector", "accionables": ["Priorizar la web", "Calendarizar eventos", "Participación en cámaras, polos tecnológicos, etc", "Participación en eventos académicos dando taller, chalas, etc", "", "", "", "", "", ""], "google_doc": "https://docs.google.com/document/d/1GgCcJ8RhCghIZA1Zrg21iQdo1InefEUjgMQi2UMC3RE/edit?usp=sharing", "responsables": ["", "", "", "", "", "", "", "", "", ""]}, {"id": "829d5f6a-e59e-4096-b581-0ce23d00e86b", "nombre": "Objetivos y organización", "color": "#ec4899", "tema": "La organización y el plan estratégico fue uno de los puntos más mencionados en la encuesta de diagnóstico y en el plenario de mitad de año. Se comenzó a trabajar en una comisión   integrada por personas del Consejo y otras coopes. Se debatió en asamblea, se circuló una encuesta, y en este plenario sumamos una nueva instancia para recabar información y construir   colectivamente un nuevo plan estratégico.", "preguntas": ["Debatir y explicitar cuáles son los alcances y las tareas del consejo, el consejo ampliado y la asamblea.", "Debatir y explicitar los objetivos deseados en relación a los espacios de vinculación internacional.", "¿Están faltando o sobrando objetivos en los ejes propuestos? ¿Cuáles? Si se proponen nuevos, ¿tendrían accionables cumplibles? ¿Quiénes podrían llevarlos a cabo?", "¿Cómo se podría fortalecer los espacios que no pudieron sostenerse este año? ¿Mantenemos el esquema de espacio como está? Si no, ¿cómo modificarlo?", "¿Cuál podría ser el mecanismo de seguimiento de los accionables propuestos?"], "activo": true, "orden": 6, "reflexion": "El debate estuvo polarizado y había diferencias en la forma de entender el rol del consejo. De todas formas llegamos a una única definición que fue la siguiente: \n\nEl consejo de administración cumple un rol de gestión y coordinación de un plan estratégico que se valida colectivamente.\n\nLa construcción del plan estratégico se realiza en plenario. Ahora hay un plan estratégico que se está cargando de contenido y accionables y se desea tener para abril de 2026 para empezar el año cumpliendo con ese plan.", "accionables": ["Se propone que el grupo que armó la actividad de la Federación (que es abierto y puede sumarse cualquiera, de hecho es una invitación a qué se sumen les que quieran)  haga la sistematización de lo trabajado en todos los grupos de esta actividad y elabore la primera versión del plan con accionables para compartir en febrero 2026, luego con las observaciones se hacen las iteraciones y  se presentar el plan definitivo en la asamblea de marzo 2026, la cual puede aprobarse total o parcialmente (es decir una parte o todo el plan). La idea es si o si salir con un plan.", "", "", "", "", "", "", "", "", ""], "google_doc": "https://docs.google.com/document/d/1LPNEtpwzjjRrJJy00Ymd6Z-sj9Vjqf5GqlAvtYXT46k/edit?usp=sharing", "responsables": ["Grupo que organizo la actividad del plenario.", "", "", "", "", "", "", "", "", ""]}];
+
+        const PARTICIPANTES = [{"n": "4b343679ad", "cooperativa": "Pollux", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "b49a5780a9", "cooperativa": "Teo-Coop", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "4cb270f3d7", "cooperativa": "lawal", "equipo_id": "f6e9623b-8d8c-4232-b409-bba46c9eba67"}, {"n": "172923a053", "cooperativa": "Ingecoop", "equipo_id": "c4485d24-9579-4308-aa93-1a61b7204def"}, {"n": "8354336224", "cooperativa": "Geneos", "equipo_id": "f6e9623b-8d8c-4232-b409-bba46c9eba67"}, {"n": "6ed32edf4e", "cooperativa": "Pollux", "equipo_id": "f6e9623b-8d8c-4232-b409-bba46c9eba67"}, {"n": "6257b55733", "cooperativa": "Gcoop", "equipo_id": "c4485d24-9579-4308-aa93-1a61b7204def"}, {"n": "cee2f0490b", "cooperativa": "IT 10", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "9d4799a1ea", "cooperativa": "ALT", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "dbd122ef7b", "cooperativa": "Gaia", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "e2777a1b4d", "cooperativa": "Tecso", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "c3923186c4", "cooperativa": "IT 10", "equipo_id": "c4485d24-9579-4308-aa93-1a61b7204def"}, {"n": "b8bd907ab8", "cooperativa": "Código Libre", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "c5c8066d45", "cooperativa": "Factorial", "equipo_id": "c4485d24-9579-4308-aa93-1a61b7204def"}, {"n": "e19a43f0ea", "cooperativa": "Ingecoop", "equipo_id": "c4485d24-9579-4308-aa93-1a61b7204def"}, {"n": "ccc315a603", "cooperativa": "Indepi", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "7bccba4a84", "cooperativa": "Gcoop", "equipo_id": "c50fc26f-55b2-4632-8493-853559ce8db7"}, {"n": "53f6b3dcdd", "cooperativa": "Geneos", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "95af99f20c", "cooperativa": "Tecso", "equipo_id": "c4485d24-9579-4308-aa93-1a61b7204def"}, {"n": "315132deee", "cooperativa": "Código Libre", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "6521fc25e7", "cooperativa": "Pollux", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "ddaa02864e", "cooperativa": "Geneos", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "77b2418d93", "cooperativa": "Coodesoft", "equipo_id": "c4485d24-9579-4308-aa93-1a61b7204def"}, {"n": "a46b875efd", "cooperativa": "Geneos", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "279afa0af8", "cooperativa": "Animus", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "a970bf2dea", "cooperativa": "Farox", "equipo_id": "f6e9623b-8d8c-4232-b409-bba46c9eba67"}, {"n": "94dd0a2905", "cooperativa": "Animus", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "82c0be8ed9", "cooperativa": "Código Libre", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "7fea8eda84", "cooperativa": "Indepi", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "4cb270f3d7", "cooperativa": "lawal", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "2f5cbc77a1", "cooperativa": "Coodesoft", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "74cf0e9a3c", "cooperativa": "Ingecoop", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "96835dd8bf", "cooperativa": "Animus", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "a6979dc879", "cooperativa": "Equality", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "707d14912b", "cooperativa": "Pollux", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "707d14912b", "cooperativa": "Pollux", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "030ef4a526", "cooperativa": "Teo-Coop", "equipo_id": "f6e9623b-8d8c-4232-b409-bba46c9eba67"}, {"n": "dbc6bbe3b7", "cooperativa": "Coodesoft", "equipo_id": "f6e9623b-8d8c-4232-b409-bba46c9eba67"}, {"n": "ccc315a603", "cooperativa": "Indepi", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "5c2dd944dd", "cooperativa": "Farox", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "6dfa9cecb5", "cooperativa": "Gcoop", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "48be3e99c9", "cooperativa": "Tropa Circa", "equipo_id": "f6e9623b-8d8c-4232-b409-bba46c9eba67"}, {"n": "158873d90a", "cooperativa": "Redjar", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "41074d1ce6", "cooperativa": "Coodesoft", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "4cb270f3d7", "cooperativa": "Lawal", "equipo_id": "f6e9623b-8d8c-4232-b409-bba46c9eba67"}, {"n": "cd69fe5671", "cooperativa": "Geneos", "equipo_id": "c50fc26f-55b2-4632-8493-853559ce8db7"}, {"n": "792d28329d", "cooperativa": "Geneos", "equipo_id": "f6e9623b-8d8c-4232-b409-bba46c9eba67"}, {"n": "ddfb26497d", "cooperativa": "Código Libre", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "269cb45d94", "cooperativa": "Gcoop", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "85fb5cead2", "cooperativa": "Geneos", "equipo_id": "c4485d24-9579-4308-aa93-1a61b7204def"}, {"n": "f6114707ca", "cooperativa": "Código Libre", "equipo_id": "f6e9623b-8d8c-4232-b409-bba46c9eba67"}, {"n": "dbc6bbe3b7", "cooperativa": "Coodesoft", "equipo_id": "f6e9623b-8d8c-4232-b409-bba46c9eba67"}, {"n": "94e3535e87", "cooperativa": "Geneos", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "b2c4a25c2b", "cooperativa": "ALT", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "1add04efba", "cooperativa": "Drusa", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "20fb527e1b", "cooperativa": "Lawal", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "64331d9d57", "cooperativa": "Coodesoft", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "8354336224", "cooperativa": "Equality", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "454c328c8a", "cooperativa": "GAIA", "equipo_id": "c4485d24-9579-4308-aa93-1a61b7204def"}, {"n": "1ba4706449", "cooperativa": "Drusa", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "998147b6de", "cooperativa": "ALT", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "e75a52853f", "cooperativa": "Coodesoft", "equipo_id": "c50fc26f-55b2-4632-8493-853559ce8db7"}, {"n": "d725dda039", "cooperativa": "Coodesoft", "equipo_id": null}, {"n": "2f0b90461f", "cooperativa": "Drusa", "equipo_id": "c50fc26f-55b2-4632-8493-853559ce8db7"}, {"n": "27d5482eeb", "cooperativa": "Equality", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "cf37f58770", "cooperativa": "Pollux", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "eb6a2f962b", "cooperativa": "Teo-Coop", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "454c328c8a", "cooperativa": "El Maizal", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "d714d84569", "cooperativa": "Factorial", "equipo_id": "c50fc26f-55b2-4632-8493-853559ce8db7"}, {"n": "d494562afb", "cooperativa": "Farox", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "a9269b98ec", "cooperativa": "Geneos", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "9e523ec30d", "cooperativa": "Redjar", "equipo_id": "4012c2f8-79c9-4084-90bc-f57637271271"}, {"n": "310a80d2c9", "cooperativa": "Nayra", "equipo_id": "829d5f6a-e59e-4096-b581-0ce23d00e86b"}, {"n": "46ce463f4b", "cooperativa": "ANIMUS", "equipo_id": "c4485d24-9579-4308-aa93-1a61b7204def"}, {"n": "883768b6dd", "cooperativa": "Gaia", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "82c0be8ed9", "cooperativa": "Código Libre", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}, {"n": "82c0be8ed9", "cooperativa": "Código Libre", "equipo_id": "a914821e-0976-44f5-8c9a-44b6a4aad218"}];
+
+        function cargarDatos() {
+            renderizar(EQUIPOS, PARTICIPANTES);
+        }
+
+        function renderizar(equipos, participantes) {
+            const fecha = 'viernes, 12 de diciembre de 2025';
+
+            // Deduplicar personas (case insensitive)
+            const personasMap = new Map();
+            participantes.forEach(p => {
+                const key = (p.n + '|' + p.cooperativa).toLowerCase().trim();
+                if (!personasMap.has(key)) personasMap.set(key, p);
+            });
+            const totalPersonas = personasMap.size;
+
+            // Deduplicar cooperativas (case insensitive)
+            const coopMap = new Map();
+            participantes.forEach(p => {
+                const key = p.cooperativa.toLowerCase().trim();
+                if (!coopMap.has(key)) coopMap.set(key, p.cooperativa);
+            });
+            const todasCooperativas = [...coopMap.values()].sort();
+            const totalCooperativas = todasCooperativas.length;
+
+            let html = `
+                <header class="header">
+                    <img src="logo_facttic.png" alt="FACTTIC">
+                    <h1>Informe del Debate</h1>
+                    <p class="subtitulo">Plenario FACTTIC 2025</p>
+                    <p class="ubicacion">Tandil, Provincia de Buenos Aires</p>
+                    <p class="fecha">${fecha}</p>
+                </header>
+
+                <div class="stats-container animate-on-scroll">
+                    <div class="stat-box">
+                        <div class="stat-numero">${totalPersonas}</div>
+                        <div class="stat-label">Personas</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-numero">${totalCooperativas}</div>
+                        <div class="stat-label">Cooperativas</div>
+                    </div>
+                </div>
+
+                <div class="coops-lista animate-on-scroll">
+                    <h3>Cooperativas participantes</h3>
+                    <div class="coops-tags">
+                        ${todasCooperativas.map(c => `<span class="coop-tag">${c}</span>`).join('')}
+                    </div>
+                </div>
+
+                <div class="equipos-grid">
+            `;
+
+            equipos.forEach((equipo, index) => {
+                const participantesRaw = participantes.filter(p => p.equipo_id === equipo.id);
+
+                // Deduplicar participantes del equipo
+                const partMap = new Map();
+                participantesRaw.forEach(p => {
+                    const key = (p.n + '|' + p.cooperativa).toLowerCase().trim();
+                    if (!partMap.has(key)) partMap.set(key, p);
+                });
+                const participantesEquipo = [...partMap.values()];
+
+                // Deduplicar cooperativas del equipo
+                const coopMapEquipo = new Map();
+                participantesEquipo.forEach(p => {
+                    const key = p.cooperativa.toLowerCase().trim();
+                    if (!coopMapEquipo.has(key)) coopMapEquipo.set(key, p.cooperativa);
+                });
+                const cooperativas = [...coopMapEquipo.values()];
+
+                const preguntas = equipo.preguntas || [];
+                const accionables = equipo.accionables || [];
+                const responsables = equipo.responsables || [];
+
+                html += `
+                    <article class="equipo-card animate-on-scroll" style="--equipo-color: ${equipo.color}">
+                        <div class="equipo-header">
+                            <h2 class="equipo-nombre">${equipo.nombre}</h2>
+                            <p class="equipo-tema">${equipo.tema || ''}</p>
+                        </div>
+                        <div class="equipo-body">
+                            <div class="seccion">
+                                <h3 class="seccion-titulo">Preguntas disparadoras</h3>
+                                ${preguntas.length > 0 ? `
+                                    <div class="preguntas-lista">
+                                        ${preguntas.map((p, i) => `
+                                            <div class="pregunta-item">
+                                                <span class="pregunta-numero">${i + 1}.</span>
+                                                <span class="pregunta-texto">${p}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : '<p class="sin-datos">Sin preguntas</p>'}
+                            </div>
+
+                            <div class="seccion">
+                                <h3 class="seccion-titulo">Participantes</h3>
+                                <p class="sin-datos">${participantesEquipo.length} personas participaron de este debate</p>
+                            </div>
+
+                            <div class="seccion">
+                                <h3 class="seccion-titulo">Cooperativas (${cooperativas.length})</h3>
+                                ${cooperativas.length > 0 ? `
+                                    <div class="coops-equipo">
+                                        ${cooperativas.map(c => `<span class="coop-equipo-tag">${c}</span>`).join('')}
+                                    </div>
+                                ` : '<p class="sin-datos">Sin cooperativas</p>'}
+                            </div>
+
+                            <div class="seccion">
+                                <h3 class="seccion-titulo">Reflexión del grupo</h3>
+                                ${equipo.reflexion ? `
+                                    <div class="reflexion-box">${equipo.reflexion}</div>
+                                ` : '<p class="sin-datos">Sin reflexión cargada</p>'}
+                            </div>
+
+                            <div class="seccion">
+                                <h3 class="seccion-titulo">Accionables</h3>
+                                ${accionables.filter(a => a && a.trim()).length > 0 ? `
+                                    <div class="accionables-lista">
+                                        ${accionables.map((acc, i) => {
+                                            if (!acc || !acc.trim()) return '';
+                                            return `
+                                                <div class="accionable-item">
+                                                    <span class="accionable-numero">${i + 1}</span>
+                                                    <div class="accionable-content">
+                                                        <p class="accionable-texto">${acc}</p>
+                                                        ${responsables[i] ? `<p class="accionable-responsable">${responsables[i]}</p>` : ''}
+                                                    </div>
+                                                </div>
+                                            `;
+                                        }).join('')}
+                                    </div>
+                                ` : '<p class="sin-datos">Sin accionables cargados</p>'}
+                            </div>
+                        </div>
+                    </article>
+                `;
+            });
+
+            html += `
+                </div>
+                <footer class="footer">
+                    <p>FACTTIC - Federación Argentina de Cooperativas de Trabajo de Tecnología, Innovación y Conocimiento</p>
+                    <p>Plenario 2025 - Tandil, Provincia de Buenos Aires</p>
+                </footer>
+            `;
+
+            document.getElementById('contenido').innerHTML = html;
+
+            // Activar animaciones al scroll
+            initScrollAnimations();
+        }
+
+        function initScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        cargarDatos();
+    </script>
+</body>
+</html>
