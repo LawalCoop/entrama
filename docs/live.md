@@ -10,8 +10,8 @@ Copia literal de https://github.com/hg1g/facttic-para-armar, servida en /live.
 
 | Archivo | Qué es | Backend |
 |---|---|---|
-| `index.html` | Slide deck (reveal.js) de la Encuesta FACTTIC 2025. Es lo que sirve `/live`. | ninguno |
-| `dinamica.html` | Dinámica en vivo del plenario, con realtime | Supabase de FACTTIC |
+| `index.html` | Slide deck (reveal.js) de la Encuesta FACTTIC 2025 | ninguno |
+| `dinamica.html` | Dinámica en vivo del plenario, con realtime. Es lo que sirve `/live`. | Supabase de FACTTIC |
 | `admin.html` | Panel para conducir la dinámica | Supabase de FACTTIC |
 | `informe.html` | Informe del debate, en vivo | Supabase de FACTTIC |
 | `informe-2025.html` | El mismo informe, congelado | ninguno |
