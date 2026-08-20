@@ -1249,6 +1249,7 @@
             <button class="tab" onclick="cambiarTab('participantes')">👥 Participantes</button>
             <button class="tab" onclick="cambiarTab('conexiones')">📡 Conexiones</button>
             <button class="tab" onclick="cambiarTab('problemas')">📋 Problemas</button>
+            <button class="tab" onclick="cambiarTab('digerir')">🧪 Digerir</button>
         </div>
 
         <!-- Tab: Dashboard -->
@@ -1301,6 +1302,20 @@
             <div id="problemasPanel">
                 <!-- Se llena con JS -->
             </div>
+        </div>
+
+        <!-- Tab: Digerir -->
+        <div class="tab-content" id="tab-digerir">
+            <p style="opacity:.75;margin-bottom:1rem;max-width:60ch">
+                Arma un prompt con todos los problemas recolectados para que un agente los
+                agrupe por el dolor que tienen en común. Copialo y pegalo donde quieras:
+                acá no se manda a ningún lado.
+            </p>
+            <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem">
+                <button class="btn btn-primary" onclick="generarPrompt()">Generar prompt</button>
+                <button class="btn btn-secondary" id="btnCopiarPrompt" onclick="copiarPrompt()" style="display:none">Copiar</button>
+            </div>
+            <div id="digerirPanel"></div>
         </div>
     </div>
 
@@ -2920,6 +2935,67 @@
             // página vacía después de borrar se ve como si se hubiera roto algo.
             if (problemasEnPantalla.length === 1 && paginaProblemas > 1) paginaProblemas--;
             cargarProblemas(paginaProblemas);
+        }
+
+
+        // --- Digerir --------------------------------------------------------
+        // Arma el prompt de clustering con todos los problemas recolectados.
+        //
+        // Viene del server y no se arma acá: este tab solo tiene cargada la
+        // página de problemas que se está mirando, y el prompt los necesita
+        // todos. Además el endpoint está detrás del mismo proxy, con razón: el
+        // prompt lleva adentro el texto de cada aporte.
+        //
+        // No se manda a ningún modelo. El botón genera el texto y listo; quien
+        // conduce lo pega donde quiera, y de paso puede editarlo antes.
+        let promptGenerado = '';
+
+        async function generarPrompt() {
+            const panel = document.getElementById('digerirPanel');
+            const btnCopiar = document.getElementById('btnCopiarPrompt');
+            panel.innerHTML = '<p style="opacity:.6">Generando…</p>';
+            btnCopiar.style.display = 'none';
+
+            let datos;
+            try {
+                const res = await fetch('/api/admin/digerir', { credentials: 'same-origin' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                datos = await res.json();
+            } catch (e) {
+                panel.innerHTML = '<p>No se pudo generar el prompt. <a href="#" onclick="generarPrompt();return false">Reintentar</a></p>';
+                return;
+            }
+
+            if (!datos.problemas) {
+                panel.innerHTML = '<p style="opacity:.7">Todavía no hay problemas cargados en /recolectar, así que no hay nada que agrupar.</p>';
+                return;
+            }
+
+            promptGenerado = datos.texto;
+            btnCopiar.style.display = '';
+            btnCopiar.textContent = 'Copiar';
+
+            const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            panel.innerHTML = `
+                <p style="opacity:.7;margin-bottom:.5rem">
+                    ${datos.problemas} ${datos.problemas === 1 ? 'problema' : 'problemas'} ·
+                    ${datos.texto.length.toLocaleString('es-AR')} caracteres
+                </p>
+                <pre style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:26rem;overflow-y:auto;padding:1rem;border:1px solid rgba(128,128,128,.25);border-radius:10px;font-size:.8rem;line-height:1.5">${esc(datos.texto)}</pre>
+            `;
+        }
+
+        async function copiarPrompt() {
+            const btn = document.getElementById('btnCopiarPrompt');
+            try {
+                await navigator.clipboard.writeText(promptGenerado);
+                btn.textContent = '✓ Copiado';
+                setTimeout(() => { btn.textContent = 'Copiar'; }, 2000);
+            } catch (e) {
+                // El portapapeles necesita contexto seguro y a veces un permiso.
+                // Si no se puede, el texto igual está a la vista para copiarlo a mano.
+                btn.textContent = 'Copialo del cuadro';
+            }
         }
 
         function configurarRealtime() {

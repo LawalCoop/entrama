@@ -662,3 +662,45 @@ mitad, no queda un perfil incompleto precargando la próxima visita.
 participante desde la 0003. Con eso los varios problemas de una misma persona
 quedan relacionados y se pueden cruzar con su participación en la dinámica. El
 modal del tab de Problemas lo muestra.
+
+## El tab de Digerir
+
+Arma un prompt con todos los problemas recolectados en `/recolectar` para que un
+agente los agrupe. **No llama a ningún modelo**: genera el texto y lo copia; quien
+conduce lo pega donde quiera, y de paso puede editarlo antes. No hay API key en
+ninguna parte, ni proveedor elegido.
+
+La plantilla vive en `lib/digerir.ts` y no adentro del HTML: son 5KB de prompt, y
+enterrados en un archivo de 3000 líneas serían imposibles de editar.
+
+**Agrupa por el dolor común, no por la solución.** Es lo que dice la guía de la
+que salió el prompt, con énfasis: los títulos nombran el problema —"Datos
+productivos dispersos en papel y planillas"— y nunca una tecnología —"Plataforma
+IoT para campo"—. Las soluciones son un paso posterior. Cada cluster sí trae
+`tech_feasibility` y `tech_note`, que orientan qué *tipo* de solución existe sin
+nombrar productos.
+
+De la guía original se cambió una sola línea: la que le describe al agente el
+formato de su entrada. Venía de otra encuesta —`sector · tipo_de_actor —
+urgente: "…" || mediano plazo: "…"`— y dejarla sería mentirle sobre lo que se le
+está pasando. Ahora dice lo que efectivamente se emite:
+
+```
+[ref] actividades · tipo de organización · provincia — frecuencia, impacto — "el problema"
+```
+
+**Los `{{placeholders}}` se resuelven con los datos.** `{{audience}}` se deriva de
+los tipos de organización y provincias que aparecen: fija mentiría en cuanto
+cambie quién completa el formulario, y el agente usa esa línea para calibrar el
+vocabulario de los títulos. Por lo mismo, tipos y actividades se traducen a sus
+nombres — 'producto-elaborado' no es como se habla.
+
+**Los `refs`** son los primeros 8 caracteres del uuid, en hex, como pide la guía.
+Se alargan si dos colisionan: un ref repetido rompería en silencio la regla de
+"cada problema en exactamente un cluster" — el agente asignaría uno solo y el
+otro problema desaparecería sin que nadie lo note.
+
+El prompt viene de `GET /api/admin/digerir`, no se arma en el navegador: el panel
+solo tiene cargada la página de problemas que se está mirando y el prompt los
+necesita todos. Está detrás del proxy con razón: lleva adentro el texto de cada
+aporte.
