@@ -4,53 +4,45 @@ import { useCallback, useEffect, useState } from 'react'
 import { Prompt } from '@/app/icons'
 import styles from '@/app/presentar/presentar.module.css'
 
-/** Cuántas citas entran en una pantalla sin que deje de leerse proyectada. */
-const CITAS_POR_PANTALLA = 3
-
 type Cita = { texto: string; cooperativa: string; provincia: string | null }
-type Cluster = { title: string; description?: string; tech_feasibility?: string; citas: Cita[] }
+type Cluster = {
+  title: string
+  description?: string
+  tech_feasibility?: string
+  tech_note?: string
+  citas: Cita[]
+}
 type Totales = { problemas: number; organizaciones: number; provincias: number }
 
 /**
- * Una pantalla proyectable.
+ * Una pantalla por cluster, siempre.
  *
- * `apertura` es la primera; el resto son tramos de un cluster: la misma cabecera
- * y un puñado de citas. Un cluster de ocho ocupa tres pantallas en vez de
- * apretar ocho citas en una que nadie puede leer de lejos.
+ * Los problemas no se paginan: desfilan en un ticker abajo. Paginarlos partía un
+ * dolor de nueve problemas en tres pantallas iguales y dejaba la última a medio
+ * llenar; el ticker los muestra todos sin que ninguno robe el protagonismo al
+ * dolor, que es lo que la sala vino a entender.
+ *
+ * La idea es del código de AgroTIC, donde estaba resuelto así.
  */
 type Pantalla =
   | { tipo: 'apertura' }
-  | { tipo: 'cluster'; cluster: Cluster; indice: number; total: number; tramo: number; tramos: number; citas: Cita[] }
+  | { tipo: 'panoramica' }
+  | { tipo: 'cluster'; cluster: Cluster; indice: number }
 
-function armarPantallas(clusters: Cluster[]): Pantalla[] {
-  const pantallas: Pantalla[] = [{ tipo: 'apertura' }]
-
-  clusters.forEach((cluster, indice) => {
-    // Un cluster sin citas igual ocupa una pantalla: que aparezca vacío es
-    // información — significa que el agente lo inventó sin problemas adentro.
-    const grupos: Cita[][] = []
-    for (let i = 0; i < Math.max(cluster.citas.length, 1); i += CITAS_POR_PANTALLA) {
-      grupos.push(cluster.citas.slice(i, i + CITAS_POR_PANTALLA))
-    }
-    grupos.forEach((citas, tramo) => {
-      pantallas.push({
-        tipo: 'cluster', cluster, indice, total: clusters.length,
-        tramo, tramos: grupos.length, citas,
-      })
-    })
-  })
-
-  return pantallas
+const VIABILIDAD: Record<string, { etiqueta: string; color: string; signo: string }> = {
+  alta: { etiqueta: 'Viabilidad alta', color: 'var(--color-a)', signo: '✓' },
+  media: { etiqueta: 'Viabilidad media', color: 'var(--color-b)', signo: '◐' },
+  exploratoria: { etiqueta: 'Exploratoria', color: 'var(--texto-suave)', signo: '✦' },
 }
 
-const COLOR_VIABILIDAD: Record<string, string> = {
-  alta: 'var(--color-a)',
-  media: 'var(--color-b)',
-  exploratoria: 'var(--texto-suave)',
-}
-
-export default function Presentacion({ clusters, totales }: { clusters: Cluster[]; totales: Totales }) {
-  const pantallas = armarPantallas(clusters)
+export default function Presentacion({
+  clusters, totales, viabilidadVaria,
+}: { clusters: Cluster[]; totales: Totales; viabilidadVaria: boolean }) {
+  const pantallas: Pantalla[] = [
+    { tipo: 'apertura' },
+    { tipo: 'panoramica' },
+    ...clusters.map((cluster, indice) => ({ tipo: 'cluster' as const, cluster, indice })),
+  ]
   const [actual, setActual] = useState(0)
 
   const ir = useCallback((destino: number, desdeHistorial = false) => {
@@ -58,10 +50,10 @@ export default function Presentacion({ clusters, totales }: { clusters: Cluster[
     setActual(acotado)
     if (desdeHistorial) return
 
-    // Historial desde el principio, para que Atrás retroceda una pantalla en vez
-    // de sacarte de la presentación. La primera reemplaza la entrada de carga:
-    // si apilara, esa entrada quedaría sin `state` y volver hasta ella movería
-    // el historial sin mover la pantalla.
+    // Historial desde el principio: Atrás retrocede una pantalla en vez de sacar
+    // de la presentación. La primera reemplaza la entrada de carga — si apilara,
+    // esa entrada quedaría sin `state` y volver hasta ella movería el historial
+    // sin mover la pantalla.
     const estado = { pantalla: acotado }
     if (history.state?.pantalla === undefined) history.replaceState(estado, '')
     else history.pushState(estado, '')
@@ -74,14 +66,13 @@ export default function Presentacion({ clusters, totales }: { clusters: Cluster[
       if (typeof e.state?.pantalla === 'number') setActual(e.state.pantalla)
     }
     function alTeclear(e: KeyboardEvent) {
-      // Espacio y PageDown/PageUp porque es lo que mandan los controles remotos
+      // Espacio y PageUp/PageDown porque es lo que mandan los controles remotos
       // de presentación, que es como esto se va a usar en una sala.
       if (['ArrowRight', 'ArrowDown', ' ', 'PageDown'].includes(e.key)) { e.preventDefault(); ir(actual + 1) }
       if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); ir(actual - 1) }
       if (e.key === 'Home') ir(0)
       if (e.key === 'End') ir(pantallas.length - 1)
     }
-
     window.addEventListener('popstate', alVolver)
     window.addEventListener('keydown', alTeclear)
     return () => {
@@ -95,10 +86,13 @@ export default function Presentacion({ clusters, totales }: { clusters: Cluster[
   return (
     <div className={styles.pantalla}>
       <div className={styles.lienzo}>
-        {p.tipo === 'apertura' ? (
-          <Apertura totales={totales} clusters={clusters.length} />
-        ) : (
-          <Cluster {...p} />
+        {p.tipo === 'apertura' && <Apertura totales={totales} clusters={clusters.length} />}
+        {p.tipo === 'panoramica' && <Panoramica clusters={clusters} viabilidadVaria={viabilidadVaria} />}
+        {p.tipo === 'cluster' && (
+          <Grupo
+            cluster={p.cluster} indice={p.indice} total={clusters.length}
+            viabilidadVaria={viabilidadVaria}
+          />
         )}
       </div>
 
@@ -110,11 +104,7 @@ export default function Presentacion({ clusters, totales }: { clusters: Cluster[
         >
           <Prompt direction="left" width={24} height={30} />
         </button>
-
-        <span className={styles.progreso} aria-live="polite">
-          {actual + 1} / {pantallas.length}
-        </span>
-
+        <span className={styles.progreso} aria-live="polite">{actual + 1} / {pantallas.length}</span>
         <button
           type="button" className={styles.btn} onClick={() => ir(actual + 1)}
           disabled={actual === pantallas.length - 1} aria-label="Siguiente"
@@ -150,49 +140,123 @@ function Apertura({ totales, clusters }: { totales: Totales; clusters: number })
   )
 }
 
-function Cluster({ cluster, indice, total, tramo, tramos, citas }: Extract<Pantalla, { tipo: 'cluster' }>) {
+/**
+ * El mapa: todos los dolores de un vistazo antes de entrar en cada uno.
+ *
+ * Las tarjetas se achican según cuántas haya, así entran en pantalla sin
+ * scrollear — con trece no es lo mismo que con cuatro. El título se recorta a
+ * tres líneas: acá alcanza con reconocerlo, se lee entero en su pantalla.
+ */
+function Panoramica({ clusters, viabilidadVaria }: { clusters: Cluster[]; viabilidadVaria: boolean }) {
+  const n = clusters.length
+  const anchoMin = n > 28 ? 190 : n > 18 ? 220 : n > 10 ? 260 : 320
+  // Con muchos grupos las tarjetas tienen que achicarse o la grilla no entra en
+  // pantalla, y una presentación que hay que scrollear deja de ser proyectable.
+  // El título pasa a dos líneas: acá alcanza con reconocer el dolor, se lee
+  // entero en su propia pantalla.
+  const compacta = n > 8
+
   return (
-    <div className={styles.cluster}>
-      <span className={styles.dolorLabel}>
-        {cluster.tech_feasibility && (
-          // Discreto a propósito: es una señal para quien después decide qué
-          // construir, no lo que la sala vino a escuchar. Va acá y no en el
-          // título porque ahí, con un título de dos líneas, quedaba flotando a
-          // media altura sin pertenecer a ninguna.
-          <span
-            className={styles.viabilidad}
-            style={{ background: COLOR_VIABILIDAD[cluster.tech_feasibility] ?? 'var(--texto-suave)' }}
-            title={`Viabilidad técnica: ${cluster.tech_feasibility}`}
-            aria-label={`Viabilidad técnica: ${cluster.tech_feasibility}`}
-          />
+    <div
+      className={`${styles.panoramica} ${compacta ? styles.panoramicaCompacta : ''}`}
+      style={{ gridTemplateColumns: `repeat(auto-fit, minmax(${anchoMin}px, 1fr))` }}
+    >
+      {clusters.map((c, i) => (
+        <article key={i} className={styles.tarjeta}>
+          <div className={styles.tarjetaCabecera}>
+            <span className={styles.tarjetaNumero}>Grupo {i + 1}</span>
+            {/* La pastilla va en la fila del número y no en una propia: ahorra
+                el alto de una línea por tarjeta sin perder el dato. */}
+            {viabilidadVaria && <Pastilla feasibility={c.tech_feasibility} chica />}
+            <span className={styles.tarjetaCuenta}>{c.citas.length}</span>
+          </div>
+          <h3 className={styles.tarjetaTitulo}>{c.title}</h3>
+        </article>
+      ))}
+    </div>
+  )
+}
+
+function Grupo({
+  cluster, indice, total, viabilidadVaria,
+}: { cluster: Cluster; indice: number; total: number; viabilidadVaria: boolean }) {
+  return (
+    <div className={styles.grupo}>
+      <div className={styles.grupoCabecera}>
+        <span className={styles.dolorLabel}>
+          Grupo {indice + 1} de {total}
+          <span className={styles.tramo}> · {cluster.citas.length} {cluster.citas.length === 1 ? 'problema' : 'problemas'}</span>
+        </span>
+        <div className={styles.puntos} aria-hidden>
+          {Array.from({ length: total }, (_, i) => (
+            <span
+              key={i}
+              className={`${styles.punto} ${i === indice ? styles.puntoActivo : ''} ${i < indice ? styles.puntoPasado : ''}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* El dolor protagoniza: ocupa el alto disponible y queda centrado. */}
+      <div className={styles.grupoCentro}>
+        <h2 className={styles.dolorTitulo}>{cluster.title}</h2>
+        {cluster.description && <p className={styles.dolorDesc}>{cluster.description}</p>}
+        {viabilidadVaria && (
+          <div className={styles.pastillaFila}><Pastilla feasibility={cluster.tech_feasibility} /></div>
         )}
-        Dolor {indice + 1} de {total}
-        {tramos > 1 && <span className={styles.tramo}> · {tramo + 1}/{tramos}</span>}
-      </span>
+        {cluster.tech_note && <p className={styles.techNote}>{cluster.tech_note}</p>}
+      </div>
 
-      <h2 className={styles.dolorTitulo}>{cluster.title}</h2>
+      <Ticker citas={cluster.citas} />
+    </div>
+  )
+}
 
-      {/* La descripción solo en el primer tramo: repetirla en cada pantalla del
-          mismo cluster le saca lugar a las citas, que son lo que importa. */}
-      {cluster.description && tramo === 0 && (
-        <p className={styles.dolorDesc}>{cluster.description}</p>
-      )}
+function Pastilla({ feasibility, chica = false }: { feasibility?: string; chica?: boolean }) {
+  const v = feasibility ? VIABILIDAD[feasibility] : undefined
+  if (!v) return null
+  return (
+    <span
+      className={`${styles.pastilla} ${chica ? styles.pastillaChica : ''}`}
+      style={{ borderColor: v.color, color: v.color }}
+    >
+      <span aria-hidden>{v.signo}</span> {chica ? v.etiqueta.replace('Viabilidad ', '') : v.etiqueta}
+    </span>
+  )
+}
 
-      <div className={styles.citas}>
-        {citas.map((c, i) => (
-          <figure key={i} className={styles.cita}>
-            <blockquote className={styles.citaTexto}>{c.texto}</blockquote>
-            <figcaption className={styles.citaFuente}>
+/**
+ * Las citas desfilando en loop.
+ *
+ * Se duplican y se anima hasta -50%: al llegar, la posición coincide con el
+ * inicio del segundo juego y el corte no se ve. La vuelta dura ~5s por cita, con
+ * un mínimo para que con pocas no quede corriendo.
+ *
+ * Con `prefers-reduced-motion` se detiene y pasa a ser scroll horizontal: la
+ * página es pública y alguien la puede abrir en el celular, donde un carrusel
+ * que no para es incómodo además de mareador.
+ */
+function Ticker({ citas }: { citas: Cita[] }) {
+  if (citas.length === 0) return null
+
+  const duracion = Math.max(28, citas.length * 5)
+  const dobles = [...citas, ...citas]
+
+  return (
+    <div className={styles.ticker}>
+      <div
+        className={styles.tickerPista}
+        style={{ animationDuration: `${duracion}s` }}
+      >
+        {dobles.map((c, i) => (
+          <figure key={i} className={styles.tickerCita} aria-hidden={i >= citas.length}>
+            <figcaption className={styles.tickerFuente}>
               {c.cooperativa}
-              {c.provincia && ` · ${c.provincia}`}
+              {c.provincia && <span className={styles.tickerProvincia}> · {c.provincia}</span>}
             </figcaption>
+            <blockquote className={styles.tickerTexto}>{c.texto}</blockquote>
           </figure>
         ))}
-        {citas.length === 0 && (
-          <p className={styles.citaTexto} style={{ opacity: 0.6 }}>
-            Este dolor no tiene problemas asociados.
-          </p>
-        )}
       </div>
     </div>
   )

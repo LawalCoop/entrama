@@ -47,7 +47,7 @@ export default async function Pagina() {
           Esta digestión se subió incompleta: hay problemas que no quedaron en ningún grupo.
         </p>
       )}
-      <Presentacion clusters={datos.clusters} totales={datos.totales} />
+      <Presentacion clusters={datos.clusters} totales={datos.totales} viabilidadVaria={datos.viabilidadVaria} />
     </>
   )
 }

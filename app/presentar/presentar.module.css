@@ -66,13 +66,6 @@
 
 /* --- Cluster --- */
 
-.cluster {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(10px, 1.6vh, 20px);
-  width: 100%;
-}
-
 .dolorLabel {
   display: flex;
   align-items: center;
@@ -97,14 +90,6 @@
   color: var(--texto);
 }
 
-/* El punto de viabilidad: presente pero sin robar la atención. */
-.viabilidad {
-  flex: none;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-}
-
 .dolorDesc {
   font-size: clamp(14px, 1.7vw, 22px);
   line-height: 1.5;
@@ -113,31 +98,6 @@
 }
 
 /* --- Citas --- */
-
-.citas {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(10px, 1.6vh, 20px);
-  margin-top: clamp(6px, 1.2vh, 16px);
-}
-
-.cita {
-  border-left: 3px solid var(--color-a);
-  padding-left: clamp(12px, 1.4vw, 20px);
-}
-
-.citaTexto {
-  font-size: clamp(15px, 1.9vw, 26px);
-  line-height: 1.45;
-  color: var(--texto);
-  overflow-wrap: anywhere;
-}
-
-.citaFuente {
-  margin-top: 6px;
-  font-size: clamp(12px, 1.3vw, 16px);
-  color: var(--texto-suave);
-}
 
 /* --- Navegación --- */
 
@@ -218,4 +178,241 @@
   font-size: 14px;
   font-weight: 600;
   color: var(--color-a);
+}
+
+/* --- Panorámica: el mapa de todos los dolores --- */
+
+.panoramica {
+  display: grid;
+  align-content: start;
+  gap: clamp(10px, 1vw, 18px);
+  width: 100%;
+  /* Red de seguridad: con una cantidad extrema de grupos algo tiene que ceder, y
+     que scrollee la grilla es mejor que una página que se corre entera y deja el
+     header y el footer fuera de cuadro. */
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: clamp(12px, 1.2vw, 20px);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  background: var(--superficie);
+}
+
+.tarjetaCabecera {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Empuja la cuenta al extremo, quede o no la pastilla en el medio. */
+.tarjetaCuenta {
+  margin-left: auto;
+}
+
+.tarjetaNumero {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+.tarjetaCuenta {
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(18px, 1.5vw, 26px);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-a);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tres líneas alcanzan para reconocerlo: se lee entero en su propia pantalla. */
+.tarjetaTitulo {
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(14px, 1.15vw, 20px);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--texto);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --- Un grupo --- */
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.6vh, 20px);
+  width: 100%;
+  height: 100%;
+}
+
+.grupoCabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  flex: none;
+}
+
+.grupoCentro {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: clamp(12px, 2vh, 28px);
+  text-align: center;
+}
+
+.puntos {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.punto {
+  width: 8px;
+  height: 5px;
+  border-radius: 3px;
+  background: var(--borde);
+  transition: width 0.2s, background-color 0.2s;
+}
+
+.puntoPasado {
+  background: var(--color-a-tinte);
+}
+
+.puntoActivo {
+  width: 24px;
+  background: var(--color-a);
+}
+
+.pastillaFila {
+  display: flex;
+  justify-content: center;
+}
+
+.pastilla {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(10px, 0.85vw, 13px);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.techNote {
+  font-size: clamp(13px, 1.15vw, 19px);
+  line-height: 1.45;
+  color: var(--texto-suave);
+  max-width: 70ch;
+}
+
+/* --- Ticker de citas --- */
+
+.ticker {
+  flex: none;
+  width: 100%;
+  overflow: hidden;
+  /* Los bordes se desvanecen para que las cards no aparezcan y desaparezcan de
+     golpe contra el filo de la pantalla. */
+  mask-image: linear-gradient(90deg, transparent 0%, black 4%, black 96%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 4%, black 96%, transparent 100%);
+}
+
+.tickerPista {
+  display: flex;
+  width: max-content;
+  gap: clamp(10px, 0.9vw, 18px);
+  animation-name: desfilar;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+/* -50% y no -100%: las citas van duplicadas, así que al llegar a la mitad la
+   posición coincide con el inicio del segundo juego y el corte no se ve. */
+@keyframes desfilar {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.tickerCita {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: none;
+  width: clamp(240px, 22vw, 340px);
+  padding: clamp(10px, 1vw, 16px);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  background: var(--superficie);
+}
+
+.tickerFuente {
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(10px, 0.75vw, 12px);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-a);
+}
+
+.tickerProvincia {
+  color: var(--texto-suave);
+}
+
+.tickerTexto {
+  font-size: clamp(11px, 0.9vw, 14px);
+  line-height: 1.4;
+  color: var(--texto);
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* La página es pública y alguien la puede abrir en el celular, donde un
+   carrusel que no para es incómodo además de mareador. */
+@media (prefers-reduced-motion: reduce) {
+  .ticker {
+    overflow-x: auto;
+  }
+
+  .tickerPista {
+    animation: none;
+  }
+}
+
+/* Con muchos grupos: menos alto por tarjeta para que la grilla entre entera. */
+.panoramicaCompacta .tarjeta {
+  gap: 6px;
+  padding: clamp(10px, 0.9vw, 14px);
+}
+
+.panoramicaCompacta .tarjetaTitulo {
+  -webkit-line-clamp: 2;
+  font-size: clamp(13px, 1vw, 17px);
+}
+
+.pastillaChica {
+  padding: 2px 7px;
+  font-size: 9px;
+  letter-spacing: 0.1em;
 }

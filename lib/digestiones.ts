@@ -177,6 +177,9 @@ export type ClusterParaPresentar = {
   title: string
   description?: string
   tech_feasibility?: string
+  /** La pista de qué tipo de solución existe. Es lo que dice algo distinto en
+   *  cada cluster; la viabilidad suele repetirse. */
+  tech_note?: string
   citas: Cita[]
 }
 
@@ -186,6 +189,14 @@ export type ParaPresentar = {
   clusters: ClusterParaPresentar[]
   /** Para la pantalla de apertura. */
   totales: { problemas: number; organizaciones: number; provincias: number }
+  /**
+   * Si la viabilidad distingue algo.
+   *
+   * Cuando todos los clusters dan el mismo valor —pasó: trece veces "alta"— la
+   * etiqueta es la misma trece veces y no informa nada. Que se muestre o no lo
+   * decide el dato, no una constante.
+   */
+  viabilidadVaria: boolean
 }
 
 /**
@@ -219,6 +230,7 @@ export async function ultimaParaPresentar(): Promise<ParaPresentar | null> {
     title: c.title,
     description: c.description,
     tech_feasibility: c.tech_feasibility,
+    tech_note: c.tech_note,
     citas: c.member_ids
       .map((id) => problemas.get(id))
       .filter((p) => p !== undefined)
@@ -226,7 +238,10 @@ export async function ultimaParaPresentar(): Promise<ParaPresentar | null> {
   }))
 
   const todas = clusters.flatMap((c) => c.citas)
+  const viabilidades = new Set(clusters.map((c) => c.tech_feasibility).filter(Boolean))
+
   return {
+    viabilidadVaria: viabilidades.size > 1,
     creadoEn: d.creadoEn,
     completa: d.completa,
     clusters,

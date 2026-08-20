@@ -751,9 +751,31 @@ usa el armazón, la paleta y el botón de pantalla completa que ya están.
 quién le pasa, y eso no lo reemplaza ninguna síntesis. Por eso cada pantalla es
 un dolor con sus citas, y no una lista de títulos.
 
-Un cluster de ocho citas ocupa **varias pantallas** (tres por vez, con marcador
-`1/3`) en vez de apretar ocho en una que nadie lee desde el fondo de la sala.
-Nada queda escondido.
+**Una pantalla por dolor, siempre.** Los problemas no se paginan: desfilan en un
+ticker abajo, en loop, a ~5 segundos por cita. La idea sale del código de AgroTIC
+(`agrotic-codigo.zip`), donde estaba resuelto así y con un comentario que lo
+explica: *"las cards se relegan a un slider chico para que el protagonismo quede
+en el título / descripción / viabilidad del cluster"*.
+
+Paginarlas era peor: partía un dolor de nueve problemas en tres pantallas
+iguales y dejaba la última a medio llenar. Con el ticker, la digestión real de 13
+clusters pasa de 22 pantallas a 15, y ninguna queda coja.
+
+Antes del detalle va una **panorámica** con todos los dolores como tarjetas: el
+número de problemas, el título recortado y la viabilidad. Con trece grupos, la
+sala necesita ver el mapa antes de entrar en cada uno. Las tarjetas se achican
+según cuántas haya —y con más de ocho el título pasa a dos líneas y la pastilla
+se mete en la fila del número— porque una presentación que hay que scrollear deja
+de ser proyectable.
+
+`tech_note` sí se muestra: es lo que dice algo distinto en cada cluster. La
+pastilla de viabilidad aparece **solo si hay más de un valor** entre todos: si
+todos dieran "alta", la misma etiqueta trece veces no informa nada. Lo decide el
+dato, no una constante.
+
+El ticker va con CSS puro, sin `motion/react`. Con `prefers-reduced-motion` se
+detiene y pasa a ser scroll horizontal: la página es pública y alguien la puede
+abrir en el celular.
 
 **La privacidad se resuelve en la consulta, no en el render.** El `select` de
 `ultimaParaPresentar()` no trae `nombre`. Si el nombre no está en el payload, no
