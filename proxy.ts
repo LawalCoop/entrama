@@ -78,6 +78,17 @@ export function proxy(request: NextRequest) {
 }
 
 // `/admin` a secas y todo lo que cuelgue: `:path*` matchea cero o más segmentos.
+//
+// `/live/admin.html` es un archivo estático de `public/`, y el proxy igual lo
+// intercepta: así el panel de la dinámica queda detrás de la misma clave, y un
+// `fetch` same-origin desde esa página viaja con las credenciales que el
+// navegador ya guardó — sin tokens ni contraseñas dando vueltas en JS.
+//
+// `/api/admin/*` es un namespace y no un método sobre `/api/problemas` a
+// propósito: el POST de esa ruta tiene que seguir público, es como envía el
+// wizard de /recolectar. Hacer que el proxy distinga por método es la clase de
+// condición que un día se escribe al revés y abre lo que quería cerrar. Acá la
+// regla no tiene excepciones: todo lo que cuelga de /api/admin pide credenciales.
 export const config = {
-  matcher: ['/admin', '/admin/:path*'],
+  matcher: ['/admin', '/admin/:path*', '/live/admin.html', '/api/admin/:path*'],
 }

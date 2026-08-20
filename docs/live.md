@@ -36,9 +36,11 @@ siendo manejable:
 5. **El catálogo de cooperativas es compartido con Entrama**: la tabla se llama
    `cooperativas` (sin prefijo) y `dinamica.html` da de alta las que no estaban.
    Ver más abajo.
+6. **Un tab "Problemas"** con lo recolectado en `/recolectar`, y `admin.html`
+   pasa a estar detrás del Basic Auth de `proxy.ts`. Ver más abajo.
 
 Para actualizar desde upstream: copiar los archivos nuevos y volver a aplicar
-esos cinco cambios. `index.html` e `informe-2025.html` no tienen ninguno, así
+esos seis cambios. `index.html` e `informe-2025.html` no tienen ninguno, así
 que esos se copian y listo.
 
 ## El esquema
@@ -173,3 +175,33 @@ catálogo con lo que alguien escribió a medias y borró.
 cooperativa nueva escrita ahí aparece enseguida en el desplegable de la dinámica.
 Se decidió así a sabiendas. La palanca para bajar una es el campo `activa`, que
 la dinámica filtra y el tab de Cooperativas del admin ya edita.
+
+## El tab de Problemas
+
+Muestra lo que la gente carga en `/recolectar`, que es otra app y otra tabla.
+
+Esos datos **no salen de Supabase con la anon key**: `problemas` tiene RLS sin
+policies justamente para que los aportes no sean públicos, y abrirle lectura a
+`anon` los dejaría accesibles a cualquiera que mire el HTML — la anon key está
+ahí adentro.
+
+Salen de `GET /api/admin/problemas`, un endpoint de Entrama que `proxy.ts`
+protege con la misma `ADMIN_PASSWORD` que `/admin`. Y `/live/admin.html` también
+entró al matcher del proxy, así que el navegador ya tiene las credenciales
+guardadas y las manda solas en un `fetch` same-origin: no hay token ni
+contraseña dando vueltas en el JS.
+
+**Por qué `/api/admin/` y no un GET sobre `/api/problemas`:** el POST de esa ruta
+tiene que seguir público, es como envía el wizard de `/recolectar`. El proxy
+protege por ruta y no por método, así que meter toda la ruta detrás rompería el
+wizard, y hacer que el proxy distinga por método es la clase de condición que un
+día se escribe al revés y abre lo que quería cerrar. Con un namespace aparte la
+regla no tiene excepciones.
+
+**Ahora el panel pide dos claves:** primero el diálogo del navegador
+(`ADMIN_PASSWORD`) y después el login propio del HTML
+(`facttic_admin.password`). Cada una se pide una vez por sesión. Se dejaron las
+dos porque son cosas distintas: una protege la página, la otra el panel.
+
+El texto de cada problema se escapa antes de insertarlo en el DOM: es texto libre
+que escribió cualquiera desde un formulario público.

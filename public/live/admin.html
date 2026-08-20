@@ -1198,6 +1198,7 @@
             <button class="tab" onclick="cambiarTab('cooperativas')">🏢 Cooperativas</button>
             <button class="tab" onclick="cambiarTab('participantes')">👥 Participantes</button>
             <button class="tab" onclick="cambiarTab('conexiones')">📡 Conexiones</button>
+            <button class="tab" onclick="cambiarTab('problemas')">📋 Problemas</button>
         </div>
 
         <!-- Tab: Dashboard -->
@@ -1234,6 +1235,13 @@
         <!-- Tab: Conexiones -->
         <div class="tab-content" id="tab-conexiones">
             <div id="conexionesPanel">
+                <!-- Se llena con JS -->
+            </div>
+        </div>
+
+        <!-- Tab: Problemas -->
+        <div class="tab-content" id="tab-problemas">
+            <div id="problemasPanel">
                 <!-- Se llena con JS -->
             </div>
         </div>
@@ -2322,6 +2330,11 @@
 
             document.querySelector(`.tab[onclick="cambiarTab('${tab}')"]`).classList.add('activo');
             document.getElementById(`tab-${tab}`).classList.add('activo');
+
+            // Los problemas se piden al abrir el tab y no al cargar la página:
+            // son de otra app y no cambian por realtime, así que traerlos antes
+            // de que alguien los mire sería una consulta al pedo en cada login.
+            if (tab === 'problemas') cargarProblemas(paginaProblemas);
         }
 
         // Modales
@@ -2407,6 +2420,82 @@
                     Cada pestaña abierta es una conexión. Las que se cierran tardan unos
                     segundos en desaparecer, hasta que vence el heartbeat.
                 </p>
+            `;
+        }
+
+
+        // --- Problemas recolectados -------------------------------------
+        // Lo que la gente carga en /recolectar de Entrama, que es otra app y
+        // otra tabla.
+        //
+        // No sale de Supabase con la anon key: `problemas` tiene RLS sin
+        // policies justamente para que los aportes no sean públicos, y abrirle
+        // lectura a anon los dejaría accesibles a cualquiera que mire el HTML.
+        //
+        // Sale de un endpoint nuestro que `proxy.ts` protege con la misma clave
+        // que /admin. Esta página también está detrás de ese proxy, así que el
+        // navegador ya tiene las credenciales y las manda solas en un fetch
+        // same-origin: no hace falta token ni contraseña en el JS.
+        let paginaProblemas = 1;
+
+        async function cargarProblemas(pagina) {
+            const panel = document.getElementById('problemasPanel');
+            if (!panel) return;
+            paginaProblemas = pagina || 1;
+            panel.innerHTML = '<p style="opacity:.6;padding:2rem;text-align:center">Cargando…</p>';
+
+            let datos;
+            try {
+                const res = await fetch('/api/admin/problemas?p=' + paginaProblemas, { credentials: 'same-origin' });
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                datos = await res.json();
+            } catch (e) {
+                panel.innerHTML = '<p style="padding:2rem;text-align:center">No se pudieron cargar los problemas. <a href="#" onclick="cargarProblemas(' + paginaProblemas + ');return false">Reintentar</a></p>';
+                return;
+            }
+
+            if (!datos.total) {
+                panel.innerHTML = '<p style="opacity:.6;padding:2rem;text-align:center">Todavía no hay problemas cargados en /recolectar.</p>';
+                return;
+            }
+
+            const esc = (t) => String(t == null ? '' : t)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            const fecha = (iso) => new Date(iso).toLocaleString('es-AR', {
+                day: '2-digit', month: '2-digit', year: 'numeric',
+                hour: '2-digit', minute: '2-digit',
+                timeZone: 'America/Argentina/Buenos_Aires'
+            });
+
+            const tarjetas = datos.problemas.map(pr => `
+                <div style="border:1px solid rgba(128,128,128,.25);border-radius:10px;padding:1rem;margin-bottom:.75rem">
+                    <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.85rem;opacity:.7">
+                        <span><strong>${esc(pr.nombre)}</strong> · ${esc(pr.cooperativa)}</span>
+                        <span>${fecha(pr.creadoEn)}</span>
+                    </div>
+                    <div style="font-size:.85rem;opacity:.7;margin-top:.15rem">
+                        ${esc(pr.area)} · ${esc(pr.frecuencia)} · ${esc(pr.impacto)}
+                    </div>
+                    <p style="margin-top:.75rem;white-space:pre-wrap;overflow-wrap:anywhere">${esc(pr.problema)}</p>
+                </div>
+            `).join('');
+
+            const nav = datos.paginas > 1 ? `
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-top:1rem">
+                    <button class="btn" ${datos.pagina <= 1 ? 'disabled style="opacity:.4"' : ''}
+                        onclick="cargarProblemas(${datos.pagina - 1})">‹ Anterior</button>
+                    <span style="opacity:.6;font-size:.9rem">Página ${datos.pagina} de ${datos.paginas}</span>
+                    <button class="btn" ${datos.pagina >= datos.paginas ? 'disabled style="opacity:.4"' : ''}
+                        onclick="cargarProblemas(${datos.pagina + 1})">Siguiente ›</button>
+                </div>` : '';
+
+            panel.innerHTML = `
+                <p style="opacity:.7;margin-bottom:1rem">
+                    ${datos.total === 1 ? '1 problema recolectado' : datos.total + ' problemas recolectados'}
+                </p>
+                ${tarjetas}
+                ${nav}
             `;
         }
 
