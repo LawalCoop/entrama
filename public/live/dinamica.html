@@ -1753,7 +1753,8 @@
                     .update({
                         reflexion,
                         accionables,
-                        responsables
+                        responsables,
+                        cerrado: true
                     })
                     .eq('id', estado.equipoSeleccionado.id);
 
@@ -1763,6 +1764,7 @@
                 estado.equipoSeleccionado.reflexion = reflexion;
                 estado.equipoSeleccionado.accionables = accionables;
                 estado.equipoSeleccionado.responsables = responsables;
+                estado.equipoSeleccionado.cerrado = true;
 
                 // Actualizar en la lista de equipos también
                 const equipoIdx = estado.equipos.findIndex(e => e.id === estado.equipoSeleccionado.id);
@@ -1770,6 +1772,7 @@
                     estado.equipos[equipoIdx].reflexion = reflexion;
                     estado.equipos[equipoIdx].accionables = accionables;
                     estado.equipos[equipoIdx].responsables = responsables;
+                    estado.equipos[equipoIdx].cerrado = true;
                 }
 
                 mostrarPantallaTerminado();
@@ -2112,6 +2115,23 @@
                     if (data) {
                         estado.equipos = data;
                         renderizarEquipos();
+
+                        // Si el admin abrió o cerró mi equipo, seguir el cambio:
+                        // quien está mirando "¡Listo!" vuelve a poder trabajar, y
+                        // al revés. Sólo se mueve entre esas dos pantallas —si
+                        // alguien está escribiendo el cierre, no se le saca de
+                        // encima lo que estaba tipeando.
+                        const mio = estado.equipoSeleccionado
+                            && data.find(e => e.id === estado.equipoSeleccionado.id);
+                        if (mio) {
+                            estado.equipoSeleccionado = mio;
+                            const pantalla = document.querySelector('.pantalla.activa')?.id;
+                            if (mio.cerrado && pantalla === 'pantallaConfirmacion') {
+                                mostrarPantallaTerminado();
+                            } else if (!mio.cerrado && pantalla === 'pantallaTerminado') {
+                                mostrarConfirmacion();
+                            }
+                        }
                     }
                 })
                 .subscribe();
@@ -2214,7 +2234,7 @@
                 estado.cooperativaUsuario = estado.participante.cooperativa;
 
                 if (estado.equipoSeleccionado) {
-                    if (estado.participante.terminado) {
+                    if (estado.equipoSeleccionado.cerrado) {
                         mostrarPantallaTerminado();
                     } else {
                         mostrarConfirmacion();

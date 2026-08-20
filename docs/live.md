@@ -44,11 +44,15 @@ siendo manejable:
 6. **La marca es Alimentos Cooperativos**, no FACTTIC. Ver más abajo.
 7. **Un tab "Problemas"** con lo recolectado en `/recolectar`, y `admin.html`
    pasa a estar detrás del Basic Auth de `proxy.ts`. Ver más abajo.
-8. **El botón Atrás del navegador funciona**: las pantallas de `dinamica.html`,
-   los slides del deck y los tabs del admin apilan historial. Ver más abajo.
+8. **La asignación de equipo es automática** al anotarse, y el registro pide
+   provincia, tipo de organización y actividades. Ver más abajo.
+9. **Un equipo cerrado se puede reabrir** desde el dashboard del admin. Ver más
+   abajo.
+10. **El botón Atrás del navegador funciona**: las pantallas de `dinamica.html`,
+    los slides del deck y los tabs del admin apilan historial. Ver más abajo.
 
 Para actualizar desde upstream: copiar los archivos nuevos y volver a aplicar
-esos ocho cambios. De `index.html` solo el `history: true`; `informe-2025.html`
+esos diez cambios. De `index.html` solo el `history: true`; `informe-2025.html`
 no tiene ninguno, así que ese se copia y listo.
 
 ## El esquema
@@ -390,6 +394,37 @@ te movería de grupo en medio de la charla.
 **La provincia pesa poco y no estaba entre los criterios pedidos.** Se pide como
 dato y se usa con peso 2, el más bajo, para desempatar. Si no tiene que influir,
 alcanza con ponerlo en 0.
+
+## Reabrir un equipo
+
+Un equipo que cerró vuelve a "En progreso" desde el botón **↩ Reabrir**, en su
+tarjeta del dashboard del admin.
+
+**Reabrir no borra nada.** La reflexión y los accionables quedan donde estaban,
+así que el equipo retoma desde donde dejó. Por eso el botón tampoco pide
+confirmación, y volver a cerrar es enviar el cierre otra vez.
+
+Eso obligó a guardar el estado en vez de deducirlo. Antes "cerrado" era una
+condición calculada —tener `reflexion` y `accionables` cargados— y con ese
+modelo la única forma de reabrir era borrarle al equipo lo que había escrito.
+Ahora hay una columna `cerrado` en `facttic_equipos`
+(`migrations/0008_equipo_cerrado.sql`), y la migración deja en `true` a los que
+ya habían cerrado: si no, un plenario en curso vería todos sus equipos volver a
+"En progreso" de golpe al deployar.
+
+El cambio llega a los celulares por realtime: a quien esté mirando la pantalla
+de "¡Listo!" lo devuelve a la de su equipo, y al revés si lo vuelven a cerrar.
+Sólo se mueve entre esas dos pantallas —si alguien está escribiendo el cierre,
+no se le saca de encima lo que estaba tipeando.
+
+### De paso, un flag que no servía
+
+La pantalla que veía cada participante al volver a entrar salía de
+`participantes.terminado`, y **nada en el código ponía nunca ese campo en
+`true`**: quien cerraba y recargaba volvía a la pantalla de su equipo como si no
+hubiera cerrado. Ahora sale de `equipos.cerrado`, que además es lo correcto —el
+cierre es del equipo, no de cada persona—. La columna `terminado` sigue en la
+tabla y el admin la muestra, pero nadie la escribe.
 
 ## El botón Atrás
 
