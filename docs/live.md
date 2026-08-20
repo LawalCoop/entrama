@@ -428,6 +428,18 @@ El acento es el verde de marca y no `--equipo-actual`: en esa pantalla todavía 
 se sabe qué equipo tocó, y quien viene de una asignación anterior tiene esa
 variable con el color del equipo viejo.
 
+### El popup del equipo
+
+Lo que se ve después del reparto. El título y el mensaje van con `clamp()` para
+que entren en un celular angosto sin quedar chicos en una pantalla grande: esa
+pantalla se lee de lejos, porque el punto es que la levantes para que los de tu
+color te encuentren.
+
+El ícono del teléfono se mueve en bucle —sube, se inclina para un lado y para el
+otro— mientras el popup esté abierto. Antes hacía un rebote de 0,6 s y se quedaba
+quieto justo cuando alguien empezaba a leer el mensaje que le pide ese mismo
+gesto.
+
 ### Cómo elige
 
 Le pone puntaje a cada equipo activo y se queda con el más bajo. Los pesos están

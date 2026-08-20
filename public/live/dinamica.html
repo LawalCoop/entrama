@@ -634,6 +634,7 @@
 
         @media (prefers-reduced-motion: reduce) {
             .reparto-anillo { animation: none; }
+            .popup-bienvenida .popup-icono { animation: none; }
             .reparto-criterios li,
             .reparto-criterios li.visible { opacity: 1; transform: none; animation: none; }
         }
@@ -924,28 +925,38 @@
         }
 
         .popup-bienvenida .popup-icono {
-            font-size: 5rem;
+            font-size: 5.5rem;
             margin-bottom: 1.5rem;
-            animation: bounce 0.6s ease;
+            /* En bucle y no una sola vez: el mensaje pide un gesto —levantar el
+               celular y mostrar la pantalla— y el ícono lo hace todo el tiempo
+               que el popup esté abierto, en vez de hacerlo una vez y quedarse
+               quieto justo cuando lo estás leyendo. */
+            animation: levantarCelu 2.8s ease-in-out infinite;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+        /* Sube, se inclina para un lado y para el otro, y baja: el movimiento de
+           alzar el teléfono para que lo vean de lejos. */
+        @keyframes levantarCelu {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25%      { transform: translateY(-20px) rotate(-7deg); }
+            50%      { transform: translateY(-26px) rotate(5deg); }
+            75%      { transform: translateY(-20px) rotate(-3deg); }
         }
 
         .popup-bienvenida .popup-titulo {
-            font-size: 1.8rem;
+            /* clamp para que entre en un celular angosto sin quedar chico en una
+               pantalla grande: la de este popup se lee de lejos. */
+            font-size: clamp(2rem, 8vw, 2.8rem);
             font-weight: bold;
             color: white;
             margin-bottom: 1.5rem;
-            line-height: 1.3;
+            line-height: 1.2;
         }
 
         .popup-bienvenida .popup-mensaje {
-            font-size: 1.2rem;
-            color: rgba(255,255,255,0.9);
-            line-height: 1.5;
+            font-size: clamp(1.25rem, 4.5vw, 1.55rem);
+            color: rgba(255,255,255,0.95);
+            line-height: 1.45;
             margin-bottom: 2rem;
         }
 
