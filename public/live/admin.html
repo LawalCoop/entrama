@@ -1435,7 +1435,7 @@
         async function cargarDatos() {
             const [equiposRes, coopRes, partsRes, configRes] = await Promise.all([
                 supabase.from('facttic_equipos').select('*').order('orden'),
-                supabase.from('facttic_cooperativas').select('*').order('orden'),
+                supabase.from('cooperativas').select('*').order('orden'),
                 supabase.from('facttic_participantes').select('*').order('created_at'),
                 supabase.from('facttic_config').select('*').eq('id', 1).single()
             ]);
@@ -1622,10 +1622,10 @@
 
             try {
                 if (id) {
-                    await supabase.from('facttic_cooperativas').update(data).eq('id', id);
+                    await supabase.from('cooperativas').update(data).eq('id', id);
                 } else {
                     data.activa = true;
-                    await supabase.from('facttic_cooperativas').insert(data);
+                    await supabase.from('cooperativas').insert(data);
                 }
                 cerrarModal('modalCooperativa');
                 await cargarDatos();
@@ -1639,13 +1639,13 @@
             const coop = estado.cooperativas.find(c => c.id === id);
             if (!coop) return;
 
-            await supabase.from('facttic_cooperativas').update({ activa: !coop.activa }).eq('id', id);
+            await supabase.from('cooperativas').update({ activa: !coop.activa }).eq('id', id);
             await cargarDatos();
         }
 
         async function eliminarCooperativa(id) {
             if (!confirm('¿Eliminar esta cooperativa?')) return;
-            await supabase.from('facttic_cooperativas').delete().eq('id', id);
+            await supabase.from('cooperativas').delete().eq('id', id);
             await cargarDatos();
         }
 
@@ -2415,7 +2415,7 @@
                 .channel('admin-changes')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_participantes' }, () => cargarDatos())
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_equipos' }, () => cargarDatos())
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_cooperativas' }, () => cargarDatos())
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'cooperativas' }, () => cargarDatos())
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_config' }, async () => {
                     const { data } = await supabase.from('facttic_config').select('*').eq('id', 1).single();
                     if (data) estado.config = data;

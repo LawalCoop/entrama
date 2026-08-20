@@ -33,9 +33,12 @@ siendo manejable:
 4. **Un contador de conexiones persistentes**: `dinamica.html` y `admin.html` se
    registran en el canal de presence `facttic-conexiones`, y `admin.html` tiene
    un tab "Conexiones" que las muestra. Ver más abajo.
+5. **El catálogo de cooperativas es compartido con Entrama**: la tabla se llama
+   `cooperativas` (sin prefijo) y `dinamica.html` da de alta las que no estaban.
+   Ver más abajo.
 
 Para actualizar desde upstream: copiar los archivos nuevos y volver a aplicar
-esos cuatro cambios. `index.html` e `informe-2025.html` no tienen ninguno, así
+esos cinco cambios. `index.html` e `informe-2025.html` no tienen ninguno, así
 que esos se copian y listo.
 
 ## El esquema
@@ -46,8 +49,8 @@ que era una reconstrucción y no un `pg_dump` fiel: los tipos, la nulabilidad y 
 foreign key son fieles; los defaults y los nombres de constraints, la
 reconstrucción más probable.
 
-Cinco tablas: `facttic_equipos` (6 filas), `facttic_cooperativas` (51),
-`facttic_participantes` (vacía), `facttic_config` (el timer) y `facttic_admin`
+Cinco tablas: `facttic_equipos` (6 filas), `cooperativas` (51),
+`facttic_participantes`, `facttic_config` (el timer) y `facttic_admin`
 (la contraseña del panel).
 
 **Los participantes del plenario 2025 no están.** El dump los excluyó por ser
@@ -130,3 +133,43 @@ Verde hasta el 60%, ámbar hasta el 90%, rojo de ahí en adelante.
 **Lo que no cuenta:** si algún día otra app usa este mismo proyecto de Supabase
 con realtime, sus conexiones gastan cuota y no aparecen acá. Y una conexión que
 muere tarda unos segundos en desaparecer, hasta que vence el heartbeat.
+
+## El catálogo de cooperativas
+
+`cooperativas` no lleva prefijo porque dejó de ser de la dinámica: la comparte
+con `/recolectar` de Entrama. Nació como `facttic_cooperativas` y la renombró
+`migrations/0004_cooperativas.sql`. Una sola lista, y lo que se escribe en un
+lado sugiere en el otro.
+
+Tiene una columna `slug` **generada por Postgres**, con índice único:
+
+```sql
+slug text generated always as (
+  lower(trim(translate(nombre, 'áéíóúüñÁÉÍÓÚÜÑ', 'aeiouunAEIOUUN')))
+) stored
+```
+
+Generada y no calculada por quien inserta: si la computaran los clientes,
+`dinamica.html` y el backend de Entrama tendrían que coincidir en cómo se
+normaliza, y el día que uno cambie aparecen duplicados que nadie entiende. Se usa
+`translate` y no `unaccent` porque unaccent es una extensión que puede no estar
+instalada, y esto tiene que correr igual en PGlite local.
+
+Con eso "CALF", " calf " y "Calf" son la misma fila. "Coop. CALF" no: eso ya es
+otro nombre, y adivinar que son la misma sería inventar.
+
+Las altas usan `on conflict (slug) do nothing`, así que quien llega segundo no
+pisa el nombre que puso el que la creó.
+
+**Dónde se da de alta:** en `dinamica.html` al anotarse (`registrarCooperativa`)
+y en Entrama al enviar un problema (`POST /api/problemas`). En los dos casos
+falla en silencio: la persona ya quedó anotada o su problema ya se guardó, y el
+catálogo es una mejora para el que venga después, no parte de la operación.
+
+En Entrama el alta ocurre **al enviar y no al tipear**, para no llenar el
+catálogo con lo que alguien escribió a medias y borró.
+
+**Lo que esto abre:** `/recolectar` es público y sin rate limit, así que una
+cooperativa nueva escrita ahí aparece enseguida en el desplegable de la dinámica.
+Se decidió así a sabiendas. La palanca para bajar una es el campo `activa`, que
+la dinámica filtra y el tab de Cooperativas del admin ya edita.

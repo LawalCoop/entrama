@@ -984,7 +984,7 @@
 
                 // Cargar cooperativas
                 const { data: cooperativas, error: errorCoops } = await supabase
-                    .from('facttic_cooperativas')
+                    .from('cooperativas')
                     .select('*')
                     .eq('activa', true)
                     .order('orden');
@@ -1200,7 +1200,35 @@
             };
         }
 
+        // Suma la cooperativa al catálogo si no estaba, para que la próxima
+        // persona la encuentre en el desplegable en vez de volver a tipearla.
+        //
+        // El catálogo lo comparten esta dinámica y /recolectar de Entrama, así
+        // que una que se da de alta acá también sugiere allá.
+        //
+        // El `slug` es una columna generada en Postgres: "CALF", " calf " y
+        // "Calf" caen en la misma fila, y quien llega segundo no pisa el nombre
+        // del que la creó. Por eso alcanza con intentar el insert y no hace
+        // falta buscar antes si existe.
+        //
+        // Falla en silencio a propósito: si esto no anda, la persona igual
+        // quedó anotada. Es una mejora para el que venga después, no parte de
+        // anotarse.
+        async function registrarCooperativa(nombre) {
+            const limpio = (nombre || '').trim();
+            if (!limpio) return;
+            try {
+                await supabase
+                    .from('cooperativas')
+                    .upsert({ nombre: limpio }, { onConflict: 'slug', ignoreDuplicates: true });
+            } catch (e) {
+                console.warn('No se pudo sumar la cooperativa al catálogo:', e);
+            }
+        }
+
         async function registrarParticipante(nombre, cooperativa, equipoId) {
+            registrarCooperativa(cooperativa);
+
             // Deshabilitar clicks en equipos mientras se guarda
             document.querySelectorAll('.equipo-card').forEach(card => {
                 card.style.pointerEvents = 'none';
@@ -1737,8 +1765,8 @@
             // Suscribirse a cambios en cooperativas
             supabase
                 .channel('cooperativas-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_cooperativas' }, async () => {
-                    const { data } = await supabase.from('facttic_cooperativas').select('*').eq('activa', true).order('orden');
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'cooperativas' }, async () => {
+                    const { data } = await supabase.from('cooperativas').select('*').eq('activa', true).order('orden');
                     if (data) {
                         estado.cooperativas = data;
                         poblarCooperativas();

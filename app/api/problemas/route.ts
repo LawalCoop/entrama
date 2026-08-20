@@ -1,3 +1,4 @@
+import { registrar } from '@/lib/cooperativas'
 import { withClient } from '@/lib/db'
 import { validar } from '@/lib/recolectar'
 
@@ -35,6 +36,16 @@ export async function POST(request: Request) {
          returning id`,
         [nombre, cooperativa, area, problema, frecuencia, impacto],
       )
+      // El catálogo se alimenta al enviar y no al tipear: así no se llena con
+      // lo que alguien escribió a medias y borró. Va después del insert y en un
+      // try aparte porque es secundario — el problema ya está guardado, y no
+      // vale perderlo porque falló una sugerencia para la próxima persona.
+      try {
+        await registrar(client, cooperativa)
+      } catch (err) {
+        console.error('POST /api/problemas: no se pudo registrar la cooperativa:', err)
+      }
+
       return rows[0].id
     })
 

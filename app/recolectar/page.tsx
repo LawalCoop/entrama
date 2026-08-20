@@ -124,8 +124,39 @@ function Bienvenida({ onEmpezar }: { onEmpezar: () => void }) {
   )
 }
 
+/**
+ * Los nombres del catálogo, para sugerir mientras se escribe.
+ *
+ * Falla en silencio y devuelve una lista vacía: sin sugerencias el campo sigue
+ * siendo un input de texto común y el wizard funciona igual. No hay estado de
+ * carga ni de error porque no hay nada que la persona pueda hacer al respecto,
+ * y un cartel de "no se pudieron cargar las sugerencias" sería ruido sobre algo
+ * que no le importa a nadie.
+ */
+function useCooperativas(): string[] {
+  const [nombres, setNombres] = useState<string[]>([])
+
+  useEffect(() => {
+    let vigente = true
+    fetch('/api/cooperativas')
+      .then((r) => r.json())
+      .then((d) => {
+        if (vigente) setNombres(d.cooperativas ?? [])
+      })
+      .catch(() => {})
+    // Evita el setState sobre un componente desmontado si alguien pasa de paso
+    // antes de que conteste.
+    return () => {
+      vigente = false
+    }
+  }, [])
+
+  return nombres
+}
+
 function PasoDatos() {
   const { data, set } = useWizard()
+  const cooperativas = useCooperativas()
   return (
     <>
       <StepHeader
@@ -145,6 +176,7 @@ function PasoDatos() {
           placeholder="Ej: Cooperativa CALF"
           value={(data.cooperativa as string) ?? ''}
           onChange={(v) => set('cooperativa', v)}
+          sugerencias={cooperativas}
         />
       </div>
     </>
@@ -398,12 +430,21 @@ function StepHeader({ label, title, subtitle }: { label: string; title: string; 
   )
 }
 
-function Field({ label, placeholder, value, onChange }: {
+function Field({ label, placeholder, value, onChange, sugerencias }: {
   label: string
   placeholder: string
   value: string
   onChange: (v: string) => void
+  /** Si viene, el campo autocompleta contra esta lista sin dejar de aceptar texto libre. */
+  sugerencias?: string[]
 }) {
+  // `<datalist>` nativo en vez de un combo propio: el browser se encarga del
+  // filtrado, del teclado y de la accesibilidad, y en celular sale el
+  // comportamiento que la gente ya conoce. Sigue siendo un input de texto, así
+  // que una cooperativa que no está en la lista se escribe igual — que es
+  // justo lo que tiene que pasar cuando alguien viene de una nueva.
+  const listaId = sugerencias ? `sugerencias-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined
+
   return (
     <label className={styles.field}>
       <span className={styles.fieldLabel}>{label}</span>
@@ -413,7 +454,16 @@ function Field({ label, placeholder, value, onChange }: {
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
+        list={listaId}
+        autoComplete="off"
       />
+      {sugerencias && sugerencias.length > 0 && (
+        <datalist id={listaId}>
+          {sugerencias.map((n) => (
+            <option key={n} value={n} />
+          ))}
+        </datalist>
+      )}
     </label>
   )
 }
