@@ -1230,7 +1230,15 @@
         // El `valor` es lo que va a la base y lo que lee la función de
         // asignación; la `etiqueta`, lo que se lee en pantalla. Separados
         // porque cambiar un texto no tiene por qué invalidar lo ya guardado.
-        const PROVINCIAS = [
+        // Las provincias salen de /provincias.json, que es la misma lista que usa
+        // el paso 1 de /recolectar. Son 24 y no cambian, así que no ganan nada
+        // estando en la base — pero sí ganan estando en un solo archivo.
+        //
+        // Se traen con fetch y no con un `import`: esta página usa scripts
+        // clásicos, y un módulo ES correría diferido, o sea después de init().
+        //
+        // El respaldo es para si el fetch falla, igual que con actividades.
+        const PROVINCIAS_DE_RESPALDO = [
             'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
             'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
             'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
@@ -1242,15 +1250,15 @@
         // quién vino, pero para mezclar cuentan como uno solo: eso lo resuelve
         // la columna `familia_organizacion`, que los agrupa por el prefijo
         // `estado-`. Si se agrega un nivel nuevo, respetar ese prefijo.
-        const TIPOS_ORGANIZACION = [
-            { valor: 'cooperativa',       etiqueta: 'Cooperativa' },
-            { valor: 'organizacion',      etiqueta: 'Organización' },
-            { valor: 'mutual',            etiqueta: 'Mutual' },
-            { valor: 'universidad',       etiqueta: 'Universidad' },
-            { valor: 'estado-municipal',  etiqueta: 'Estado municipal' },
-            { valor: 'estado-provincial', etiqueta: 'Estado provincial' },
-            { valor: 'estado-nacional',   etiqueta: 'Estado nacional' },
-            { valor: 'otra',              etiqueta: 'Otra' }
+        const TIPOS_DE_RESPALDO = [
+            { slug: 'cooperativa', nombre: 'Cooperativa' },
+            { slug: 'organizacion', nombre: 'Organización' },
+            { slug: 'mutual', nombre: 'Mutual' },
+            { slug: 'universidad', nombre: 'Universidad' },
+            { slug: 'estado-municipal', nombre: 'Estado municipal' },
+            { slug: 'estado-provincial', nombre: 'Estado provincial' },
+            { slug: 'estado-nacional', nombre: 'Estado nacional' },
+            { slug: 'otra', nombre: 'Otra' }
         ];
 
         // Las actividades ya no viven acá: están en la tabla `actividades`, porque
@@ -1258,6 +1266,8 @@
         // para quien se anote después. Se cargan en `estado.actividades`.
 
         let estado = {
+            provincias: [],
+            tipos: [],
             deviceId: null,
             participante: null,
             equipos: [],
@@ -1274,12 +1284,21 @@
         };
 
         // Poblar los campos del registro desde los catálogos de arriba.
+        // Conserva lo elegido: esto puede volver a llamarse cuando llega un tipo
+        // nuevo por realtime, y sería feo que a quien está completando el
+        // formulario se le borre lo que había puesto.
         function poblarCamposDelPerfil() {
             const provincia = document.getElementById('inputProvincia');
-            provincia.append(...PROVINCIAS.map(p => new Option(p, p)));
+            const provinciaElegida = provincia.value;
+            provincia.length = 1;
+            provincia.append(...estado.provincias.map(p => new Option(p, p)));
+            provincia.value = provinciaElegida;
 
             const tipo = document.getElementById('inputTipoOrganizacion');
-            tipo.append(...TIPOS_ORGANIZACION.map(t => new Option(t.etiqueta, t.valor)));
+            const tipoElegido = tipo.value;
+            tipo.length = 1;
+            tipo.append(...estado.tipos.map(t => new Option(t.nombre, t.slug)));
+            tipo.value = tipoElegido;
 
             renderizarActividades();
         }
@@ -1379,6 +1398,41 @@
         ];
 
         /** Trae el catálogo de actividades y vuelve a pintar las casillas. */
+        /** Trae las provincias del archivo compartido con /recolectar. */
+        async function cargarProvincias() {
+            try {
+                const res = await fetch('/provincias.json');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                const data = await res.json();
+                if (Array.isArray(data) && data.length) {
+                    estado.provincias = data;
+                    return;
+                }
+                throw new Error('respuesta vacía');
+            } catch (e) {
+                console.warn('No se pudo cargar provincias.json:', e);
+                estado.provincias = PROVINCIAS_DE_RESPALDO;
+            }
+        }
+
+        /** Trae los tipos de organización de la tabla. */
+        async function cargarTipos() {
+            const { data, error } = await supabase
+                .from('tipos_organizacion')
+                .select('slug, nombre')
+                .eq('activa', true)
+                .order('orden')
+                .order('nombre');
+
+            if (error || !data || !data.length) {
+                console.warn('No se pudo cargar el catálogo de tipos:', error);
+                // Sólo si todavía no hay nada, mismo criterio que actividades.
+                if (!estado.tipos.length) estado.tipos = TIPOS_DE_RESPALDO;
+                return;
+            }
+            estado.tipos = data;
+        }
+
         async function cargarActividades() {
             const { data, error } = await supabase
                 .from('actividades')
@@ -2549,6 +2603,11 @@
 
             // Antes de cualquier cosa: sin los campos armados, precargarlos
             // desde localStorage más abajo no tendría dónde escribir.
+            //
+            // Los catálogos van antes de poblar, porque poblar los lee. En
+            // paralelo: son independientes y así el arranque no paga las dos
+            // esperas una atrás de la otra.
+            await Promise.all([cargarProvincias(), cargarTipos()]);
             poblarCamposDelPerfil();
             await cargarActividades();
 

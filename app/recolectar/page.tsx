@@ -124,39 +124,62 @@ function Bienvenida({ onEmpezar }: { onEmpezar: () => void }) {
   )
 }
 
+type Opcion = { nombre: string; slug: string }
+
 /**
- * Los nombres del catálogo, para sugerir mientras se escribe.
+ * Los catálogos del paso 1: cooperativas para sugerir, y provincias, tipos y
+ * actividades para elegir.
  *
- * Falla en silencio y devuelve una lista vacía: sin sugerencias el campo sigue
- * siendo un input de texto común y el wizard funciona igual. No hay estado de
- * carga ni de error porque no hay nada que la persona pueda hacer al respecto,
- * y un cartel de "no se pudieron cargar las sugerencias" sería ruido sobre algo
- * que no le importa a nadie.
+ * Fallan en silencio y devuelven listas vacías. Los tres campos de perfil son
+ * opcionales, así que sin catálogo el wizard se completa igual, y el campo de
+ * cooperativa sigue siendo un input de texto común. No hay estado de carga ni
+ * de error porque no hay nada que la persona pueda hacer al respecto, y un
+ * cartel de "no se pudieron cargar las opciones" sería ruido sobre algo que no
+ * le importa a nadie.
  */
-function useCooperativas(): string[] {
-  const [nombres, setNombres] = useState<string[]>([])
+function useCatalogos() {
+  const [cooperativas, setCooperativas] = useState<string[]>([])
+  const [provincias, setProvincias] = useState<string[]>([])
+  const [tipos, setTipos] = useState<Opcion[]>([])
+  const [actividades, setActividades] = useState<Opcion[]>([])
 
   useEffect(() => {
+    // Evita el setState sobre un componente desmontado si alguien pasa de paso
+    // antes de que contesten.
     let vigente = true
+
     fetch('/api/cooperativas')
       .then((r) => r.json())
+      .then((d) => { if (vigente) setCooperativas(d.cooperativas ?? []) })
+      .catch(() => {})
+
+    fetch('/api/opciones')
+      .then((r) => r.json())
       .then((d) => {
-        if (vigente) setNombres(d.cooperativas ?? [])
+        if (!vigente) return
+        setProvincias(d.provincias ?? [])
+        setTipos(d.tipos ?? [])
+        setActividades(d.actividades ?? [])
       })
       .catch(() => {})
-    // Evita el setState sobre un componente desmontado si alguien pasa de paso
-    // antes de que conteste.
-    return () => {
-      vigente = false
-    }
+
+    return () => { vigente = false }
   }, [])
 
-  return nombres
+  return { cooperativas, provincias, tipos, actividades }
 }
 
 function PasoDatos() {
   const { data, set } = useWizard()
-  const cooperativas = useCooperativas()
+  const { cooperativas, provincias, tipos, actividades } = useCatalogos()
+  const elegidas = (data.actividades as string[]) ?? []
+
+  function alternarActividad(slug: string) {
+    set('actividades', elegidas.includes(slug)
+      ? elegidas.filter((a) => a !== slug)
+      : [...elegidas, slug])
+  }
+
   return (
     <>
       <StepHeader
@@ -178,8 +201,65 @@ function PasoDatos() {
           onChange={(v) => set('cooperativa', v)}
           sugerencias={cooperativas}
         />
+
+        {/* Los tres de abajo son opcionales: el paso avanza sin ellos. El
+            "(opcional)" va en la etiqueta y no en un cartel aparte para que se
+            lea justo donde se decide si completarlos. */}
+        <Selector
+          label="Provincia (opcional)"
+          value={(data.provincia as string) ?? ''}
+          onChange={(v) => set('provincia', v)}
+          opciones={provincias.map((p) => ({ valor: p, etiqueta: p }))}
+        />
+        <Selector
+          label="Tipo de organización (opcional)"
+          value={(data.tipoOrganizacion as string) ?? ''}
+          onChange={(v) => set('tipoOrganizacion', v)}
+          opciones={tipos.map((t) => ({ valor: t.slug, etiqueta: t.nombre }))}
+        />
+
+        {actividades.length > 0 && (
+          <div className={styles.field}>
+            <span className={styles.fieldLabel}>Actividad (opcional)</span>
+            <div className={styles.casillas}>
+              {actividades.map((a) => (
+                <label key={a.slug} className={styles.casilla}>
+                  <input
+                    type="checkbox"
+                    checked={elegidas.includes(a.slug)}
+                    onChange={() => alternarActividad(a.slug)}
+                  />
+                  {a.nombre}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </>
+  )
+}
+
+function Selector({ label, value, onChange, opciones }: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  opciones: { valor: string; etiqueta: string }[]
+}) {
+  // Sin opciones no se dibuja: un desplegable vacío no ayuda a nadie y ocupa
+  // lugar. Pasa si el catálogo no cargó.
+  if (opciones.length === 0) return null
+
+  return (
+    <label className={styles.field}>
+      <span className={styles.fieldLabel}>{label}</span>
+      <select className={styles.select} value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="">Elegí una…</option>
+        {opciones.map((o) => (
+          <option key={o.valor} value={o.valor}>{o.etiqueta}</option>
+        ))}
+      </select>
+    </label>
   )
 }
 

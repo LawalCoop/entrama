@@ -26,15 +26,19 @@ export async function POST(request: Request) {
     return Response.json({ error: validacion.motivo }, { status: 400 })
   }
 
-  const { nombre, cooperativa, area, problema, frecuencia, impacto } = validacion.valor
+  const { nombre, cooperativa, area, problema, frecuencia, impacto,
+          provincia, tipoOrganizacion, actividades } = validacion.valor
 
   try {
     const id = await withClient(async (client) => {
       const { rows } = await client.query<{ id: string }>(
-        `insert into problemas (nombre, cooperativa, area, problema, frecuencia, impacto)
-         values ($1, $2, $3, $4, $5, $6)
+        `insert into problemas
+           (nombre, cooperativa, area, problema, frecuencia, impacto,
+            provincia, tipo_organizacion, actividades)
+         values ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          returning id`,
-        [nombre, cooperativa, area, problema, frecuencia, impacto],
+        [nombre, cooperativa, area, problema, frecuencia, impacto,
+         provincia, tipoOrganizacion, actividades],
       )
       // El catálogo se alimenta al enviar y no al tipear: así no se llena con
       // lo que alguien escribió a medias y borró. Va después del insert y en un

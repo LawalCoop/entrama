@@ -25,6 +25,14 @@ export const LIMITE_PROBLEMA = 1000
 export const LIMITE_CORTO = 120
 
 /**
+ * Cuántas actividades se guardan como mucho.
+ *
+ * El formulario ofrece las del catálogo, así que en uso normal son pocas; el
+ * tope es contra un POST armado a mano que mande mil.
+ */
+export const LIMITE_ACTIVIDADES = 20
+
+/**
  * `area` no se valida contra AREAS: el paso 2 ofrece "Otra" con texto libre, así
  * que la lista es una sugerencia, no un dominio cerrado. Frecuencia e impacto sí
  * son cerrados — no hay forma de elegir algo fuera de la lista en la UI.
@@ -39,6 +47,10 @@ export type Problema = {
   problema: string
   frecuencia: string
   impacto: string
+  /** Perfil, opcional: el wizard los pide pero no bloquea si faltan. */
+  provincia: string | null
+  tipoOrganizacion: string | null
+  actividades: string[]
 }
 
 export type Validacion =
@@ -89,5 +101,24 @@ export function validar(payload: unknown): Validacion {
     return { ok: false, motivo: '"impacto" no es una de las opciones válidas.' }
   }
 
-  return { ok: true, valor: { nombre, cooperativa, area, problema, frecuencia, impacto } }
+  // Los tres de perfil no bloquean: son datos de contexto, no parte de contar
+  // un problema, y /recolectar es anónimo y voluntario. Lo que venga mal
+  // formado se descarta en silencio en vez de rechazar el envío entero —
+  // perder el problema por una provincia rara sería el peor canje posible.
+  const provincia = texto(d.provincia, LIMITE_CORTO)
+  const tipoOrganizacion = texto(d.tipoOrganizacion, LIMITE_CORTO)
+  const actividades = Array.isArray(d.actividades)
+    ? d.actividades
+        .map((a) => texto(a, LIMITE_CORTO))
+        .filter((a): a is string => a !== null)
+        .slice(0, LIMITE_ACTIVIDADES)
+    : []
+
+  return {
+    ok: true,
+    valor: {
+      nombre, cooperativa, area, problema, frecuencia, impacto,
+      provincia, tipoOrganizacion, actividades,
+    },
+  }
 }

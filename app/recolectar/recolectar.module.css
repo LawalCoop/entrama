@@ -572,3 +572,63 @@
   outline: 2px solid var(--texto);
   outline-offset: 3px;
 }
+
+/* --- Campos de perfil del paso 1 (opcionales) --- */
+
+/* Calca .input para que los cinco campos del paso se lean como uno solo.
+   `appearance: none` saca el estilo nativo del sistema, que en Chrome ignora el
+   fondo y quedaba un desplegable blanco sobre el fondo oscuro. */
+.select {
+  height: 48px;
+  padding: 0 14px;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  color: var(--texto);
+  font-family: var(--font-heading), sans-serif;
+  font-size: 15px;
+  outline: none;
+  appearance: none;
+  transition: border-color 0.15s;
+}
+
+.select:focus {
+  border-color: var(--color-a);
+}
+
+/* El desplegable en sí lo dibuja el sistema operativo y no lo alcanza el CSS
+   del módulo: se le fija el fondo a las opciones para que no queden blancas
+   sobre blanco en los navegadores que sí lo respetan. */
+.select option {
+  background: var(--superficie);
+  color: var(--texto);
+}
+
+.casillas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.casilla {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--texto);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.casilla:hover {
+  border-color: var(--color-a);
+}
+
+.casilla input {
+  accent-color: var(--color-a);
+  cursor: pointer;
+}
