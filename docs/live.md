@@ -740,3 +740,38 @@ queda congelada.
 
 De yapa, el parseo rescata el JSON envuelto en ```` ```json ````, que es lo que el
 agente hace más seguido pese a que se le pide que no.
+
+## /presentar
+
+La lectura proyectable de la última digestión. Vive en Entrama, no en `/live`:
+usa el armazón, la paleta y el botón de pantalla completa que ya están.
+
+**El cluster es el titular; las palabras de la gente son la prueba.** Un resumen
+—"Datos productivos dispersos en papel"— dice qué pasa; la cita textual dice a
+quién le pasa, y eso no lo reemplaza ninguna síntesis. Por eso cada pantalla es
+un dolor con sus citas, y no una lista de títulos.
+
+Un cluster de ocho citas ocupa **varias pantallas** (tres por vez, con marcador
+`1/3`) en vez de apretar ocho en una que nadie lee desde el fondo de la sala.
+Nada queda escondido.
+
+**La privacidad se resuelve en la consulta, no en el render.** El `select` de
+`ultimaParaPresentar()` no trae `nombre`. Si el nombre no está en el payload, no
+puede filtrarse por un descuido de maquetación ni aparecer en el HTML que
+cualquiera puede leer — `/presentar` es público. Cada cita se firma con
+organización y provincia.
+
+**Sin realtime**, a propósito: una presentación que cambia sola mientras se
+proyecta es un problema, no una función.
+
+Navega con flechas, espacio y PageUp/PageDown —lo que mandan los controles
+remotos de presentación—, Home y End, y con el botón Atrás del navegador, que
+apila historial desde el principio.
+
+`tech_feasibility` va como un punto de color junto a "Dolor N de M". `tech_note`
+no se muestra: la guía dice que las soluciones son un paso posterior, y ponerlas
+en la presentación es empezar a resolver antes de terminar de escuchar. Queda en
+la base para cuando haga falta.
+
+Si la digestión se subió incompleta, lo avisa arriba: quien proyecta tiene que
+saber que hay problemas que no están en ninguna pantalla.

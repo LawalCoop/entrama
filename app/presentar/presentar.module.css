@@ -1,0 +1,221 @@
+/* Pensado para proyectar: una idea por pantalla, sin scroll, y tipografía que
+   se lea desde el fondo de la sala. Las medidas van en `clamp` para que la
+   misma pantalla sirva en un proyector y en una notebook. */
+
+.pantalla {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  max-width: 1100px;
+  gap: 24px;
+}
+
+.lienzo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+/* --- Apertura --- */
+
+.apertura {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(24px, 4vh, 56px);
+  text-align: center;
+}
+
+.aperturaTitulo {
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(28px, 4.5vw, 56px);
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.cifras {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(24px, 5vw, 72px);
+}
+
+.cifra {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.cifraNumero {
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(44px, 8vw, 104px);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-a);
+  font-variant-numeric: tabular-nums;
+}
+
+.cifraEtiqueta {
+  font-size: clamp(13px, 1.4vw, 18px);
+  color: var(--texto-suave);
+}
+
+/* --- Cluster --- */
+
+.cluster {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.6vh, 20px);
+  width: 100%;
+}
+
+.dolorLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(12px, 1.3vw, 16px);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-a);
+}
+
+.tramo {
+  opacity: 0.6;
+}
+
+.dolorTitulo {
+  font-family: var(--font-heading), sans-serif;
+  font-size: clamp(24px, 3.6vw, 46px);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--texto);
+}
+
+/* El punto de viabilidad: presente pero sin robar la atención. */
+.viabilidad {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.dolorDesc {
+  font-size: clamp(14px, 1.7vw, 22px);
+  line-height: 1.5;
+  color: var(--texto-suave);
+  max-width: 62ch;
+}
+
+/* --- Citas --- */
+
+.citas {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 1.6vh, 20px);
+  margin-top: clamp(6px, 1.2vh, 16px);
+}
+
+.cita {
+  border-left: 3px solid var(--color-a);
+  padding-left: clamp(12px, 1.4vw, 20px);
+}
+
+.citaTexto {
+  font-size: clamp(15px, 1.9vw, 26px);
+  line-height: 1.45;
+  color: var(--texto);
+  overflow-wrap: anywhere;
+}
+
+.citaFuente {
+  margin-top: 6px;
+  font-size: clamp(12px, 1.3vw, 16px);
+  color: var(--texto-suave);
+}
+
+/* --- Navegación --- */
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 88px;
+  padding: 12px 20px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--color-a);
+  cursor: pointer;
+  transition: border-color 0.15s, opacity 0.15s;
+}
+
+.btn:hover:not(:disabled) {
+  border-color: var(--color-a);
+}
+
+.btn:disabled {
+  cursor: default;
+}
+
+.progreso {
+  font-size: 14px;
+  color: var(--texto-suave);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Estados --- */
+
+.aviso {
+  width: 100%;
+  max-width: 1100px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border: 1px solid var(--borde);
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  padding: 48px 16px;
+  max-width: 60ch;
+}
+
+.vacioTitulo {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--texto);
+}
+
+.vacioDesc {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--texto-suave);
+}
+
+.vacioLink {
+  margin-top: 8px;
+  font-family: var(--font-heading), sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-a);
+}

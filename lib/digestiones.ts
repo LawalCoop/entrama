@@ -170,4 +170,75 @@ export async function ultima(): Promise<Digestion | null> {
   })
 }
 
+/** Una cita para proyectar: sin nombre, a propósito. */
+export type Cita = { texto: string; cooperativa: string; provincia: string | null }
+
+export type ClusterParaPresentar = {
+  title: string
+  description?: string
+  tech_feasibility?: string
+  citas: Cita[]
+}
+
+export type ParaPresentar = {
+  creadoEn: Date
+  completa: boolean
+  clusters: ClusterParaPresentar[]
+  /** Para la pantalla de apertura. */
+  totales: { problemas: number; organizaciones: number; provincias: number }
+}
+
+/**
+ * La última digestión con sus problemas resueltos, lista para proyectar.
+ *
+ * **El `select` no trae `nombre` a propósito.** /presentar es público, y la
+ * privacidad se resuelve acá y no en el render: si el nombre no está en el
+ * payload, no puede filtrarse por un descuido de maquetación ni aparecer en el
+ * HTML que cualquiera puede leer. Cada cita se firma con organización y
+ * provincia, que alcanza para dar contexto sin exponer a quien completó un
+ * formulario sin saber que iría a una pantalla.
+ */
+export async function ultimaParaPresentar(): Promise<ParaPresentar | null> {
+  const d = await ultima()
+  if (!d) return null
+
+  const ids = [...new Set(d.clusters.flatMap((c) => c.member_ids))]
+  if (ids.length === 0) return null
+
+  const problemas = await withClient(async (client) => {
+    const { rows } = await client.query<{
+      id: string; problema: string; cooperativa: string; provincia: string | null
+    }>(
+      'select id, problema, cooperativa, provincia from problemas where id = any($1)',
+      [ids],
+    )
+    return new Map(rows.map((r) => [r.id, r]))
+  })
+
+  const clusters = d.clusters.map((c) => ({
+    title: c.title,
+    description: c.description,
+    tech_feasibility: c.tech_feasibility,
+    citas: c.member_ids
+      .map((id) => problemas.get(id))
+      .filter((p) => p !== undefined)
+      .map((p) => ({ texto: p.problema, cooperativa: p.cooperativa, provincia: p.provincia })),
+  }))
+
+  const todas = clusters.flatMap((c) => c.citas)
+  return {
+    creadoEn: d.creadoEn,
+    completa: d.completa,
+    clusters,
+    totales: {
+      // Los problemas se cuentan sobre los que efectivamente se resolvieron: si
+      // una digestión quedó incompleta, decir 42 cuando se muestran 39 sería
+      // decir algo que no es.
+      problemas: todas.length,
+      organizaciones: new Set(todas.map((c) => c.cooperativa)).size,
+      provincias: new Set(todas.map((c) => c.provincia).filter(Boolean)).size,
+    },
+  }
+}
+
 export { Invalido }
