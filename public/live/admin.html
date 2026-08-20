@@ -1245,6 +1245,7 @@
             <button class="tab activo" onclick="cambiarTab('dashboard')">📊 Dashboard</button>
             <button class="tab" onclick="cambiarTab('equipos')">🏷️ Equipos</button>
             <button class="tab" onclick="cambiarTab('cooperativas')">🏢 Cooperativas</button>
+            <button class="tab" onclick="cambiarTab('actividades')">🌾 Actividades</button>
             <button class="tab" onclick="cambiarTab('participantes')">👥 Participantes</button>
             <button class="tab" onclick="cambiarTab('conexiones')">📡 Conexiones</button>
             <button class="tab" onclick="cambiarTab('problemas')">📋 Problemas</button>
@@ -1266,6 +1267,13 @@
         </div>
 
         <!-- Tab: Cooperativas -->
+        <div class="tab-content" id="tab-actividades">
+            <button class="btn btn-primary" onclick="abrirFormActividad()" style="margin-bottom: 1rem;">+ Nueva Actividad</button>
+            <div class="items-lista" id="actividadesLista">
+                <!-- Se llena con JS -->
+            </div>
+        </div>
+
         <div class="tab-content" id="tab-cooperativas">
             <button class="btn btn-primary" onclick="abrirFormCooperativa()" style="margin-bottom: 1rem;">+ Nueva Cooperativa</button>
             <div class="items-lista" id="cooperativasLista">
@@ -1333,6 +1341,25 @@
     </div>
 
     <!-- Modal: Cooperativa -->
+    <div class="form-modal" id="modalActividad">
+        <div class="form-content">
+            <h2 id="modalActividadTitulo">Nueva Actividad</h2>
+            <input type="hidden" id="actividadId">
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="actividadNombre" placeholder="Ej: Ganadería">
+            </div>
+            <div class="form-group">
+                <label>Orden</label>
+                <input type="number" id="actividadOrden" value="999" min="0">
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary btn-block" onclick="guardarActividad()">Guardar</button>
+                <button class="btn btn-secondary btn-block" onclick="cerrarModal('modalActividad')">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <div class="form-modal" id="modalCooperativa">
         <div class="form-content">
             <h2 id="modalCooperativaTitulo">Nueva Cooperativa</h2>
@@ -1538,22 +1565,29 @@
                 supabase.from('cooperativas').select('*').order('orden'),
                 supabase.from('facttic_participantes').select('*').order('created_at'),
                 supabase.from('facttic_config').select('*').eq('id', 1).single(),
-                supabase.from('actividades').select('slug, nombre')
+                supabase.from('actividades').select('*').order('orden').order('nombre')
             ]);
 
             estado.equipos = equiposRes.data || [];
             estado.cooperativas = coopRes.data || [];
             estado.participantes = partsRes.data || [];
             estado.config = configRes.data;
-            // slug -> nombre, para mostrar "Agrícola" y no "agricola". Sale de la
-            // tabla y no de una lista fija acá porque la gente da de alta
-            // actividades desde el formulario: una copia local se quedaría vieja.
-            estado.actividades = Object.fromEntries((actsRes.data || []).map(a => [a.slug, a.nombre]));
+            // Sale de la tabla y no de una lista fija acá porque la gente da de
+            // alta actividades desde el formulario: una copia local se quedaría
+            // vieja.
+            estado.actividades = actsRes.data || [];
 
             renderizarTodo();
         }
 
+        /** El nombre que se lee en pantalla para un slug guardado. */
+        function nombreDeActividad(slug) {
+            const fila = (estado.actividades || []).find(a => a.slug === slug);
+            return fila?.nombre || ETIQUETAS_ACTIVIDAD[slug] || slug;
+        }
+
         function renderizarTodo() {
+            renderizarActividades();
             renderizarDashboard();
             renderizarEquiposAdmin();
             renderizarCooperativas();
@@ -1681,6 +1715,133 @@
         }
 
         // Cooperativas
+        function renderizarActividades() {
+            const container = document.getElementById('actividadesLista');
+            if (!container) return;
+
+            if (!estado.actividades.length) {
+                container.innerHTML = '<p style="padding: 1rem; color: var(--color-texto-secundario);">No hay actividades</p>';
+                return;
+            }
+
+            container.innerHTML = estado.actividades.map(act => {
+                // Cuánta gente la eligió. Sirve para no bajar de un plumazo una
+                // que está en uso, y para ver cuáles quedaron sin nadie.
+                const usos = estado.participantes.filter(p => (p.actividades || []).includes(act.slug)).length;
+                return `
+                    <div class="item-row" style="opacity: ${act.activa ? 1 : 0.5}">
+                        <div>
+                            <span class="nombre">${act.nombre}</span>
+                            <span style="color: var(--color-texto-secundario); margin-left: 0.5rem; font-size: 0.85rem;">
+                                ${usos} ${usos === 1 ? 'persona' : 'personas'}
+                            </span>
+                        </div>
+                        <div class="actions">
+                            <button class="btn btn-sm btn-secondary" onclick="editarActividad('${act.id}')">✏️</button>
+                            <button class="btn btn-sm btn-${act.activa ? 'warning' : 'success'}" onclick="toggleActividad('${act.id}')">
+                                ${act.activa ? '🔒' : '🔓'}
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="eliminarActividad('${act.id}')">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function abrirFormActividad(act = null) {
+            document.getElementById('modalActividadTitulo').textContent = act ? 'Editar Actividad' : 'Nueva Actividad';
+            document.getElementById('actividadId').value = act?.id || '';
+            document.getElementById('actividadNombre').value = act?.nombre || '';
+            document.getElementById('actividadOrden').value = act?.orden ?? 999;
+            document.getElementById('modalActividad').classList.add('activo');
+        }
+
+        function editarActividad(id) {
+            const act = estado.actividades.find(a => a.id === id);
+            if (act) abrirFormActividad(act);
+        }
+
+        /**
+         * Alta y edición.
+         *
+         * Corregir el nombre le cambia el `slug`, que es lo que quedó guardado
+         * en cada participante. Por eso avisa: quien la haya elegido queda
+         * apuntando a un slug que ya no existe y su actividad se lee como el
+         * texto crudo. Cambiar mayúsculas o acentos no rompe nada —el slug los
+         * normaliza—, así que sólo pregunta cuando el slug cambia de verdad.
+         */
+        async function guardarActividad() {
+            const id = document.getElementById('actividadId').value;
+            const nombre = document.getElementById('actividadNombre').value.trim();
+            const orden = parseInt(document.getElementById('actividadOrden').value) || 0;
+
+            if (!nombre) {
+                alert('El nombre es requerido');
+                return;
+            }
+
+            const slugDe = (n) => n
+                .replace(/[áéíóúüñÁÉÍÓÚÜÑ]/g, c => 'aeiouunAEIOUUN'['áéíóúüñÁÉÍÓÚÜÑ'.indexOf(c)])
+                .toLowerCase().trim().replace(/\s+/g, '-');
+
+            if (id) {
+                const act = estado.actividades.find(a => a.id === id);
+                const usos = estado.participantes.filter(p => (p.actividades || []).includes(act?.slug)).length;
+                if (act && slugDe(nombre) !== act.slug && usos > 0) {
+                    if (!confirm(`${usos} ${usos === 1 ? 'persona eligió' : 'personas eligieron'} "${act.nombre}".\n\nAl cambiarle el nombre, su actividad va a quedar apuntando a algo que ya no existe.\n\n¿Seguir igual?`)) {
+                        return;
+                    }
+                }
+            }
+
+            try {
+                const datos = { nombre, orden };
+                if (id) {
+                    const { error } = await supabase.from('actividades').update(datos).eq('id', id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabase.from('actividades').insert({ ...datos, activa: true });
+                    if (error) throw error;
+                }
+                cerrarModal('modalActividad');
+                await cargarDatos();
+            } catch (error) {
+                console.error('Error guardando la actividad:', error);
+                // El índice único por slug es el que salta si ya existe.
+                alert(error?.code === '23505'
+                    ? 'Ya hay una actividad con ese nombre.'
+                    : 'No se pudo guardar la actividad.');
+            }
+        }
+
+        /**
+         * Baja lógica: la saca del formulario sin borrarla.
+         *
+         * Es la palanca para una repetida o una que no va más. Quien ya la
+         * eligió la conserva, porque la fila sigue existiendo y su nombre se
+         * puede seguir leyendo.
+         */
+        async function toggleActividad(id) {
+            const act = estado.actividades.find(a => a.id === id);
+            if (!act) return;
+            await supabase.from('actividades').update({ activa: !act.activa }).eq('id', id);
+            await cargarDatos();
+        }
+
+        async function eliminarActividad(id) {
+            const act = estado.actividades.find(a => a.id === id);
+            if (!act) return;
+
+            const usos = estado.participantes.filter(p => (p.actividades || []).includes(act.slug)).length;
+            const aviso = usos > 0
+                ? `⚠️ ${usos} ${usos === 1 ? 'persona la eligió' : 'personas la eligieron'} y su actividad va a quedar sin nombre.\n\nSi sólo querés sacarla del formulario, usá el candado 🔒 en vez de borrarla.\n\n`
+                : '';
+            if (!confirm(`${aviso}¿Eliminar "${act.nombre}"?`)) return;
+
+            await supabase.from('actividades').delete().eq('id', id);
+            await cargarDatos();
+        }
+
         function renderizarCooperativas() {
             const container = document.getElementById('cooperativasLista');
 
@@ -1775,7 +1936,7 @@
                 const perfil = [
                     p.provincia,
                     ETIQUETAS_TIPO[p.tipo_organizacion] || p.tipo_organizacion,
-                    (p.actividades || []).map(a => estado.actividades?.[a] || ETIQUETAS_ACTIVIDAD[a] || a).join(', ')
+                    (p.actividades || []).map(nombreDeActividad).join(', ')
                 ].filter(Boolean).join(' · ');
 
                 return `

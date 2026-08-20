@@ -357,9 +357,25 @@ estaban guardados cuando las actividades vivían en el HTML
 —`producto-elaborado`, no `producto elaborado`—, o los participantes anotados
 antes quedarían apuntando a actividades inexistentes.
 
-Anon puede leer y dar de alta, pero no editar ni borrar: para eso está el panel,
-y una lista que cualquiera pueda vaciar en vivo es peor que una con alguna
-repetida. La palanca para bajar una sin perderla es `activa`.
+El panel tiene un tab **Actividades** para corregir un nombre, cambiar el orden,
+bajar una del formulario o borrarla, con la cantidad de gente que eligió cada
+una al lado.
+
+Al principio anon sólo podía leer y dar de alta, con la idea de que una lista que
+cualquiera pueda vaciar en vivo es peor que una con alguna repetida. No servía
+de nada: el panel usa la misma anon key que los participantes —el mismo rol de
+Postgres, ver "Lo que esto NO resuelve"—, así que lo único que esa restricción
+dejaba afuera era el panel. La 0011 la levantó y dejó `actividades` igual que
+`cooperativas`, `equipos` y `participantes`.
+
+Dos avisos en el tab, porque lo que se guarda en cada participante es el `slug`
+y el `slug` sale del nombre:
+
+- **Cambiarle el nombre** a una actividad que alguien eligió le cambia el slug, y
+  esa gente queda apuntando a uno que ya no existe. Pregunta antes. Cambiar sólo
+  mayúsculas o acentos no dispara nada, porque el slug los normaliza.
+- **Borrarla** deja sin nombre a quien la haya elegido, así que el aviso sugiere
+  el candado: `activa = false` la saca del formulario sin perder la fila.
 
 `dinamica.html` tiene las cuatro originales como respaldo, para el caso de que
 la consulta al catálogo falle. Sin eso, un error de red dejaría el formulario
