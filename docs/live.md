@@ -104,10 +104,15 @@ del evento y recargan la tabla entera con un `select`. El evento es solo un
 "algo cambió". Por eso también importa que las policies de `select` existan: sin
 lectura no hay evento, y la recarga tampoco andaría.
 
-## Licencia
+## De dónde viene el código
 
-El repo de origen no declara licencia. Antes de tratar esto como propio conviene
-tener el permiso de sus autores, o que agreguen un LICENSE.
+De `hg1g/facttic-para-armar`, que es de FACTTIC — la misma gente que trabaja en
+esto. No es código de terceros: por eso se copió, se modificó y se publicó sin
+más trámite.
+
+El repo de origen no declara licencia. Para nosotros no cambia nada, pero
+agregarle un LICENSE ayudaría a cualquier otra cooperativa que quiera reusar la
+dinámica y hoy no tiene cómo saber si puede.
 
 ## El tab de Conexiones
 
