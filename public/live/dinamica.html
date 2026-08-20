@@ -311,6 +311,48 @@
             border-color: var(--equipo-actual);
         }
 
+        /* El campo para sumar una actividad que no está en la lista. Aparece
+           sólo al marcar "Otra", porque en un formulario que se completa de
+           parado un input suelto invita a escribir ahí lo que ya está entre las
+           casillas de arriba. */
+        .actividad-otra {
+            display: none;
+            gap: 0.5rem;
+            margin-top: 0.6rem;
+        }
+
+        .actividad-otra.activa { display: flex; }
+
+        .actividad-otra input {
+            flex: 1;
+            min-width: 0;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            background: var(--color-card);
+            color: var(--color-texto);
+            font-size: 0.95rem;
+        }
+
+        .actividad-otra input:focus {
+            outline: none;
+            border-color: var(--equipo-actual);
+        }
+
+        .actividad-otra button {
+            padding: 0.7rem 1.1rem;
+            border-radius: 12px;
+            border: none;
+            background: var(--equipo-actual);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .actividad-otra button:disabled { opacity: 0.5; }
+
         .aviso-autocompletado {
             display: none;
             margin: -0.5rem 0 1rem;
@@ -878,6 +920,10 @@
             <div class="form-group">
                 <label id="labelActividades">Actividad <span class="label-nota">podés marcar más de una</span></label>
                 <div class="opciones-multiples" id="opcionesActividades" role="group" aria-labelledby="labelActividades"></div>
+                <div class="actividad-otra" id="actividadOtra">
+                    <input type="text" id="inputActividadOtra" placeholder="¿Cuál?" autocomplete="off" maxlength="60">
+                    <button type="button" id="btnAgregarActividad">Agregar</button>
+                </div>
             </div>
 
             <p class="aviso-autocompletado" id="avisoAutocompletado">
@@ -1081,6 +1127,7 @@
         const TIPOS_ORGANIZACION = [
             { valor: 'cooperativa',       etiqueta: 'Cooperativa' },
             { valor: 'organizacion',      etiqueta: 'Organización' },
+            { valor: 'mutual',            etiqueta: 'Mutual' },
             { valor: 'universidad',       etiqueta: 'Universidad' },
             { valor: 'estado-municipal',  etiqueta: 'Estado municipal' },
             { valor: 'estado-provincial', etiqueta: 'Estado provincial' },
@@ -1088,18 +1135,16 @@
             { valor: 'otra',              etiqueta: 'Otra' }
         ];
 
-        const ACTIVIDADES = [
-            { valor: 'agricola',          etiqueta: 'Agrícola' },
-            { valor: 'producto-elaborado', etiqueta: 'Producto elaborado' },
-            { valor: 'tecnologia',        etiqueta: 'Tecnología' },
-            { valor: 'comercializacion',  etiqueta: 'Comercialización' }
-        ];
+        // Las actividades ya no viven acá: están en la tabla `actividades`, porque
+        // el formulario deja sumar la que falte y tiene que quedar disponible
+        // para quien se anote después. Se cargan en `estado.actividades`.
 
         let estado = {
             deviceId: null,
             participante: null,
             equipos: [],
             cooperativas: [],
+            actividades: [],
             contadores: {},
             cooperativasPorEquipo: {},
             config: null,
@@ -1118,12 +1163,125 @@
             const tipo = document.getElementById('inputTipoOrganizacion');
             tipo.append(...TIPOS_ORGANIZACION.map(t => new Option(t.etiqueta, t.valor)));
 
-            document.getElementById('opcionesActividades').innerHTML = ACTIVIDADES.map(a => `
+            renderizarActividades();
+        }
+
+        /**
+         * Pinta las casillas de actividad con lo que hay en la tabla.
+         *
+         * Conserva lo que estaba marcado: esto se vuelve a llamar cuando alguien
+         * más da de alta una actividad —llega por realtime— y sería feo que a
+         * quien está completando el formulario se le borre lo que eligió.
+         *
+         * "Otra" va al final y no es una actividad: abre el campo para escribir
+         * una que no esté.
+         */
+        function renderizarActividades() {
+            const marcadas = new Set(actividadesElegidas());
+            const otraAbierta = document.getElementById('actividadOtra')?.classList.contains('activa');
+
+            document.getElementById('opcionesActividades').innerHTML = estado.actividades.map(a => `
                 <label>
-                    <input type="checkbox" name="actividad" value="${a.valor}">
-                    <span>${a.etiqueta}</span>
+                    <input type="checkbox" name="actividad" value="${a.slug}"${marcadas.has(a.slug) ? ' checked' : ''}>
+                    <span>${a.nombre}</span>
                 </label>
-            `).join('');
+            `).join('') + `
+                <label>
+                    <input type="checkbox" id="chkActividadOtra"${otraAbierta ? ' checked' : ''}>
+                    <span>Otra</span>
+                </label>
+            `;
+
+            document.getElementById('chkActividadOtra').addEventListener('change', (e) => {
+                document.getElementById('actividadOtra').classList.toggle('activa', e.target.checked);
+                if (e.target.checked) document.getElementById('inputActividadOtra').focus();
+            });
+        }
+
+        /**
+         * Suma una actividad al catálogo y la deja marcada.
+         *
+         * El `slug` lo genera Postgres con un índice único, así que "Ganadería",
+         * "ganaderia" y " Ganaderia " caen en la misma fila y quien llega
+         * segundo no duplica: por eso alcanza con intentar el insert.
+         *
+         * A diferencia del alta de organizaciones, esta no falla en silencio: la
+         * persona está esperando ver su actividad aparecer entre las casillas, y
+         * si no pasa nada no sabe si se anotó o no.
+         */
+        async function agregarActividad() {
+            const input = document.getElementById('inputActividadOtra');
+            const boton = document.getElementById('btnAgregarActividad');
+            const nombre = input.value.trim();
+            if (!nombre) return;
+
+            boton.disabled = true;
+            try {
+                const { error } = await supabase
+                    .from('actividades')
+                    .upsert({ nombre }, { onConflict: 'slug', ignoreDuplicates: true });
+                if (error) throw error;
+
+                await cargarActividades();
+
+                // Marcar la recién agregada. Se la busca por slug y no por el
+                // texto tipeado porque puede haber existido ya, con otra grafía.
+                const slug = nombre
+                    .replace(/[áéíóúüñÁÉÍÓÚÜÑ]/g, c => 'aeiouunAEIOUUN'['áéíóúüñÁÉÍÓÚÜÑ'.indexOf(c)])
+                    .toLowerCase().trim().replace(/\s+/g, '-');
+                const agregada = estado.actividades.find(a => a.slug === slug);
+                if (agregada) {
+                    marcarActividades([...actividadesElegidas(), agregada.slug]);
+                }
+
+                input.value = '';
+                document.getElementById('chkActividadOtra').checked = false;
+                document.getElementById('actividadOtra').classList.remove('activa');
+            } catch (e) {
+                console.error('No se pudo agregar la actividad:', e);
+                alert('No pudimos agregar esa actividad. Probá de nuevo.');
+            } finally {
+                boton.disabled = false;
+            }
+        }
+
+        /**
+         * Las cuatro de siempre, por si la tabla no responde.
+         *
+         * Sin esto, un error de red dejaría el formulario sin una sola casilla
+         * de actividad, y como marcar al menos una es obligatorio, nadie podría
+         * anotarse. Los slugs son los mismos que precarga la migración, así que
+         * lo que se guarde con esta lista sigue siendo válido.
+         */
+        const ACTIVIDADES_DE_RESPALDO = [
+            { slug: 'agricola',           nombre: 'Agrícola' },
+            { slug: 'producto-elaborado', nombre: 'Producto elaborado' },
+            { slug: 'tecnologia',         nombre: 'Tecnología' },
+            { slug: 'comercializacion',   nombre: 'Comercialización' }
+        ];
+
+        /** Trae el catálogo de actividades y vuelve a pintar las casillas. */
+        async function cargarActividades() {
+            const { data, error } = await supabase
+                .from('actividades')
+                .select('slug, nombre')
+                .eq('activa', true)
+                .order('orden')
+                .order('nombre');
+
+            if (error || !data || !data.length) {
+                console.warn('No se pudo cargar el catálogo de actividades:', error);
+                // Sólo si todavía no hay nada: una lista buena no se pisa con el
+                // respaldo porque una recarga puntual haya fallado.
+                if (!estado.actividades.length) {
+                    estado.actividades = ACTIVIDADES_DE_RESPALDO;
+                    renderizarActividades();
+                }
+                return;
+            }
+
+            estado.actividades = data;
+            renderizarActividades();
         }
 
         function actividadesElegidas() {
@@ -2176,6 +2334,9 @@
             // Suscribirse a cambios en cooperativas
             supabase
                 .channel('cooperativas-changes')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'actividades' }, async () => {
+                    await cargarActividades();
+                })
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'cooperativas' }, async () => {
                     const { data } = await supabase.from('cooperativas').select('*').eq('activa', true).order('orden');
                     if (data) {
@@ -2190,6 +2351,11 @@
         document.getElementById('btnContinuar').addEventListener('click', continuarRegistro);
         // `change` y no `input`: dispara al elegir del desplegable o al salir
         // del campo, no en cada tecla, así no consulta la base por letra.
+        document.getElementById('btnAgregarActividad').addEventListener('click', agregarActividad);
+        document.getElementById('inputActividadOtra').addEventListener('keydown', (e) => {
+            // Enter agrega, sin mandar el formulario ni pasar de pantalla.
+            if (e.key === 'Enter') { e.preventDefault(); agregarActividad(); }
+        });
         document.getElementById('inputCooperativaRegistro').addEventListener('change', (e) => {
             autocompletarPerfil(e.target.value.trim());
         });
@@ -2214,6 +2380,7 @@
             // Antes de cualquier cosa: sin los campos armados, precargarlos
             // desde localStorage más abajo no tendría dónde escribir.
             poblarCamposDelPerfil();
+            await cargarActividades();
 
             // Recuperar datos del localStorage
             estado.nombreUsuario = localStorage.getItem('facttic_nombre');

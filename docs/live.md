@@ -321,8 +321,10 @@ aparecía recién después de elegir, cuando ya habías leído el que querías.
 
 ### Qué se pregunta ahora
 
-Además de nombre y organización: **provincia**, **tipo de organización** y
-**actividad** (esta admite varias). Los tres viven en `facttic_participantes`,
+Además de nombre y organización: **provincia**, **tipo de organización**
+(cooperativa, organización, mutual, universidad, los tres niveles del Estado, u
+otra) y **actividad**, que admite varias y se puede ampliar en el momento (ver
+más abajo). Los tres viven en `facttic_participantes`,
 no en el catálogo `cooperativas`: ese catálogo es público, editable y compartido
 con `/recolectar`, así que un dato equivocado ahí se propagaría a todas las
 personas de esa organización.
@@ -336,6 +338,33 @@ separado para poder leer después quién vino, pero a la hora de mezclar cuentan
 como uno solo. Eso lo resuelve `familia_organizacion`, una columna generada que
 agrupa por el prefijo `estado-`. **Si se agrega un nivel nuevo, respetar ese
 prefijo**, o va a contar como un tipo aparte.
+
+### Las actividades son una tabla, no una lista en el HTML
+
+Empezaron como cuatro constantes adentro de `dinamica.html`, así que sumar una
+era editar el archivo y deployar. Al anotarse hay gente que no encaja en
+ninguna, y cuál falta no se sabe de antemano: ahora el formulario ofrece
+**Otra**, y lo que se escriba ahí queda en la tabla `actividades` y le aparece
+—por realtime, sin recargar— a quien se anote después.
+
+Lo que se guarda en `facttic_participantes.actividades` es el **slug**, no el
+nombre. El slug lo genera Postgres con un índice único, así que "Ganadería",
+"ganaderia" y " Ganaderia " caen en la misma fila.
+
+Ese slug reemplaza además los espacios por guiones, a diferencia del de
+`cooperativas`. No es un capricho: tiene que dar exactamente los valores que ya
+estaban guardados cuando las actividades vivían en el HTML
+—`producto-elaborado`, no `producto elaborado`—, o los participantes anotados
+antes quedarían apuntando a actividades inexistentes.
+
+Anon puede leer y dar de alta, pero no editar ni borrar: para eso está el panel,
+y una lista que cualquiera pueda vaciar en vivo es peor que una con alguna
+repetida. La palanca para bajar una sin perderla es `activa`.
+
+`dinamica.html` tiene las cuatro originales como respaldo, para el caso de que
+la consulta al catálogo falle. Sin eso, un error de red dejaría el formulario
+sin una sola casilla, y como marcar al menos una es obligatorio, nadie podría
+anotarse.
 
 ### Por qué el algoritmo vive en Postgres
 

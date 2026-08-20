@@ -1462,6 +1462,7 @@
         const ETIQUETAS_TIPO = {
             'cooperativa': 'Cooperativa',
             'organizacion': 'Organización',
+            'mutual': 'Mutual',
             'universidad': 'Universidad',
             'estado-municipal': 'Estado municipal',
             'estado-provincial': 'Estado provincial',
@@ -1469,6 +1470,9 @@
             'otra': 'Otra'
         };
 
+        // Respaldo por si la consulta a `actividades` falla: sin esto, un error de
+        // red dejaría la lista de participantes mostrando slugs crudos. Los
+        // nombres buenos salen de `estado.actividades`.
         const ETIQUETAS_ACTIVIDAD = {
             'agricola': 'Agrícola',
             'producto-elaborado': 'Producto elaborado',
@@ -1529,17 +1533,22 @@
 
         // Cargar datos
         async function cargarDatos() {
-            const [equiposRes, coopRes, partsRes, configRes] = await Promise.all([
+            const [equiposRes, coopRes, partsRes, configRes, actsRes] = await Promise.all([
                 supabase.from('facttic_equipos').select('*').order('orden'),
                 supabase.from('cooperativas').select('*').order('orden'),
                 supabase.from('facttic_participantes').select('*').order('created_at'),
-                supabase.from('facttic_config').select('*').eq('id', 1).single()
+                supabase.from('facttic_config').select('*').eq('id', 1).single(),
+                supabase.from('actividades').select('slug, nombre')
             ]);
 
             estado.equipos = equiposRes.data || [];
             estado.cooperativas = coopRes.data || [];
             estado.participantes = partsRes.data || [];
             estado.config = configRes.data;
+            // slug -> nombre, para mostrar "Agrícola" y no "agricola". Sale de la
+            // tabla y no de una lista fija acá porque la gente da de alta
+            // actividades desde el formulario: una copia local se quedaría vieja.
+            estado.actividades = Object.fromEntries((actsRes.data || []).map(a => [a.slug, a.nombre]));
 
             renderizarTodo();
         }
@@ -1766,7 +1775,7 @@
                 const perfil = [
                     p.provincia,
                     ETIQUETAS_TIPO[p.tipo_organizacion] || p.tipo_organizacion,
-                    (p.actividades || []).map(a => ETIQUETAS_ACTIVIDAD[a] || a).join(', ')
+                    (p.actividades || []).map(a => estado.actividades?.[a] || ETIQUETAS_ACTIVIDAD[a] || a).join(', ')
                 ].filter(Boolean).join(' · ');
 
                 return `
