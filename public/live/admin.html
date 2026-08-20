@@ -2884,6 +2884,7 @@
                 ${fila('Tipo de organización', pr.tipoOrganizacion)}
                 ${fila('Actividades', (pr.actividades || []).join(', '))}
                 ${fila('Cargado', new Date(pr.creadoEn).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }))}
+                ${fila('Dispositivo', pr.deviceId)}
             `;
             document.getElementById('modalProblema').classList.add('activo');
         }

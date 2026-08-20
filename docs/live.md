@@ -623,3 +623,42 @@ la de su equipo— y eso no es navegación de nadie. Apilándolo, esa persona
 arrancaba con una entrada de más y su primer Atrás la mandaba al registro, una
 pantalla que nunca había visto en esa visita. La bandera baja en un `.finally`
 porque `init()` tiene un return temprano si falla la conexión.
+
+## El perfil compartido con /recolectar
+
+`dinamica.html` y `/recolectar` de Entrama se sirven desde el mismo origen
+(`entrama.vercel.app`), y `localStorage` se guarda por origen: lo que escribe una
+lo lee la otra sin que haya que transportar nada. No hay cookies en ninguna de
+las dos — una cookie sirve para que el *servidor* sepa quién sos, y acá quien lo
+necesita es el formulario, que corre en el mismo navegador donde está el dato.
+
+Las seis claves las inventó `dinamica.html` y ahora las escriben las dos:
+
+| Clave | Qué es |
+|---|---|
+| `facttic_device_id` | uuid del navegador; en la dinámica es cómo te reconoce al volver |
+| `facttic_nombre` · `facttic_cooperativa` | |
+| `facttic_provincia` · `facttic_tipo_organizacion` · `facttic_actividades` | |
+
+En Entrama se acceden solo desde `lib/perfil.ts`, que además envuelve cada
+lectura en un try: `localStorage` tira si está bloqueado —modo incógnito de
+algunos navegadores— y una excepción al montar dejaría el paso 1 en blanco.
+
+**El prefijo `facttic_` quedó siendo histórico.** Renombrarlo le borraría el
+`device_id` a todo el que ya se anotó y lo obligaría a registrarse de nuevo, que
+es peor que un nombre viejo.
+
+**Qué se ve:** quien se anotó en la dinámica abre `/recolectar` y encuentra los
+cinco campos completos, con un renglón que lo dice y un "No soy yo" que limpia
+todo —incluido el `device_id`, porque si no alguien en una computadora prestada
+seguiría mandando problemas atados al dispositivo de otra persona—. Y al revés:
+quien primero pasa por `/recolectar` llega a la dinámica con el registro
+precargado.
+
+El perfil se guarda **al enviar** y no mientras se tipea: si alguien abandona a
+mitad, no queda un perfil incompleto precargando la próxima visita.
+
+**El `device_id` viaja con cada problema** (`0014`), como ya viajaba con cada
+participante desde la 0003. Con eso los varios problemas de una misma persona
+quedan relacionados y se pueden cruzar con su participación en la dinámica. El
+modal del tab de Problemas lo muestra.

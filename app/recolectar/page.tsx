@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Wizard, { Step, useWizard } from '@/components/Wizard'
 import Cargando from '@/components/Cargando'
+import { leerPerfil, guardarPerfil, obtenerDeviceId, olvidarPerfil } from '@/lib/perfil'
 import { AREAS, FRECUENCIAS, IMPACTOS, LIMITE_PROBLEMA } from '@/lib/recolectar'
 import styles from './recolectar.module.css'
 
@@ -42,9 +43,19 @@ export default function Recolectar() {
       const res = await fetch('/api/problemas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, deviceId: obtenerDeviceId() }),
       })
       if (!res.ok) throw new Error(MENSAJE_ENVIO_ERROR)
+
+      // Se guarda recién ahora y no mientras se tipea: si alguien abandona a
+      // mitad, no queda un perfil a medias precargando la próxima visita.
+      guardarPerfil({
+        nombre: ((data.nombre as string) ?? '').trim(),
+        cooperativa: ((data.cooperativa as string) ?? '').trim(),
+        provincia: (data.provincia as string) ?? '',
+        tipoOrganizacion: (data.tipoOrganizacion as string) ?? '',
+        actividades: (data.actividades as string[]) ?? [],
+      })
       setDone(true)
     } catch {
       setError(MENSAJE_ENVIO_ERROR)
@@ -172,7 +183,41 @@ function useCatalogos() {
 function PasoDatos() {
   const { data, set } = useWizard()
   const { cooperativas, provincias, tipos, actividades } = useCatalogos()
+  const [precargado, setPrecargado] = useState(false)
   const elegidas = (data.actividades as string[]) ?? []
+
+  /**
+   * Precarga con lo que quedó de la última vez, propia o de la dinámica.
+   *
+   * Las dos apps viven en el mismo origen, así que comparten `localStorage`:
+   * quien se anotó en /live ya tiene estos cinco campos guardados y acá
+   * aparecen solos.
+   *
+   * Corre una sola vez y solo si el paso está vacío: si volviste con el botón
+   * Atrás después de editar algo, pisarte lo tipeado sería lo peor que podría
+   * hacer.
+   */
+  useEffect(() => {
+    if (data.nombre || data.cooperativa) return
+    const perfil = leerPerfil()
+    if (!perfil) return
+
+    set('nombre', perfil.nombre)
+    set('cooperativa', perfil.cooperativa)
+    if (perfil.provincia) set('provincia', perfil.provincia)
+    if (perfil.tipoOrganizacion) set('tipoOrganizacion', perfil.tipoOrganizacion)
+    if (perfil.actividades.length) set('actividades', perfil.actividades)
+    setPrecargado(true)
+    // Solo al montar: las dependencias reales son el estado inicial del wizard.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function noSoyYo() {
+    olvidarPerfil()
+    for (const campo of ['nombre', 'cooperativa', 'provincia', 'tipoOrganizacion']) set(campo, '')
+    set('actividades', [])
+    setPrecargado(false)
+  }
 
   function alternarActividad(slug: string) {
     set('actividades', elegidas.includes(slug)
@@ -187,6 +232,17 @@ function PasoDatos() {
         title="Nosotras somos Lawal, ¿y vos?"
         subtitle="Decinos tu nombre y a qué cooperativa pertenecés."
       />
+      {/* Visible y no escondido a propósito: precargar hace que sea fácil mandar
+          algo firmado sin darse cuenta, y en una computadora prestada eso sería
+          con el nombre de otra persona. Esta es la salida. */}
+      {precargado && (
+        <p className={styles.precargado}>
+          Completamos tus datos de la última vez ·{' '}
+          <button type="button" className={styles.noSoyYo} onClick={noSoyYo}>
+            No soy yo
+          </button>
+        </p>
+      )}
       <div className={styles.fields}>
         <Field
           label="Nombre"

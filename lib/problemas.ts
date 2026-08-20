@@ -23,6 +23,7 @@ export type Problema = {
   provincia: string | null
   tipoOrganizacion: string | null
   actividades: string[]
+  deviceId: string | null
 }
 
 export type Pagina = {
@@ -36,7 +37,7 @@ export type Pagina = {
 
 const COLUMNAS =
   'id, creado_en, nombre, cooperativa, area, problema, frecuencia, impacto, ' +
-  'provincia, tipo_organizacion, actividades'
+  'provincia, tipo_organizacion, actividades, device_id'
 
 /** Un uuid v4 tal como los genera `gen_random_uuid()`. */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -53,13 +54,15 @@ type Fila = {
   provincia: string | null
   tipo_organizacion: string | null
   actividades: string[] | null
+  device_id: string | null
 }
 
-function aProblema({ creado_en, tipo_organizacion, actividades, ...resto }: Fila): Problema {
+function aProblema({ creado_en, tipo_organizacion, actividades, device_id, ...resto }: Fila): Problema {
   return {
     ...resto,
     creadoEn: creado_en,
     tipoOrganizacion: tipo_organizacion,
+    deviceId: device_id,
     // Postgres devuelve null si la columna nunca se escribió; para quien
     // consume, "sin actividades" es una lista vacía y no una ausencia.
     actividades: actividades ?? [],

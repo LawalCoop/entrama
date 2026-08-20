@@ -51,6 +51,8 @@ export type Problema = {
   provincia: string | null
   tipoOrganizacion: string | null
   actividades: string[]
+  /** De qué dispositivo vino. Null si el navegador tiene el storage bloqueado. */
+  deviceId: string | null
 }
 
 export type Validacion =
@@ -114,11 +116,13 @@ export function validar(payload: unknown): Validacion {
         .slice(0, LIMITE_ACTIVIDADES)
     : []
 
+  const deviceId = texto(d.deviceId, LIMITE_CORTO)
+
   return {
     ok: true,
     valor: {
       nombre, cooperativa, area, problema, frecuencia, impacto,
-      provincia, tipoOrganizacion, actividades,
+      provincia, tipoOrganizacion, actividades, deviceId,
     },
   }
 }
