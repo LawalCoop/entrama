@@ -459,7 +459,7 @@ ese tab directo.
 **Volver no deshace nada.** Si ya te anotaste seguís anotado; si tu equipo cerró,
 sigue cerrado. Es lo mismo que hace el botón "Cambiar de equipo", que ya existía.
 
-Dos detalles de los que depende que funcione, y que salieron de probarlo:
+Tres detalles de los que depende que funcione, y que salieron de probarlo:
 
 **La primera pantalla reemplaza la entrada de carga, no apila una nueva.** Si
 apilara, la entrada original quedaría sin `state`, y al volver hasta ella
@@ -470,3 +470,10 @@ siguiente sale de la app.
 **En `cambiarTab` la validación va antes de apagar los tabs.** Si primero apagara
 todos y después abortara por un hash inventado, el panel quedaría sin ninguno
 activo, o sea en blanco.
+
+**Durante `init()` los cambios de pantalla reemplazan, no apilan.** El arranque
+puede mover de pantalla al resolver el estado —quien ya se anotó entra directo a
+la de su equipo— y eso no es navegación de nadie. Apilándolo, esa persona
+arrancaba con una entrada de más y su primer Atrás la mandaba al registro, una
+pantalla que nunca había visto en esa visita. La bandera baja en un `.finally`
+porque `init()` tiene un return temprano si falla la conexión.

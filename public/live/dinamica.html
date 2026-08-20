@@ -1193,6 +1193,10 @@
         }
 
         // Navegación entre pantallas
+        // Mientras init() resuelve en qué pantalla corresponde entrar, los cambios
+        // de pantalla reemplazan la entrada del historial en vez de apilarla.
+        let arrancando = true;
+
         // Las pantallas se cambian prendiendo una clase, así que para el navegador
         // nunca pasaba nada: `history.length` se quedaba en 1 y el botón Atrás
         // —o el gesto de deslizar desde el borde, que en celular es lo mismo y la
@@ -1212,6 +1216,12 @@
             document.getElementById(id).classList.add('activa');
 
             if (!desdeHistorial) {
+                // Durante el arranque también se reemplaza. `init()` puede
+                // mover de pantalla al resolver el estado —quien ya se anotó
+                // entra directo a la de su equipo— y eso no es navegación de
+                // nadie: apilarlo dejaría a esa persona con un Atrás que la
+                // manda al registro, una pantalla que nunca vio en esta visita.
+                //
                 // La primera pantalla reemplaza la entrada con la que se cargó
                 // la página en vez de apilar una nueva. Si apilara, esa entrada
                 // quedaría sin `state`, y al volver hasta ella `popstate`
@@ -1219,10 +1229,10 @@
                 // movería y la pantalla no, o sea un Atrás que no hace nada
                 // visible. Reemplazándola, volver desde la primera pantalla sale
                 // de la app, que es lo que corresponde.
-                if (history.state?.pantalla) {
-                    history.pushState({ pantalla: id }, '');
-                } else {
+                if (arrancando || !history.state?.pantalla) {
                     history.replaceState({ pantalla: id }, '');
+                } else {
+                    history.pushState({ pantalla: id }, '');
                 }
             }
         }
@@ -2253,7 +2263,9 @@
             // Si no hay nada, mostrar registro (ya es la pantalla por defecto)
         }
 
-        init();
+        // `.finally` y no al final de init(): esa función tiene un return temprano
+        // si falla la conexión, y la bandera tiene que bajar igual.
+        init().finally(() => { arrancando = false; });
     </script>
 </body>
 </html>
