@@ -417,6 +417,31 @@ de "¡Listo!" lo devuelve a la de su equipo, y al revés si lo vuelven a cerrar.
 Sólo se mueve entre esas dos pantallas —si alguien está escribiendo el cierre,
 no se le saca de encima lo que estaba tipeando.
 
+### El cierre lo marca la base, no el navegador
+
+`cerrado` lo seteaba el cliente, mandándolo junto con la reflexión. Eso falla con
+la app abierta, y en esta app la app está abierta: durante la actividad la gente
+tiene la pantalla puesta desde el principio, y un deploy no les cambia el
+JavaScript hasta que recarguen. Pasó en vivo el 2026-08-20: un equipo mandó su
+cierre desde una pestaña anterior al deploy, se guardaron la reflexión y los
+accionables, `cerrado` quedó en false, y el panel lo siguió mostrando "En
+progreso" mientras en el celular decía "¡Listo!".
+
+Pedirle a cien personas que recarguen no es un plan, así que ahora lo deduce un
+trigger (`migrations/0009_cerrar_en_la_base.sql`): si un update deja una
+reflexión con texto, el equipo queda cerrado, sin importar qué versión tenga
+quien lo mandó.
+
+El trigger no pisa una reapertura. Sólo actúa cuando el update **no** habla de
+`cerrado` —"Reabrir" manda `cerrado = false` y nada más— y cuando la reflexión o
+los accionables cambiaron de verdad, para que editarle el nombre o el color a un
+equipo reabierto no lo vuelva a cerrar.
+
+Queda un caso afuera: reabrir y reenviar el cierre **sin cambiarle una coma**.
+Ahí no cambia nada que el trigger pueda mirar. Es raro —si lo reabrieron es para
+tocar algo— y los clientes actualizados lo cubren igual, porque mandan `cerrado`
+ellos mismos.
+
 ### De paso, un flag que no servía
 
 La pantalla que veía cada participante al volver a entrar salía de
