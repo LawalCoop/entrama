@@ -42,11 +42,30 @@ type WizardProps = {
   onComplete: (data: Record<string, unknown>) => void | Promise<void>
   /** True mientras onComplete está en curso: deshabilita Enviar y evita el doble envío. */
   busy?: boolean
+  /**
+   * Dónde empezar y con qué. Sirven para retomar sin volver al principio: quien
+   * acaba de mandar un problema y quiere cargar otro no tiene por qué contar de
+   * nuevo quién es.
+   *
+   * Son valores iniciales, no controlados: se leen al montar y después el wizard
+   * sigue por su cuenta. Para retomar de nuevo hay que remontarlo, con `key`.
+   */
+  pasoInicial?: number
+  datosIniciales?: Record<string, unknown>
 }
 
-export default function Wizard({ children, onComplete, busy = false }: WizardProps) {
-  const [current, setCurrent] = useState(0)
-  const [data, setData] = useState<Record<string, unknown>>({})
+export default function Wizard({
+  children,
+  onComplete,
+  busy = false,
+  pasoInicial = 0,
+  datosIniciales,
+}: WizardProps) {
+  // Acotado al rango real: un `pasoInicial` fuera de los pasos que existen
+  // dejaría `children[current]` en undefined y la pantalla en blanco.
+  const [current, setCurrent] = useState(() =>
+    Math.min(Math.max(0, pasoInicial), children.length - 1))
+  const [data, setData] = useState<Record<string, unknown>>(datosIniciales ?? {})
   const total = children.length
 
   const set = useCallback((key: string, value: unknown) => {

@@ -17,6 +17,15 @@ export default function Recolectar() {
   const [cargando, setCargando] = useState(false)
   const [enviando, setEnviando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  /**
+   * Con qué retomar si carga otro problema, y cuántas veces ya retomó.
+   *
+   * El contador es la `key` del Wizard: cambiarla lo remonta limpio, sin
+   * arrastrar estado del envío anterior. `pasoInicial` y `datosIniciales` se
+   * leen al montar, así que sin remonte no harían nada.
+   */
+  const [retomarCon, setRetomarCon] = useState<Record<string, unknown> | null>(null)
+  const [vuelta, setVuelta] = useState(0)
 
   function handleEmpezar() {
     setCargando(true)
@@ -46,6 +55,15 @@ export default function Recolectar() {
         tipoOrganizacion: (data.tipoOrganizacion as string) ?? '',
         actividades: (data.actividades as string[]) ?? [],
       })
+      // Se guarda la persona, no el problema: frecuencia, impacto y el texto son
+      // de este envío y arrancan vacíos en el siguiente.
+      setRetomarCon({
+        nombre: data.nombre,
+        cooperativa: data.cooperativa,
+        provincia: data.provincia,
+        tipoOrganizacion: data.tipoOrganizacion,
+        actividades: data.actividades,
+      })
       setDone(true)
     } catch {
       setError(MENSAJE_ENVIO_ERROR)
@@ -54,7 +72,12 @@ export default function Recolectar() {
     }
   }
 
-  if (done) return <Confirmacion onReset={() => setDone(false)} onHome={() => router.push('/')} />
+  function otroProblema() {
+    setVuelta((v) => v + 1)
+    setDone(false)
+  }
+
+  if (done) return <Confirmacion onReset={otroProblema} onHome={() => router.push('/')} />
 
   if (cargando) {
     return (
@@ -73,7 +96,15 @@ export default function Recolectar() {
           {error}
         </p>
       )}
-      <Wizard onComplete={handleComplete} busy={enviando}>
+      <Wizard
+        key={vuelta}
+        onComplete={handleComplete}
+        busy={enviando}
+        datosIniciales={retomarCon ?? undefined}
+        /* Directo al problema si ya contó quién es. `1` es ese paso: datos,
+           problema, frecuencia e impacto, resumen. */
+        pasoInicial={retomarCon ? 1 : 0}
+      >
         <Step validate={(d) => !!((d.nombre as string)?.trim() && (d.cooperativa as string)?.trim())}>
           <PasoDatos />
         </Step>
