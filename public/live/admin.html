@@ -1371,8 +1371,8 @@
 
     <script>
         // Configuración Supabase
-        const SUPABASE_URL = 'https://aziyyqvupqaexdzmumvl.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6aXl5cXZ1cHFhZXhkem11bXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMDYxOTUsImV4cCI6MjA4MDg4MjE5NX0.Rc_Bom4RPoAcIMoifdWZJIhItsPEBbUHTSyT8SYEcv0';
+        const SUPABASE_URL = 'https://niiflnildmljjcgkqmwd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5paWZsbmlsZG1sampjZ2txbXdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3OTY0NTksImV4cCI6MjEwMTM3MjQ1OX0.QZooFUiK-ZUn5OmSUvyFMYohHkw8ufXe3NmN4UsHNQU';
 
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -1389,18 +1389,19 @@
         async function login() {
             const password = document.getElementById('passwordInput').value;
 
+            // La comparación ocurre en Postgres, no acá. Antes esto se traía la
+            // contraseña real al browser para compararla en JavaScript: para
+            // preguntarte si la sabías, primero te la mandaba. Ahora va la que
+            // escribiste y vuelve solo true o false.
             const { data, error } = await supabase
-                .from('config')
-                .select('admin_password')
-                .eq('id', 1)
-                .single();
+                .rpc('facttic_verificar_admin', { pass: password });
 
-            if (error || !data) {
+            if (error) {
                 document.getElementById('loginError').style.display = 'block';
                 return;
             }
 
-            if (password === data.admin_password) {
+            if (data === true) {
                 localStorage.setItem('facttic_admin', 'true');
                 mostrarAdmin();
             } else {
@@ -1424,10 +1425,10 @@
         // Cargar datos
         async function cargarDatos() {
             const [equiposRes, coopRes, partsRes, configRes] = await Promise.all([
-                supabase.from('equipos').select('*').order('orden'),
-                supabase.from('cooperativas').select('*').order('orden'),
-                supabase.from('participantes').select('*').order('created_at'),
-                supabase.from('config').select('*').eq('id', 1).single()
+                supabase.from('facttic_equipos').select('*').order('orden'),
+                supabase.from('facttic_cooperativas').select('*').order('orden'),
+                supabase.from('facttic_participantes').select('*').order('created_at'),
+                supabase.from('facttic_config').select('*').eq('id', 1).single()
             ]);
 
             estado.equipos = equiposRes.data || [];
@@ -1535,10 +1536,10 @@
 
             try {
                 if (id) {
-                    await supabase.from('equipos').update(data).eq('id', id);
+                    await supabase.from('facttic_equipos').update(data).eq('id', id);
                 } else {
                     data.activo = true;
-                    await supabase.from('equipos').insert(data);
+                    await supabase.from('facttic_equipos').insert(data);
                 }
                 cerrarModal('modalEquipo');
                 await cargarDatos();
@@ -1552,13 +1553,13 @@
             const equipo = estado.equipos.find(e => e.id === id);
             if (!equipo) return;
 
-            await supabase.from('equipos').update({ activo: !equipo.activo }).eq('id', id);
+            await supabase.from('facttic_equipos').update({ activo: !equipo.activo }).eq('id', id);
             await cargarDatos();
         }
 
         async function eliminarEquipo(id) {
             if (!confirm('¿Eliminar este equipo?')) return;
-            await supabase.from('equipos').delete().eq('id', id);
+            await supabase.from('facttic_equipos').delete().eq('id', id);
             await cargarDatos();
         }
 
@@ -1612,10 +1613,10 @@
 
             try {
                 if (id) {
-                    await supabase.from('cooperativas').update(data).eq('id', id);
+                    await supabase.from('facttic_cooperativas').update(data).eq('id', id);
                 } else {
                     data.activa = true;
-                    await supabase.from('cooperativas').insert(data);
+                    await supabase.from('facttic_cooperativas').insert(data);
                 }
                 cerrarModal('modalCooperativa');
                 await cargarDatos();
@@ -1629,13 +1630,13 @@
             const coop = estado.cooperativas.find(c => c.id === id);
             if (!coop) return;
 
-            await supabase.from('cooperativas').update({ activa: !coop.activa }).eq('id', id);
+            await supabase.from('facttic_cooperativas').update({ activa: !coop.activa }).eq('id', id);
             await cargarDatos();
         }
 
         async function eliminarCooperativa(id) {
             if (!confirm('¿Eliminar esta cooperativa?')) return;
-            await supabase.from('cooperativas').delete().eq('id', id);
+            await supabase.from('facttic_cooperativas').delete().eq('id', id);
             await cargarDatos();
         }
 
@@ -1666,13 +1667,13 @@
 
         async function eliminarParticipante(id) {
             if (!confirm('¿Eliminar este participante?')) return;
-            await supabase.from('participantes').delete().eq('id', id);
+            await supabase.from('facttic_participantes').delete().eq('id', id);
             await cargarDatos();
         }
 
         async function limpiarParticipantes() {
             if (!confirm('¿Eliminar TODOS los participantes? Esta acción no se puede deshacer.')) return;
-            await supabase.from('participantes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+            await supabase.from('facttic_participantes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
             await cargarDatos();
         }
 
@@ -1680,7 +1681,7 @@
             if (!confirm('⚠️ ¿Resetear TODOS los participantes?\n\nEsto eliminará todos los registros de participantes.\nEsta acción no se puede deshacer.')) return;
 
             try {
-                await supabase.from('participantes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                await supabase.from('facttic_participantes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
                 await cargarDatos();
                 alert('✅ Todos los participantes han sido eliminados');
             } catch (error) {
@@ -1722,7 +1723,7 @@
             const minutos = parseInt(document.getElementById('timerMinutos').value) || 15;
             const fin = new Date(Date.now() + minutos * 60 * 1000);
 
-            await supabase.from('config').update({
+            await supabase.from('facttic_config').update({
                 timer_end: fin.toISOString(),
                 timer_duration: minutos,
                 timer_paused: false,
@@ -1740,7 +1741,7 @@
             const fin = new Date(estado.config.timer_end);
             const remaining = Math.max(0, Math.floor((fin - ahora) / 1000));
 
-            await supabase.from('config').update({
+            await supabase.from('facttic_config').update({
                 timer_paused: true,
                 timer_paused_remaining: remaining
             }).eq('id', 1);
@@ -1750,7 +1751,7 @@
         }
 
         async function resetearTimer() {
-            await supabase.from('config').update({
+            await supabase.from('facttic_config').update({
                 timer_end: null,
                 timer_paused: false,
                 timer_paused_remaining: null
@@ -2323,19 +2324,19 @@
         function configurarRealtime() {
             supabase
                 .channel('admin-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'participantes' }, () => cargarDatos())
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'equipos' }, () => cargarDatos())
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'cooperativas' }, () => cargarDatos())
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'config' }, async () => {
-                    const { data } = await supabase.from('config').select('*').eq('id', 1).single();
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_participantes' }, () => cargarDatos())
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_equipos' }, () => cargarDatos())
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_cooperativas' }, () => cargarDatos())
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_config' }, async () => {
+                    const { data } = await supabase.from('facttic_config').select('*').eq('id', 1).single();
                     if (data) estado.config = data;
                 })
                 .subscribe();
 
             // Polling cada 3 segundos como backup (por si Realtime no funciona)
             setInterval(async () => {
-                const { data: participantes } = await supabase.from('participantes').select('*').order('created_at');
-                const { data: equipos } = await supabase.from('equipos').select('*').order('orden');
+                const { data: participantes } = await supabase.from('facttic_participantes').select('*').order('created_at');
+                const { data: equipos } = await supabase.from('facttic_equipos').select('*').order('orden');
                 if (participantes) estado.participantes = participantes;
                 if (equipos) estado.equipos = equipos;
                 renderizarDashboard();

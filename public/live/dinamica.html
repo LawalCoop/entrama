@@ -918,8 +918,8 @@
 
     <script>
         // Configuración Supabase
-        const SUPABASE_URL = 'https://aziyyqvupqaexdzmumvl.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF6aXl5cXZ1cHFhZXhkem11bXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMDYxOTUsImV4cCI6MjA4MDg4MjE5NX0.Rc_Bom4RPoAcIMoifdWZJIhItsPEBbUHTSyT8SYEcv0';
+        const SUPABASE_URL = 'https://niiflnildmljjcgkqmwd.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5paWZsbmlsZG1sampjZ2txbXdkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU3OTY0NTksImV4cCI6MjEwMTM3MjQ1OX0.QZooFUiK-ZUn5OmSUvyFMYohHkw8ufXe3NmN4UsHNQU';
 
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -974,7 +974,7 @@
             try {
                 // Cargar equipos
                 const { data: equipos, error: errorEquipos } = await supabase
-                    .from('equipos')
+                    .from('facttic_equipos')
                     .select('*')
                     .eq('activo', true)
                     .order('orden');
@@ -984,7 +984,7 @@
 
                 // Cargar cooperativas
                 const { data: cooperativas, error: errorCoops } = await supabase
-                    .from('cooperativas')
+                    .from('facttic_cooperativas')
                     .select('*')
                     .eq('activa', true)
                     .order('orden');
@@ -994,7 +994,7 @@
 
                 // Cargar participantes para contadores
                 const { data: participantes, error: errorParts } = await supabase
-                    .from('participantes')
+                    .from('facttic_participantes')
                     .select('*');
 
                 if (errorParts) throw errorParts;
@@ -1004,7 +1004,7 @@
 
                 // Cargar config
                 const { data: config, error: errorConfig } = await supabase
-                    .from('config')
+                    .from('facttic_config')
                     .select('*')
                     .eq('id', 1)
                     .single();
@@ -1213,7 +1213,7 @@
                 if (estado.participante) {
                     // Actualizar participante existente
                     const { error } = await supabase
-                        .from('participantes')
+                        .from('facttic_participantes')
                         .update({
                             nombre,
                             cooperativa,
@@ -1236,7 +1236,7 @@
                     // Crear nuevo participante
                     console.log('Creando participante:', { device_id: estado.deviceId, nombre, cooperativa, equipo_id: equipoId });
                     const { data, error } = await supabase
-                        .from('participantes')
+                        .from('facttic_participantes')
                         .insert({
                             device_id: estado.deviceId,
                             nombre,
@@ -1367,7 +1367,7 @@
             try {
                 // Guardar cierre en el equipo
                 const { error } = await supabase
-                    .from('equipos')
+                    .from('facttic_equipos')
                     .update({
                         reflexion,
                         accionables,
@@ -1420,7 +1420,7 @@
             if (estado.participante) {
                 try {
                     await supabase
-                        .from('participantes')
+                        .from('facttic_participantes')
                         .update({
                             equipo_id: null,
                             terminado: false,
@@ -1433,7 +1433,7 @@
                     estado.equipoSeleccionado = null;
 
                     // Recargar contadores
-                    const { data: participantes } = await supabase.from('participantes').select('*');
+                    const { data: participantes } = await supabase.from('facttic_participantes').select('*');
                     if (participantes) {
                         calcularContadores(participantes);
                     }
@@ -1456,7 +1456,7 @@
                 // Borrar participante de la base de datos
                 if (estado.participante) {
                     await supabase
-                        .from('participantes')
+                        .from('facttic_participantes')
                         .delete()
                         .eq('id', estado.participante.id);
                 }
@@ -1478,7 +1478,7 @@
                 document.getElementById('inputCooperativaRegistro').value = '';
 
                 // Recargar contadores
-                const { data: participantes } = await supabase.from('participantes').select('*');
+                const { data: participantes } = await supabase.from('facttic_participantes').select('*');
                 if (participantes) {
                     calcularContadores(participantes);
                     renderizarEquipos();
@@ -1668,8 +1668,8 @@
             // Suscribirse a cambios en participantes
             supabase
                 .channel('participantes-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'participantes' }, async () => {
-                    const { data } = await supabase.from('participantes').select('*');
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_participantes' }, async () => {
+                    const { data } = await supabase.from('facttic_participantes').select('*');
                     if (data) {
                         calcularContadores(data);
                         renderizarEquipos();
@@ -1680,8 +1680,8 @@
             // Suscribirse a cambios en config (timer)
             supabase
                 .channel('config-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'config' }, async () => {
-                    const { data } = await supabase.from('config').select('*').eq('id', 1).single();
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_config' }, async () => {
+                    const { data } = await supabase.from('facttic_config').select('*').eq('id', 1).single();
                     if (data) {
                         estado.config = data;
                         actualizarTimer();
@@ -1692,8 +1692,8 @@
             // Suscribirse a cambios en equipos
             supabase
                 .channel('equipos-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'equipos' }, async () => {
-                    const { data } = await supabase.from('equipos').select('*').eq('activo', true).order('orden');
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_equipos' }, async () => {
+                    const { data } = await supabase.from('facttic_equipos').select('*').eq('activo', true).order('orden');
                     if (data) {
                         estado.equipos = data;
                         renderizarEquipos();
@@ -1704,8 +1704,8 @@
             // Suscribirse a cambios en cooperativas
             supabase
                 .channel('cooperativas-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'cooperativas' }, async () => {
-                    const { data } = await supabase.from('cooperativas').select('*').eq('activa', true).order('orden');
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'facttic_cooperativas' }, async () => {
+                    const { data } = await supabase.from('facttic_cooperativas').select('*').eq('activa', true).order('orden');
                     if (data) {
                         estado.cooperativas = data;
                         poblarCooperativas();
@@ -1762,7 +1762,7 @@
 
             // Polling de config cada 5 segundos como backup (por si Realtime no funciona)
             setInterval(async () => {
-                const { data } = await supabase.from('config').select('*').eq('id', 1).single();
+                const { data } = await supabase.from('facttic_config').select('*').eq('id', 1).single();
                 if (data) {
                     estado.config = data;
                 }
