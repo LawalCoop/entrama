@@ -417,6 +417,21 @@ de "¡Listo!" lo devuelve a la de su equipo, y al revés si lo vuelven a cerrar.
 Sólo se mueve entre esas dos pantallas —si alguien está escribiendo el cierre,
 no se le saca de encima lo que estaba tipeando.
 
+### Editar el cierre devuelve el equipo al debate
+
+Abrir la pantalla de cierre —sea con "Cargar conclusiones" o con "Editar
+cierre"— pone el equipo en `cerrado = false`. Mientras alguien lo está
+escribiendo, el panel y la pantalla proyectada no pueden seguir diciendo que
+terminó.
+
+Vive en `mostrarPantallaCierre` y no en el botón, porque los dos caminos que
+llevan ahí son lo mismo: abrir el cierre para escribirlo. El update sale después
+de pintar la pantalla, para no hacer esperar a quien la abrió, y si falla se
+sigue editando igual —enviar el cierre lo vuelve a marcar—.
+
+Por realtime, a los demás del equipo que estén mirando "¡Listo!" los devuelve a
+la pantalla de su equipo.
+
 ### El cierre lo marca la base, no el navegador
 
 `cerrado` lo seteaba el cliente, mandándolo junto con la reflexión. Eso falla con

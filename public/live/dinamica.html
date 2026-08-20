@@ -1713,6 +1713,33 @@
 
             actualizarContadorAccionables();
             mostrarPantalla('pantallaCierre');
+
+            // Entrar a editar el cierre devuelve el equipo al debate: mientras
+            // alguien lo está tocando, el panel y la pantalla proyectada no
+            // pueden seguir diciendo que terminó.
+            //
+            // Va acá y no en el botón "Editar cierre" porque los dos caminos
+            // que llevan a esta pantalla son lo mismo —abrir el cierre para
+            // escribirlo—, y el otro es el que usa quien viene de un celular
+            // que no cerró.
+            //
+            // Después de pintar la pantalla, para no hacer esperar a quien la
+            // abrió. Si el update falla, se sigue editando igual: enviar el
+            // cierre lo vuelve a marcar.
+            if (equipo.cerrado) {
+                const { error } = await supabase
+                    .from('facttic_equipos')
+                    .update({ cerrado: false })
+                    .eq('id', equipo.id);
+
+                if (error) {
+                    console.warn('No se pudo devolver el equipo al debate:', error);
+                } else {
+                    equipo.cerrado = false;
+                    const idx = estado.equipos.findIndex(e => e.id === equipo.id);
+                    if (idx >= 0) estado.equipos[idx].cerrado = false;
+                }
+            }
         }
 
         // Actualizar contador de accionables
