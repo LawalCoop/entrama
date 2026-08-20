@@ -12,15 +12,20 @@ Copia de https://github.com/hg1g/facttic-para-armar, servida en /live.
 | Archivo | Qué es | Backend |
 |---|---|---|
 | `index.html` | Slide deck (reveal.js) de la Encuesta FACTTIC 2025 | ninguno |
-| `dinamica.html` | Dinámica en vivo del plenario, con realtime. Es lo que sirve `/live`. | nuestro Supabase |
+| `dinamica.html` | Dinámica en vivo, con realtime. Es lo que sirve `/live`. | nuestro Supabase |
 | `admin.html` | Panel para conducir la dinámica | nuestro Supabase |
 | `informe.html` | Informe del debate, en vivo | nuestro Supabase |
 | `informe-2025.html` | El mismo informe, congelado | ninguno |
 
+Los tres del medio están con la marca de **Alimentos Cooperativos** (ver más
+abajo). `index.html` e `informe-2025.html` siguen siendo de FACTTIC: son
+contenido histórico —la Encuesta 2025 y el informe del plenario— y rebrandearlos
+los volvería engañosos.
+
 ## Ya no es una copia literal
 
 Al principio estos archivos eran idénticos al repo de origen. Dejaron de serlo
-cuando la dinámica pasó a correr sobre nuestra base. Los cambios son tres, y
+cuando la dinámica pasó a correr sobre nuestra base. Los cambios son seis, y
 están acotados a propósito para que la próxima actualización desde upstream siga
 siendo manejable:
 
@@ -36,11 +41,12 @@ siendo manejable:
 5. **El catálogo de cooperativas es compartido con Entrama**: la tabla se llama
    `cooperativas` (sin prefijo) y `dinamica.html` da de alta las que no estaban.
    Ver más abajo.
-6. **Un tab "Problemas"** con lo recolectado en `/recolectar`, y `admin.html`
+6. **La marca es Alimentos Cooperativos**, no FACTTIC. Ver más abajo.
+7. **Un tab "Problemas"** con lo recolectado en `/recolectar`, y `admin.html`
    pasa a estar detrás del Basic Auth de `proxy.ts`. Ver más abajo.
 
 Para actualizar desde upstream: copiar los archivos nuevos y volver a aplicar
-esos seis cambios. `index.html` e `informe-2025.html` no tienen ninguno, así
+esos siete cambios. `index.html` e `informe-2025.html` no tienen ninguno, así
 que esos se copian y listo.
 
 ## El esquema
@@ -175,6 +181,69 @@ catálogo con lo que alguien escribió a medias y borró.
 cooperativa nueva escrita ahí aparece enseguida en el desplegable de la dinámica.
 Se decidió así a sabiendas. La palanca para bajar una es el campo `activa`, que
 la dinámica filtra y el tab de Cooperativas del admin ya edita.
+## La marca
+
+La dinámica se usa para Alimentos Cooperativos (alimentoscooperativos.com), así
+que `dinamica.html`, `admin.html` e `informe.html` llevan esa marca, y abajo un
+pie "Powered by Lawal y FACTTIC".
+
+**Los equipos siguen siendo los de FACTTIC.** Los seis, con sus temas y sus
+preguntas, son los del plenario 2025: esto fue un cambio de marca, no de
+contenido. Cargar los que correspondan se hace desde el panel de admin, o con una
+migración nueva.
+
+Las cooperativas ya no: desde que el catálogo es compartido (ver arriba) crece
+solo con lo que se escribe acá y en `/recolectar`.
+
+Lo que cambió, además de los textos:
+
+- **El acento pasó de azul (`#3b82f6`) a verde (`#6ba54a`)**, que es el primario
+  del sitio de Alimentos Cooperativos. En `dinamica.html` es solo el valor por
+  defecto de `--equipo-actual`: en cuanto alguien elige un equipo, el JS lo pisa
+  con el color de ese equipo.
+- **En el informe imprimible el verde va oscurecido a `#4e7d33`.** Ese informe
+  se imprime sobre blanco, y el verde de marca contra blanco da 2.96:1, por
+  debajo del mínimo legible; el oscurecido da 4.88:1. Sobre el fondo oscuro de
+  la app el de marca da 6.04:1 y se usa tal cual.
+- **El logo del informe imprimible andaba roto.** Apuntaba a un `.png` de
+  `facttic.org.ar` que hoy da 404. Ahora sale de `public/live/`, con URL
+  absoluta armada con `location.origin`: esa ventana se llena con
+  `document.write` sobre `about:blank`, donde una ruta relativa no resuelve.
+
+### Los logos
+
+Cada logo está en dos versiones, y cada pantalla usa la que contrasta con su
+fondo:
+
+| Fondo oscuro | Fondo claro |
+|---|---|
+| `logo_alimentos_claro.png` | `logo_alimentos_oscuro.png` |
+| `logo_lawal_claro.png` | `logo_lawal_oscuro.png` |
+| `logo_facttic.png` (el de upstream) | `logo_facttic_oscuro.png` |
+
+Dos archivos y no uno con `filter: invert()` porque el texto de cada logo es de
+un tono solo, pero las hojas del de Alimentos Cooperativos y las barras de
+colores de los tres no lo son: invertir daría vuelta también eso, que es
+justamente la marca. Las versiones nuevas se generaron recoloreando únicamente
+los píxeles acromáticos, así que el color quedó intacto.
+
+Dónde importan las dos versiones: la **vista proyectable** de `admin.html` tiene
+un switch de modo claro, así que ahí conviven las dos y el CSS muestra una u
+otra. Un detalle a tener en cuenta si se toca ese CSS: las reglas que las
+esconden van **después** de `.pie-marca img` y nombran el elemento
+(`img.logo-en-claro`), porque si no pierden en especificidad contra el
+`display: block` de ahí arriba y los dos logos se dibujan encimados.
+
+También se sacó la pastilla oscura que el modo claro le ponía detrás al logo del
+encabezado: existía porque el logo de FACTTIC es de trazo blanco y sin ella se
+perdía. Ahora que hay una versión por fondo, sobra.
+
+El pie de marca no va en todas las pantallas de `dinamica.html`: las de
+confirmación y "listo" se pintan con el color del equipo elegido, que puede ser
+cualquiera de los seis, y ahí ni el gris del texto ni los logos tienen un
+contraste que se pueda garantizar. Va en las tres que usan el fondo de la app
+—registro, selección de equipo y cierre— y en la vista proyectable, que es la
+única pantalla del admin que ve la sala.
 
 ## El tab de Problemas
 

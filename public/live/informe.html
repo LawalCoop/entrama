@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informe del Debate - Plenario FACTTIC 2025</title>
+    <title>Informe del Debate - Alimentos Cooperativos</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,8 +17,8 @@
             --color-texto: #fafafa;
             --color-texto-secundario: #a1a1aa;
             --color-texto-terciario: #71717a;
-            --color-primario: #3b82f6;
-            --color-primario-soft: rgba(59, 130, 246, 0.1);
+            --color-primario: #6ba54a;
+            --color-primario-soft: rgba(107, 165, 74, 0.1);
             --color-success: #22c55e;
             --color-warning: #f59e0b;
         }
@@ -70,7 +70,7 @@
         .header img {
             height: 80px;
             margin-bottom: 2rem;
-            filter: drop-shadow(0 4px 20px rgba(59, 130, 246, 0.3));
+            filter: drop-shadow(0 4px 20px rgba(107, 165, 74, 0.3));
         }
 
         .header h1 {
@@ -123,13 +123,13 @@
         .stat-box:hover {
             transform: translateY(-5px);
             border-color: var(--color-primario);
-            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+            box-shadow: 0 20px 40px rgba(107, 165, 74, 0.15);
         }
 
         .stat-numero {
             font-size: 4rem;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--color-primario) 0%, #8b5cf6 100%);
+            background: linear-gradient(135deg, var(--color-primario) 0%, #a3d977 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -179,7 +179,7 @@
             border-radius: 100px;
             font-size: 0.85rem;
             font-weight: 500;
-            border: 1px solid rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(107, 165, 74, 0.2);
             transition: all 0.2s ease;
         }
 
@@ -412,6 +412,36 @@
             font-size: 0.85rem;
         }
 
+        /* Pie de marca: "Powered by" con los dos logos. */
+        .pie-marca {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+            font-size: 0.7rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            opacity: 0.65;
+        }
+
+        .pie-marca img {
+            height: 13px;
+            width: auto;
+            display: block;
+        }
+
+        /* El logo de FACTTIC es de trazo más fino: a la misma altura que el de
+           Lawal se lee menos, así que va un punto más grande. */
+        .pie-marca img.logo-facttic { height: 15px; }
+
+        .pie-marca a {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
         /* Loading */
         .loading {
             display: flex;
@@ -544,10 +574,9 @@
 
             let html = `
                 <header class="header">
-                    <img src="logo_facttic.png" alt="FACTTIC">
+                    <img src="logo_alimentos_claro.png" alt="Alimentos Cooperativos">
                     <h1>Informe del Debate</h1>
-                    <p class="subtitulo">Plenario FACTTIC 2025</p>
-                    <p class="ubicacion">Tandil, Provincia de Buenos Aires</p>
+                    <p class="subtitulo">Alimentos Cooperativos</p>
                     <p class="fecha">${fecha}</p>
                 </header>
 
@@ -670,8 +699,13 @@
             html += `
                 </div>
                 <footer class="footer">
-                    <p>FACTTIC - Federación Argentina de Cooperativas de Trabajo de Tecnología, Innovación y Conocimiento</p>
-                    <p>Plenario 2025 - Tandil, Provincia de Buenos Aires</p>
+                    <p>Alimentos Cooperativos</p>
+                    <p class="pie-marca">
+                        <span>Powered by</span>
+                        <a href="https://lawal.coop" target="_blank" rel="noopener noreferrer"><img src="logo_lawal_claro.png" alt="Lawal"></a>
+                        <span>y</span>
+                        <a href="https://facttic.org.ar" target="_blank" rel="noopener noreferrer"><img class="logo-facttic" src="logo_facttic.png" alt="FACTTIC"></a>
+                    </p>
                 </footer>
             `;
 

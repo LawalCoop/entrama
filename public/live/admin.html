@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Dinámica FACTTIC</title>
+    <title>Admin - Dinámica Alimentos Cooperativos</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"></script>
     <style>
         :root {
@@ -14,7 +14,7 @@
             --color-success: #22c55e;
             --color-warning: #f59e0b;
             --color-danger: #ef4444;
-            --color-primary: #3b82f6;
+            --color-primary: #6ba54a;
         }
 
         * {
@@ -517,6 +517,56 @@
             background: #f1f5f9;
         }
 
+        /* Pie de marca: "Powered by" con los dos logos. Va acá y no en el panel
+           de administración porque esta es la pantalla que se proyecta, o sea
+           la única del admin que ve la sala. */
+        .vista-proyectable .pie-marca {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+            padding-top: 0.9rem;
+            font-size: 0.7rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #94a3b8;
+            opacity: 0.65;
+        }
+
+        .vista-proyectable.modo-claro .pie-marca { color: #64748b; }
+
+        .vista-proyectable .pie-marca img {
+            height: 13px;
+            width: auto;
+            display: block;
+        }
+
+        /* El logo de FACTTIC es de trazo más fino: a la misma altura que el de
+           Lawal se lee menos, así que va un punto más grande. */
+        .vista-proyectable .pie-marca img.logo-facttic { height: 15px; }
+
+        .vista-proyectable .pie-marca a {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        /* Cada logo va en dos versiones y se muestra la que contrasta con el
+           fondo: la de trazo claro sobre el fondo oscuro, la de trazo oscuro
+           sobre el claro. Un solo archivo no sirve —el texto de cada logo es de
+           un tono solo— y un `filter: invert()` daría vuelta también las hojas
+           verdes y las barras de colores, que son la marca.
+
+           Estas reglas van después de `.pie-marca img` y nombran el elemento
+           (`img.logo-en-claro`, no `.logo-en-claro` a secas) porque si no
+           empatan en especificidad con el `display: block` de ahí arriba y
+           pierden por orden: los dos logos se dibujarían encimados. */
+        .vista-proyectable img.logo-en-claro { display: none; }
+        .vista-proyectable.modo-claro img.logo-en-oscuro { display: none; }
+        .vista-proyectable.modo-claro img.logo-en-claro { display: block; }
+
         .vista-proyectable.modo-claro h1,
         .vista-proyectable.modo-claro .switch-label {
             color: #1e293b;
@@ -581,11 +631,10 @@
             color: #1e293b;
         }
 
-        .vista-proyectable.modo-claro .header-proyectable img {
-            background: #1e293b;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-        }
+        /* Acá había una pastilla oscura detrás del logo. Existía porque el logo
+           de FACTTIC es de trazo blanco y en modo claro se perdía contra el
+           fondo. Ahora hay una versión del logo para cada fondo, así que la
+           pastilla sobra —y encima tapaba al logo oscuro. */
 
         .vista-proyectable .header-proyectable {
             display: flex;
@@ -1154,8 +1203,8 @@
     <!-- Login -->
     <div class="login-container" id="loginContainer">
         <div class="login-box">
-            <img src="logo_facttic.png" alt="FACTTIC" style="height: 50px; display: block; margin: 0 auto 1rem;">
-            <h1>Admin FACTTIC</h1>
+            <img src="logo_alimentos_claro.png" alt="Alimentos Cooperativos" style="height: 50px; display: block; margin: 0 auto 1rem;">
+            <h1>Admin Alimentos Cooperativos</h1>
             <input type="password" id="passwordInput" placeholder="Contraseña">
             <button onclick="login()">Ingresar</button>
             <p class="login-error" id="loginError">Contraseña incorrecta</p>
@@ -1166,7 +1215,7 @@
     <div class="admin-container" id="adminContainer">
         <div class="admin-header">
             <div style="display: flex; align-items: center; gap: 1rem;">
-                <img src="logo_facttic.png" alt="FACTTIC" style="height: 40px;">
+                <img src="logo_alimentos_claro.png" alt="Alimentos Cooperativos" style="height: 40px;">
                 <h1>Panel de Administración</h1>
             </div>
             <div class="admin-actions">
@@ -1262,7 +1311,7 @@
             </div>
             <div class="form-group">
                 <label>Color</label>
-                <input type="color" id="equipoColor" value="#3b82f6">
+                <input type="color" id="equipoColor" value="#6ba54a">
             </div>
             <div class="form-group">
                 <label>Preguntas disparadoras (una por línea)</label>
@@ -1314,13 +1363,27 @@
             <button class="btn btn-secondary cerrar" onclick="cerrarVistaProyectable()">✕ Cerrar</button>
         </div>
         <div class="header-proyectable">
-            <img src="logo_facttic.png" alt="FACTTIC" style="height: 50px;">
+            <img class="logo-en-oscuro" src="logo_alimentos_claro.png" alt="Alimentos Cooperativos" style="height: 50px;">
+            <img class="logo-en-claro" src="logo_alimentos_oscuro.png" alt="Alimentos Cooperativos" style="height: 50px;">
             <h1>Dinámica de Grupos</h1>
             <div class="timer-grande" id="timerProyectable">--:--</div>
         </div>
         <div class="equipos-proyectable" id="equiposProyectable">
             <!-- Se llena con JS -->
         </div>
+
+        <footer class="pie-marca">
+            <span>Powered by</span>
+            <a href="https://lawal.coop" target="_blank" rel="noopener noreferrer">
+                <img class="logo-en-oscuro" src="logo_lawal_claro.png" alt="Lawal">
+                <img class="logo-en-claro" src="logo_lawal_oscuro.png" alt="Lawal">
+            </a>
+            <span>y</span>
+            <a href="https://facttic.org.ar" target="_blank" rel="noopener noreferrer">
+                <img class="logo-facttic logo-en-oscuro" src="logo_facttic.png" alt="FACTTIC">
+                <img class="logo-facttic logo-en-claro" src="logo_facttic_oscuro.png" alt="FACTTIC">
+            </a>
+        </footer>
     </div>
 
     <!-- Modal Resultados - Estilo Slide -->
@@ -1523,7 +1586,7 @@
             document.getElementById('equipoId').value = equipo?.id || '';
             document.getElementById('equipoNombre').value = equipo?.nombre || '';
             document.getElementById('equipoTema').value = equipo?.tema || '';
-            document.getElementById('equipoColor').value = equipo?.color || '#3b82f6';
+            document.getElementById('equipoColor').value = equipo?.color || '#6ba54a';
             document.getElementById('equipoPreguntas').value = (equipo?.preguntas || []).join('\n');
             document.getElementById('equipoGoogleDoc').value = equipo?.google_doc || '';
             document.getElementById('equipoOrden').value = equipo?.orden || 0;
@@ -1946,8 +2009,7 @@
             const totalCooperativas = todasCooperativas.length;
 
             let html = `<div style="margin-bottom: 2rem; text-align: center;">
-                <h2 style="margin: 0;">FACTTIC - Plenario 2025</h2>
-                <p style="color: var(--color-texto-secundario);">Tandil, Provincia de Buenos Aires</p>
+                <h2 style="margin: 0;">Alimentos Cooperativos</h2>
                 <p style="color: var(--color-texto-secundario);">${fecha}</p>
                 <div style="display: flex; justify-content: center; gap: 3rem; margin-top: 1.5rem;">
                     <div>
@@ -2041,7 +2103,7 @@
             const content = document.getElementById('informeContent');
 
             // Generar texto plano
-            let texto = 'FACTTIC - Plenario 2025\n';
+            let texto = 'Alimentos Cooperativos\n';
             texto += new Date().toLocaleDateString('es-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + '\n\n';
             texto += '='.repeat(50) + '\n\n';
 
@@ -2181,7 +2243,7 @@
                 <html>
                 <head>
                     <meta charset="UTF-8">
-                    <title>Informe Debate FACTTIC - Plenario 2025</title>
+                    <title>Informe del Debate - Alimentos Cooperativos</title>
                     <style>
                         * { box-sizing: border-box; }
                         body {
@@ -2221,7 +2283,7 @@
                         .stat-numero {
                             font-size: 2.5rem;
                             font-weight: bold;
-                            color: #3b82f6;
+                            color: #4e7d33;
                         }
                         .stat-label {
                             color: #64748b;
@@ -2262,7 +2324,7 @@
                             background: #f8fafc;
                             padding: 1rem;
                             border-radius: 8px;
-                            border-left: 4px solid #3b82f6;
+                            border-left: 4px solid #6ba54a;
                         }
                         .accionables-table {
                             width: 100%;
@@ -2286,18 +2348,35 @@
                             color: #94a3b8;
                             font-style: italic;
                         }
+                        .pie-marca {
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 0.6rem;
+                            flex-wrap: wrap;
+                            margin-top: 3rem;
+                            padding-top: 1.5rem;
+                            border-top: 1px solid #e2e8f0;
+                            font-size: 0.7rem;
+                            letter-spacing: 0.04em;
+                            text-transform: uppercase;
+                            color: #64748b;
+                        }
+                        .pie-marca img { height: 13px; width: auto; display: block; }
+                        .pie-marca img.logo-facttic { height: 15px; }
+                        .pie-marca a { display: inline-flex; align-items: center; text-decoration: none; }
                         @media print {
                             body { padding: 0; }
                             .equipo-seccion { page-break-inside: avoid; }
+                            .pie-marca { page-break-inside: avoid; }
                         }
                     </style>
                 </head>
                 <body>
                     <div class="header">
-                        <img src="https://facttic.org.ar/wp-content/uploads/2018/11/logo-facttic_1-e1542743219955.png" alt="FACTTIC">
+                        <img src="${location.origin}/live/logo_alimentos_oscuro.png" alt="Alimentos Cooperativos">
                         <h1>Informe del Debate</h1>
-                        <p class="subtitulo">Plenario FACTTIC 2025</p>
-                        <p class="ubicacion">Tandil, Provincia de Buenos Aires</p>
+                        <p class="subtitulo">Alimentos Cooperativos</p>
                         <p class="fecha">${fecha}</p>
                         <div class="stats">
                             <div>
@@ -2312,6 +2391,12 @@
                         <p class="lista-coops">${todasCooperativas.sort().join(' • ')}</p>
                     </div>
                     ${contenidoEquipos}
+                    <footer class="pie-marca">
+                        <span>Powered by</span>
+                        <a href="https://lawal.coop"><img src="${location.origin}/live/logo_lawal_oscuro.png" alt="Lawal"></a>
+                        <span>y</span>
+                        <a href="https://facttic.org.ar"><img class="logo-facttic" src="${location.origin}/live/logo_facttic_oscuro.png" alt="FACTTIC"></a>
+                    </footer>
                 </body>
                 </html>
             `);

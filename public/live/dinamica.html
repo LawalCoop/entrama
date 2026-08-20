@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dinámica FACTTIC</title>
+    <title>Dinámica Alimentos Cooperativos</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.3"></script>
     <style>
         :root {
@@ -13,7 +13,10 @@
             --color-texto-secundario: #94a3b8;
             --color-success: #22c55e;
             --color-warning: #f59e0b;
-            --equipo-actual: #3b82f6;
+            /* Verde de Alimentos Cooperativos. Es el acento por defecto: en
+               cuanto se elige un equipo, el JS lo pisa con el color de ese
+               equipo. */
+            --equipo-actual: #6ba54a;
         }
 
         * {
@@ -591,6 +594,42 @@
         .mt-auto { margin-top: auto; }
         .text-center { text-align: center; }
 
+        /* Pie de marca: "Powered by" con los dos logos.
+           Va como último hijo de cada pantalla y no lleva `margin-top: auto`
+           a propósito: las pantallas ya empujan su contenido con `.mt-auto` o
+           con un hijo `flex: 1`, y dos elementos peleando por el espacio
+           sobrante lo reparten en vez de mandar este al fondo. */
+        .pie-marca {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-top: 1.5rem;
+            padding: 1rem 0 0.25rem;
+            font-size: 0.7rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--color-texto-secundario);
+            opacity: 0.65;
+        }
+
+        .pie-marca img {
+            height: 13px;
+            width: auto;
+            display: block;
+        }
+
+        /* El logo de FACTTIC es más chico y de trazo fino: a la misma altura
+           que el de Lawal se lee menos, así que va un punto más grande. */
+        .pie-marca img.logo-facttic { height: 15px; }
+
+        .pie-marca a {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
         /* Alerta de tiempo */
         .alerta-tiempo {
             position: fixed;
@@ -751,7 +790,7 @@
     <!-- PANTALLA 0: Registro inicial -->
     <div class="pantalla activa" id="pantallaRegistro">
         <div class="header">
-            <img src="logo_facttic.png" alt="FACTTIC" style="height: 50px; margin-bottom: 1rem;">
+            <img src="logo_alimentos_claro.png" alt="Alimentos Cooperativos" style="height: 50px; margin-bottom: 1rem;">
             <h1>Dinámica de Grupos</h1>
             <p>Primero contanos quién sos</p>
         </div>
@@ -772,12 +811,19 @@
                 <button class="btn btn-primary" id="btnContinuar">Continuar</button>
             </div>
         </div>
+
+        <footer class="pie-marca">
+            <span>Powered by</span>
+            <a href="https://lawal.coop" target="_blank" rel="noopener noreferrer"><img src="logo_lawal_claro.png" alt="Lawal"></a>
+            <span>y</span>
+            <a href="https://facttic.org.ar" target="_blank" rel="noopener noreferrer"><img class="logo-facttic" src="logo_facttic.png" alt="FACTTIC"></a>
+        </footer>
     </div>
 
     <!-- PANTALLA 1: Selección de equipo -->
     <div class="pantalla" id="pantallaSeleccion">
         <div class="header">
-            <img src="logo_facttic.png" alt="FACTTIC" style="height: 40px; margin-bottom: 0.5rem;">
+            <img src="logo_alimentos_claro.png" alt="Alimentos Cooperativos" style="height: 40px; margin-bottom: 0.5rem;">
             <h1>Elegí un equipo</h1>
             <p id="saludoUsuario">Hola! Elegí un tema para trabajar</p>
         </div>
@@ -801,6 +847,13 @@
         </div>
 
         <a href="#" class="btn-logout" id="btnLogout">🚪 Salir y cambiar de persona</a>
+
+        <footer class="pie-marca">
+            <span>Powered by</span>
+            <a href="https://lawal.coop" target="_blank" rel="noopener noreferrer"><img src="logo_lawal_claro.png" alt="Lawal"></a>
+            <span>y</span>
+            <a href="https://facttic.org.ar" target="_blank" rel="noopener noreferrer"><img class="logo-facttic" src="logo_facttic.png" alt="FACTTIC"></a>
+        </footer>
     </div>
 
     <!-- PANTALLA 3: Confirmación -->
@@ -905,6 +958,13 @@
                 <button class="btn btn-secondary" id="btnCancelarCierre">Volver</button>
             </div>
         </div>
+
+        <footer class="pie-marca">
+            <span>Powered by</span>
+            <a href="https://lawal.coop" target="_blank" rel="noopener noreferrer"><img src="logo_lawal_claro.png" alt="Lawal"></a>
+            <span>y</span>
+            <a href="https://facttic.org.ar" target="_blank" rel="noopener noreferrer"><img class="logo-facttic" src="logo_facttic.png" alt="FACTTIC"></a>
+        </footer>
     </div>
 
     <!-- PANTALLA 5: Terminado -->
