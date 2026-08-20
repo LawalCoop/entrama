@@ -1554,7 +1554,7 @@
             container.innerHTML = estado.equipos.filter(e => e.activo).map(equipo => {
                 const participantesEquipo = estado.participantes.filter(p => p.equipo_id === equipo.id);
                 const total = participantesEquipo.length;
-                const equipoListo = equipo.reflexion && equipo.accionables && equipo.accionables.length > 0;
+                const equipoListo = equipo.cerrado;
 
                 return `
                     <div class="equipo-admin-card" style="border-color: ${equipo.color}">
@@ -1565,7 +1565,10 @@
                         <div class="tema">${equipo.tema || ''}</div>
                         ${equipo.google_doc ? `<a href="${equipo.google_doc}" target="_blank" style="color: var(--color-primary); font-size: 0.85rem;">📄 Google Doc</a>` : ''}
                         <div class="stats">
-                            ${equipoListo ? '<span class="terminados">✓ LISTO</span>' : '<span style="color: var(--color-texto-secundario);">En progreso...</span>'}
+                            ${equipoListo
+                                ? `<span class="terminados">✓ LISTO</span>
+                                   <button class="btn btn-sm btn-secondary" onclick="reabrirEquipo('${equipo.id}')">↩ Reabrir</button>`
+                                : '<span style="color: var(--color-texto-secundario);">En progreso...</span>'}
                         </div>
                         <div class="participantes-lista">
                             ${participantesEquipo.map(p => `
@@ -1782,6 +1785,32 @@
             await cargarDatos();
         }
 
+        /**
+         * Devuelve un equipo cerrado a "En progreso".
+         *
+         * Sólo toca el flag: la reflexión y los accionables quedan como están,
+         * así que el equipo retoma desde donde dejó en vez de empezar de cero.
+         * Por eso tampoco pide confirmación —no se pierde nada— y volver a
+         * cerrarlo es enviar el cierre de nuevo.
+         *
+         * En la dinámica el cambio llega por realtime: a quien esté en la
+         * pantalla de "¡Listo!" lo devuelve a la de su equipo.
+         */
+        async function reabrirEquipo(id) {
+            const { error } = await supabase
+                .from('facttic_equipos')
+                .update({ cerrado: false })
+                .eq('id', id);
+
+            if (error) {
+                console.error('Error reabriendo el equipo:', error);
+                alert('No se pudo reabrir el equipo. Probá de nuevo.');
+                return;
+            }
+
+            await cargarDatos();
+        }
+
         async function limpiarParticipantes() {
             if (!confirm('¿Eliminar TODOS los participantes? Esta acción no se puede deshacer.')) return;
             await supabase.from('facttic_participantes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
@@ -1896,7 +1925,7 @@
                 const cooperativas = [...coopMap.values()];
 
                 // Un equipo está LISTO si tiene cierre (reflexion + accionables)
-                const equipoListo = equipo.reflexion && equipo.accionables && equipo.accionables.length > 0;
+                const equipoListo = equipo.cerrado;
 
                 const debatiendo = total > 0 && !equipoListo;
 
