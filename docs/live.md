@@ -174,6 +174,25 @@ y en Entrama al enviar un problema (`POST /api/problemas`). En los dos casos
 falla en silencio: la persona ya quedó anotada o su problema ya se guardó, y el
 catálogo es una mejora para el que venga después, no parte de la operación.
 
+Del lado de la dinámica eso no llegaba a pasar nunca: el formulario validaba que
+la organización estuviera en el catálogo y cortaba si no, así que
+`registrarCooperativa` sólo se ejecutaba con nombres que ya existían. Esa
+validación se sacó. Al encuentro va gente cuya organización puede no estar
+cargada, y dejarla afuera del formulario es peor que un catálogo con algún
+duplicado; el desplegable sigue sugiriendo, que es lo que evita que cada quien
+escriba el mismo nombre a su manera.
+
+**La precarga.** `migrations/0006_organizaciones_rosario.sql` trae las 79
+organizaciones del tablero de inscripción del encuentro de Rosario. Ese tablero
+es un formulario de texto libre, así que lo que llegó no se pudo cargar tal
+cual: seis nombres traían los acentos rotos (UTF-8 guardado como Latin-1), siete
+personas habían anotado varias organizaciones en el mismo campo, y varias
+llegaron escritas de más de una forma —COTRAAVI, de cuatro—. Eso último importa
+más de lo que parece: el índice único por `slug` no junta esas variantes, y para
+`asignar_equipo` serían organizaciones distintas, con lo cual dos personas de la
+misma casa podrían caer en el mismo equipo. La migración documenta cada
+decisión.
+
 En Entrama el alta ocurre **al enviar y no al tipear**, para no llenar el
 catálogo con lo que alguien escribió a medias y borró.
 
@@ -279,3 +298,88 @@ dos porque son cosas distintas: una protege la página, la otra el panel.
 
 El texto de cada problema se escapa antes de insertarlo en el DOM: es texto libre
 que escribió cualquiera desde un formulario público.
+## La asignación automática de equipo
+
+Al anotarse ya salís con equipo: la pantalla de confirmación aparece de una, con
+el color del que te tocó. Cambiar de equipo sigue estando —el botón lleva a la
+misma lista de siempre, con las sugerencias de balanceo que ya había.
+
+Antes cada quien elegía tema de una lista. Los equipos terminaban armados por
+quién llegó primero: los primeros temas se llenaban, y la sugerencia de moverse
+aparecía recién después de elegir, cuando ya habías leído el que querías.
+
+### Qué se pregunta ahora
+
+Además de nombre y organización: **provincia**, **tipo de organización** y
+**actividad** (esta admite varias). Los tres viven en `facttic_participantes`,
+no en el catálogo `cooperativas`: ese catálogo es público, editable y compartido
+con `/recolectar`, así que un dato equivocado ahí se propagaría a todas las
+personas de esa organización.
+
+Para que no haya que tipearlo una vez por persona, el formulario autocompleta
+desde alguien de la misma organización que ya se haya anotado. Falla en
+silencio: si no anda, los campos quedan vacíos y se completan a mano.
+
+Los tres niveles del Estado (municipal, provincial, nacional) se guardan por
+separado para poder leer después quién vino, pero a la hora de mezclar cuentan
+como uno solo. Eso lo resuelve `familia_organizacion`, una columna generada que
+agrupa por el prefijo `estado-`. **Si se agrega un nivel nuevo, respetar ese
+prefijo**, o va a contar como un tipo aparte.
+
+### Por qué el algoritmo vive en Postgres
+
+Está en `asignar_equipo`, en `migrations/0005_asignacion_automatica.sql`.
+
+En el navegador no serviría: al arrancar la actividad se anota todo el mundo
+casi a la vez, y si cada cliente se trae la foto de la base, calcula y después
+inserta, todos ven el mismo equipo como "el más vacío" y se amontonan ahí. La
+función toma un `pg_advisory_xact_lock`, así que cada asignación decide viendo
+ya sumada a la anterior.
+
+No es `security definer`: leer equipos y participantes e insertar un
+participante es lo que anon ya puede hacer. Tampoco es una barrera —con la anon
+key uno puede insertarse donde quiera, igual que antes—: ordena la asignación,
+no la custodia.
+
+### Cómo elige
+
+Le pone puntaje a cada equipo activo y se queda con el más bajo. Los pesos están
+arriba de la función y se leen como "cuántas personas de diferencia tolero con
+tal de no repetir esto":
+
+| Criterio | Peso |
+|---|---|
+| Cada persona ya en el equipo | 10 |
+| Cada una de la misma organización | 25 |
+| Cada una de la misma familia de organización | 6 |
+| Cada una que comparta alguna actividad | 4 |
+| Cada una de la misma provincia | 2 |
+
+Con estos números, a igualdad de tamaño manda la diversidad; con dos personas de
+diferencia manda el tamaño. Ese orden es deliberado: equipos parejos primero,
+variados después. Para que queden más variados a costa de tamaños dispares, subir
+los de diversidad; para lo contrario, subir el de tamaño.
+
+Los empates se rompen al azar. Sin eso, con la base vacía las primeras personas
+empatan en cero y caen todas en el mismo equipo, porque el orden que devuelve
+Postgres es estable.
+
+Simulado con 101 personas —los inscriptos al encuentro de Rosario— sobre 5
+equipos: 20, 20, 21, 20 y 20, ninguna organización repetida, los 5 tipos y las 8
+provincias del simulacro presentes en cada equipo. Con 10 personas de una sola
+organización y 6 equipos —donde repetir es inevitable— reparte 2/2/2/2/1/1.
+
+### Lo que no hace
+
+**No rebalancea.** Asigna a quien llega mirando cómo viene el reparto hasta ese
+momento; no mueve a nadie después. Si las primeras diez personas son todas de la
+misma provincia, esa provincia ya quedó repartida entre los equipos y las que
+lleguen después no lo corrigen.
+
+**No reasigna a quien ya tiene equipo.** Volver a entrar desde el mismo
+dispositivo te devuelve a tu equipo, no a uno nuevo: si no, refrescar la página
+te movería de grupo en medio de la charla.
+
+**La provincia pesa poco y no estaba entre los criterios pedidos.** Se pide como
+dato y se usa con peso 2, el más bajo, para desempatar. Si no tiene que influir,
+alcanza con ponerlo en 0.

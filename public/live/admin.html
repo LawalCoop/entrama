@@ -1456,6 +1456,26 @@
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Estado
+        // Para mostrar en castellano lo que en la base va como slug. Espejo de
+        // los catálogos de dinamica.html, que es donde se cargan: si allá se
+        // suma un tipo o una actividad, sumarlo acá o se ve el slug crudo.
+        const ETIQUETAS_TIPO = {
+            'cooperativa': 'Cooperativa',
+            'organizacion': 'Organización',
+            'universidad': 'Universidad',
+            'estado-municipal': 'Estado municipal',
+            'estado-provincial': 'Estado provincial',
+            'estado-nacional': 'Estado nacional',
+            'otra': 'Otra'
+        };
+
+        const ETIQUETAS_ACTIVIDAD = {
+            'agricola': 'Agrícola',
+            'producto-elaborado': 'Producto elaborado',
+            'tecnologia': 'Tecnología',
+            'comercializacion': 'Comercialización'
+        };
+
         let estado = {
             equipos: [],
             cooperativas: [],
@@ -1731,6 +1751,16 @@
 
             container.innerHTML = estado.participantes.map(p => {
                 const equipo = estado.equipos.find(e => e.id === p.equipo_id);
+                // Lo que declaró al anotarse, que es con lo que se armaron los
+                // equipos. Sin esto los datos se recolectan y no se ven en
+                // ningún lado, y no hay forma de revisar por qué alguien cayó
+                // donde cayó.
+                const perfil = [
+                    p.provincia,
+                    ETIQUETAS_TIPO[p.tipo_organizacion] || p.tipo_organizacion,
+                    (p.actividades || []).map(a => ETIQUETAS_ACTIVIDAD[a] || a).join(', ')
+                ].filter(Boolean).join(' · ');
+
                 return `
                     <div class="item-row">
                         <div>
@@ -1738,6 +1768,7 @@
                             <span style="color: var(--color-texto-secundario); margin-left: 0.5rem;">${p.cooperativa}</span>
                             ${equipo ? `<span style="color: ${equipo.color}; margin-left: 0.5rem;">→ ${equipo.nombre}</span>` : ''}
                             ${p.terminado ? '<span style="color: var(--color-success); margin-left: 0.5rem;">✓</span>' : ''}
+                            ${perfil ? `<div style="color: var(--color-texto-secundario); font-size: 0.8rem; margin-top: 0.2rem;">${perfil}</div>` : ''}
                         </div>
                         <button class="btn btn-sm btn-danger" onclick="eliminarParticipante('${p.id}')">🗑️</button>
                     </div>

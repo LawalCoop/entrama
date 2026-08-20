@@ -268,6 +268,58 @@
             transition: border-color 0.2s;
         }
 
+        .form-group .label-nota {
+            font-weight: 400;
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        /* Actividad admite varias, así que son casillas y no un <select
+           multiple>: en el celular un select múltiple se abre como una lista
+           donde no se ve cuáles quedaron marcadas, y acá se elige de parado y
+           apurado. Estas se ven todas de una y el área táctil es la etiqueta
+           entera. */
+        .opciones-multiples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .opciones-multiples label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.7rem 1rem;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            background: var(--color-card);
+            font-size: 0.95rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .opciones-multiples input {
+            /* El accent-color pinta el tilde con el color del equipo/marca sin
+               tener que dibujar la casilla a mano. */
+            accent-color: var(--equipo-actual);
+            width: 1.1rem;
+            height: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        .opciones-multiples label:has(input:checked) {
+            border-color: var(--equipo-actual);
+        }
+
+        .aviso-autocompletado {
+            display: none;
+            margin: -0.5rem 0 1rem;
+            font-size: 0.85rem;
+            color: var(--color-texto-secundario);
+        }
+
+        .aviso-autocompletado.activo { display: block; }
+
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
@@ -802,10 +854,35 @@
             </div>
 
             <div class="form-group">
-                <label for="inputCooperativaRegistro">Tu cooperativa</label>
+                <label for="inputCooperativaRegistro">Tu organización</label>
                 <input type="text" id="inputCooperativaRegistro" list="listaCooperativas" placeholder="Escribí para buscar..." autocomplete="off">
                 <datalist id="listaCooperativas"></datalist>
             </div>
+
+            <!-- De acá para abajo es lo que usa el reparto en equipos. Se
+                 autocompleta si alguien de la misma organización ya se anotó. -->
+            <div class="form-group">
+                <label for="inputProvincia">Provincia</label>
+                <select id="inputProvincia">
+                    <option value="">Elegí una…</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="inputTipoOrganizacion">Tipo de organización</label>
+                <select id="inputTipoOrganizacion">
+                    <option value="">Elegí una…</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label id="labelActividades">Actividad <span class="label-nota">podés marcar más de una</span></label>
+                <div class="opciones-multiples" id="opcionesActividades" role="group" aria-labelledby="labelActividades"></div>
+            </div>
+
+            <p class="aviso-autocompletado" id="avisoAutocompletado">
+                Completado con lo que cargó alguien de tu organización. Si no es así, cambialo.
+            </p>
 
             <div class="mt-auto">
                 <button class="btn btn-primary" id="btnContinuar">Continuar</button>
@@ -984,6 +1061,40 @@
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // Estado de la aplicación
+        // Lo que se pregunta al anotarse y alimenta el reparto en equipos.
+        //
+        // El `valor` es lo que va a la base y lo que lee la función de
+        // asignación; la `etiqueta`, lo que se lee en pantalla. Separados
+        // porque cambiar un texto no tiene por qué invalidar lo ya guardado.
+        const PROVINCIAS = [
+            'Buenos Aires', 'CABA', 'Catamarca', 'Chaco', 'Chubut', 'Córdoba',
+            'Corrientes', 'Entre Ríos', 'Formosa', 'Jujuy', 'La Pampa', 'La Rioja',
+            'Mendoza', 'Misiones', 'Neuquén', 'Río Negro', 'Salta', 'San Juan',
+            'San Luis', 'Santa Cruz', 'Santa Fe', 'Santiago del Estero',
+            'Tierra del Fuego', 'Tucumán'
+        ];
+
+        // Los tres niveles del Estado van separados para poder leer después
+        // quién vino, pero para mezclar cuentan como uno solo: eso lo resuelve
+        // la columna `familia_organizacion`, que los agrupa por el prefijo
+        // `estado-`. Si se agrega un nivel nuevo, respetar ese prefijo.
+        const TIPOS_ORGANIZACION = [
+            { valor: 'cooperativa',       etiqueta: 'Cooperativa' },
+            { valor: 'organizacion',      etiqueta: 'Organización' },
+            { valor: 'universidad',       etiqueta: 'Universidad' },
+            { valor: 'estado-municipal',  etiqueta: 'Estado municipal' },
+            { valor: 'estado-provincial', etiqueta: 'Estado provincial' },
+            { valor: 'estado-nacional',   etiqueta: 'Estado nacional' },
+            { valor: 'otra',              etiqueta: 'Otra' }
+        ];
+
+        const ACTIVIDADES = [
+            { valor: 'agricola',          etiqueta: 'Agrícola' },
+            { valor: 'producto-elaborado', etiqueta: 'Producto elaborado' },
+            { valor: 'tecnologia',        etiqueta: 'Tecnología' },
+            { valor: 'comercializacion',  etiqueta: 'Comercialización' }
+        ];
+
         let estado = {
             deviceId: null,
             participante: null,
@@ -998,6 +1109,70 @@
             nombreUsuario: null,
             cooperativaUsuario: null
         };
+
+        // Poblar los campos del registro desde los catálogos de arriba.
+        function poblarCamposDelPerfil() {
+            const provincia = document.getElementById('inputProvincia');
+            provincia.append(...PROVINCIAS.map(p => new Option(p, p)));
+
+            const tipo = document.getElementById('inputTipoOrganizacion');
+            tipo.append(...TIPOS_ORGANIZACION.map(t => new Option(t.etiqueta, t.valor)));
+
+            document.getElementById('opcionesActividades').innerHTML = ACTIVIDADES.map(a => `
+                <label>
+                    <input type="checkbox" name="actividad" value="${a.valor}">
+                    <span>${a.etiqueta}</span>
+                </label>
+            `).join('');
+        }
+
+        function actividadesElegidas() {
+            return [...document.querySelectorAll('input[name="actividad"]:checked')].map(i => i.value);
+        }
+
+        function marcarActividades(valores) {
+            const elegidas = new Set(valores || []);
+            document.querySelectorAll('input[name="actividad"]').forEach(i => {
+                i.checked = elegidas.has(i.value);
+            });
+        }
+
+        /**
+         * Completa provincia, tipo y actividad con lo que cargó alguien de la
+         * misma organización.
+         *
+         * Ese dato vive en el participante y no en el catálogo de cooperativas
+         * —que es público y lo comparte /recolectar— así que se lee de quien ya
+         * se anotó. En la práctica se tipea una vez por organización.
+         *
+         * No pisa lo que la persona ya haya tocado: si vino a corregir algo,
+         * elegir de nuevo la organización no se lo deshace.
+         */
+        async function autocompletarPerfil(cooperativa) {
+            if (!cooperativa) return;
+
+            const yaCargado = document.getElementById('inputProvincia').value
+                || document.getElementById('inputTipoOrganizacion').value
+                || actividadesElegidas().length;
+            if (yaCargado) return;
+
+            const { data, error } = await supabase
+                .from('facttic_participantes')
+                .select('provincia, tipo_organizacion, actividades')
+                .ilike('cooperativa', cooperativa)
+                .not('tipo_organizacion', 'is', null)
+                .limit(1);
+
+            // Falla en silencio: es una comodidad, no un requisito. Si no anda,
+            // los campos quedan vacíos y se completan a mano.
+            if (error || !data || !data.length) return;
+
+            const perfil = data[0];
+            document.getElementById('inputProvincia').value = perfil.provincia || '';
+            document.getElementById('inputTipoOrganizacion').value = perfil.tipo_organizacion || '';
+            marcarActividades(perfil.actividades);
+            document.getElementById('avisoAutocompletado').classList.add('activo');
+        }
 
         // Utilidades
         function generarDeviceId() {
@@ -1186,10 +1361,25 @@
             return null;
         }
 
-        // Registro inicial
-        function continuarRegistro() {
+        /**
+         * Registro inicial: anota y reparte, en un solo paso.
+         *
+         * Antes esto solo guardaba el nombre y pasaba a la lista de equipos
+         * para que cada quien eligiera tema. Los equipos terminaban armados por
+         * quién llegó primero: los primeros temas de la lista se llenaban, y la
+         * sugerencia de moverse aparecía recién después de elegir, cuando ya
+         * habías leído el tema que querías.
+         *
+         * Ahora el equipo lo decide `asignar_equipo` en Postgres, mirando cómo
+         * viene el reparto hasta ese momento. Cambiar de equipo sigue estando:
+         * el botón lleva a la misma lista de siempre.
+         */
+        async function continuarRegistro() {
             const nombre = document.getElementById('inputNombreRegistro').value.trim();
             const cooperativa = document.getElementById('inputCooperativaRegistro').value.trim();
+            const provincia = document.getElementById('inputProvincia').value;
+            const tipoOrganizacion = document.getElementById('inputTipoOrganizacion').value;
+            const actividades = actividadesElegidas();
 
             if (!nombre) {
                 alert('Por favor ingresá tu nombre');
@@ -1197,14 +1387,31 @@
             }
 
             if (!cooperativa) {
-                alert('Por favor ingresá tu cooperativa');
+                alert('Por favor ingresá tu organización');
                 return;
             }
 
-            // Validar que sea una cooperativa de la lista
-            const coopValida = estado.cooperativas.some(c => c.nombre.toLowerCase() === cooperativa.toLowerCase());
-            if (!coopValida) {
-                alert('Por favor seleccioná una cooperativa de la lista');
+            // No se valida contra el catálogo a propósito. Antes sí, y era una
+            // contradicción: cortaba si lo que escribías no estaba en la lista,
+            // así que `registrarCooperativa` —que existe para dar de alta las
+            // que faltan— nunca llegaba a ejecutarse con algo nuevo. Al
+            // encuentro va gente cuya organización puede no estar cargada, y
+            // dejarla afuera del formulario es peor que un catálogo con algún
+            // duplicado. El desplegable sigue sugiriendo, que es lo que evita
+            // que cada quien escriba el mismo nombre a su manera.
+
+            if (!provincia) {
+                alert('Por favor elegí tu provincia');
+                return;
+            }
+
+            if (!tipoOrganizacion) {
+                alert('Por favor elegí el tipo de organización');
+                return;
+            }
+
+            if (!actividades.length) {
+                alert('Por favor marcá al menos una actividad');
                 return;
             }
 
@@ -1213,11 +1420,53 @@
             estado.cooperativaUsuario = cooperativa;
             localStorage.setItem('facttic_nombre', nombre);
             localStorage.setItem('facttic_cooperativa', cooperativa);
+            localStorage.setItem('facttic_provincia', provincia);
+            localStorage.setItem('facttic_tipo_organizacion', tipoOrganizacion);
+            localStorage.setItem('facttic_actividades', JSON.stringify(actividades));
 
-            // Mostrar saludo personalizado
-            document.getElementById('saludoUsuario').textContent = `${nombre}, elegí un tema para trabajar`;
+            document.getElementById('saludoUsuario').textContent = `${nombre}, elegí otro tema si querés`;
 
-            mostrarPantalla('pantallaSeleccion');
+            const boton = document.getElementById('btnContinuar');
+            const textoOriginal = boton.textContent;
+            boton.disabled = true;
+            boton.textContent = 'Buscándote equipo…';
+
+            try {
+                registrarCooperativa(cooperativa);
+
+                const { data, error } = await supabase.rpc('asignar_equipo', {
+                    p_device_id: estado.deviceId,
+                    p_nombre: nombre,
+                    p_cooperativa: cooperativa,
+                    p_provincia: provincia,
+                    p_tipo_organizacion: tipoOrganizacion,
+                    p_actividades: actividades
+                });
+
+                if (error) throw error;
+                if (!data) throw new Error('La asignación no devolvió participante');
+
+                estado.participante = data;
+                estado.equipoSeleccionado = estado.equipos.find(e => e.id === data.equipo_id);
+
+                // El equipo salió de la base, así que puede ser uno que este
+                // navegador todavía no tenía cargado: recién ahí se recarga.
+                if (!estado.equipoSeleccionado) {
+                    await cargarDatos();
+                    estado.equipoSeleccionado = estado.equipos.find(e => e.id === data.equipo_id);
+                }
+
+                if (!estado.equipoSeleccionado) throw new Error('El equipo asignado no está disponible');
+
+                renderizarEquipos();
+                mostrarConfirmacion(true);
+            } catch (error) {
+                console.error('Error asignando equipo:', error);
+                alert('No pudimos asignarte un equipo. Probá de nuevo.');
+            } finally {
+                boton.disabled = false;
+                boton.textContent = textoOriginal;
+            }
         }
 
         // Seleccionar equipo
@@ -1837,6 +2086,11 @@
 
         // Event listeners
         document.getElementById('btnContinuar').addEventListener('click', continuarRegistro);
+        // `change` y no `input`: dispara al elegir del desplegable o al salir
+        // del campo, no en cada tecla, así no consulta la base por letra.
+        document.getElementById('inputCooperativaRegistro').addEventListener('change', (e) => {
+            autocompletarPerfil(e.target.value.trim());
+        });
         document.getElementById('btnCambiarEquipo').addEventListener('click', cambiarEquipo);
         document.getElementById('btnLogout').addEventListener('click', (e) => { e.preventDefault(); logout(); });
         document.getElementById('btnTerminamos').addEventListener('click', mostrarPantallaCierre);
@@ -1854,6 +2108,10 @@
         // Inicialización
         async function init() {
             estado.deviceId = getDeviceId();
+
+            // Antes de cualquier cosa: sin los campos armados, precargarlos
+            // desde localStorage más abajo no tendría dónde escribir.
+            poblarCamposDelPerfil();
 
             // Recuperar datos del localStorage
             estado.nombreUsuario = localStorage.getItem('facttic_nombre');
@@ -1875,6 +2133,20 @@
             }
             if (estado.cooperativaUsuario) {
                 document.getElementById('inputCooperativaRegistro').value = estado.cooperativaUsuario;
+            }
+
+            // El perfil de la vez anterior, para no re-tipear al volver a entrar
+            // desde el mismo dispositivo.
+            const provinciaGuardada = localStorage.getItem('facttic_provincia');
+            if (provinciaGuardada) document.getElementById('inputProvincia').value = provinciaGuardada;
+
+            const tipoGuardado = localStorage.getItem('facttic_tipo_organizacion');
+            if (tipoGuardado) document.getElementById('inputTipoOrganizacion').value = tipoGuardado;
+
+            try {
+                marcarActividades(JSON.parse(localStorage.getItem('facttic_actividades') || '[]'));
+            } catch {
+                // localStorage con basura no vale romper el arranque.
             }
 
             // Timer cada segundo
