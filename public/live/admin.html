@@ -1197,6 +1197,7 @@
             <button class="tab" onclick="cambiarTab('equipos')">🏷️ Equipos</button>
             <button class="tab" onclick="cambiarTab('cooperativas')">🏢 Cooperativas</button>
             <button class="tab" onclick="cambiarTab('participantes')">👥 Participantes</button>
+            <button class="tab" onclick="cambiarTab('conexiones')">📡 Conexiones</button>
         </div>
 
         <!-- Tab: Dashboard -->
@@ -1226,6 +1227,13 @@
         <div class="tab-content" id="tab-participantes">
             <button class="btn btn-danger" onclick="limpiarParticipantes()" style="margin-bottom: 1rem;">🗑️ Limpiar todos los participantes</button>
             <div class="items-lista" id="participantesLista">
+                <!-- Se llena con JS -->
+            </div>
+        </div>
+
+        <!-- Tab: Conexiones -->
+        <div class="tab-content" id="tab-conexiones">
+            <div id="conexionesPanel">
                 <!-- Se llena con JS -->
             </div>
         </div>
@@ -1419,6 +1427,7 @@
             document.getElementById('adminContainer').classList.add('activo');
             cargarDatos();
             configurarRealtime();
+            iniciarConexiones();
             estado.timerInterval = setInterval(actualizarTimer, 1000);
         }
 
@@ -2321,6 +2330,86 @@
         }
 
         // Realtime
+
+        // --- Conexiones persistentes ------------------------------------
+        // Realtime tiene un techo de conexiones concurrentes por proyecto:
+        // pasado ese número las nuevas se rechazan y la dinámica se cae para
+        // quien llegue último. Ese contador no se puede consultar: el endpoint
+        // de salud de Realtime está cerrado en Supabase hosted, y la Management
+        // API necesita un token que no puede vivir en un HTML estático.
+        //
+        // Pero acá no hace falta estimarlo. Lo único que abre conexiones contra
+        // Realtime en este proyecto son dinamica.html y este panel —
+        // informe.html no abre ninguna, solo hace dos selects— y las dos se
+        // registran en `facttic-conexiones`. Así que esta cuenta no es un
+        // proxy: es la cantidad de conexiones que estamos gastando.
+        //
+        // Ajustá LIMITE_CONEXIONES a tu plan (Free ~200, Pro 500); el número
+        // exacto está en el dashboard de Supabase.
+        const LIMITE_CONEXIONES = 200;
+        let canalConexiones = null;
+
+        function iniciarConexiones() {
+            const clave = 'tab-' + Math.random().toString(36).slice(2) + '-' + Date.now().toString(36);
+            canalConexiones = supabase.channel('facttic-conexiones', {
+                config: { presence: { key: clave } }
+            });
+            canalConexiones
+                .on('presence', { event: 'sync' }, renderizarConexiones)
+                .on('presence', { event: 'join' }, renderizarConexiones)
+                .on('presence', { event: 'leave' }, renderizarConexiones)
+                .subscribe(async (estado) => {
+                    if (estado === 'SUBSCRIBED') {
+                        // El panel también se cuenta: ocupa un lugar como cualquiera.
+                        await canalConexiones.track({ rol: 'admin', desde: new Date().toISOString() });
+                    }
+                });
+        }
+
+        function renderizarConexiones() {
+            const panel = document.getElementById('conexionesPanel');
+            if (!panel || !canalConexiones) return;
+
+            // presenceState() devuelve { clave: [metadatos] }: una clave por
+            // pestaña, y el array trae un elemento por cada track de esa clave.
+            const entradas = Object.values(canalConexiones.presenceState()).flat();
+            const total = entradas.length;
+            const pct = Math.round((total / LIMITE_CONEXIONES) * 100);
+
+            // Verde hasta el 60%, ámbar hasta el 90%, rojo de ahí en adelante.
+            const color = pct >= 90 ? '#ef4444' : pct >= 60 ? '#f59e0b' : '#22c55e';
+
+            const porRol = {};
+            for (const e of entradas) porRol[e.rol || 'desconocido'] = (porRol[e.rol || 'desconocido'] || 0) + 1;
+
+            const filas = Object.entries(porRol)
+                .sort((a, b) => b[1] - a[1])
+                .map(([rol, n]) => `<div style="display:flex;justify-content:space-between;padding:.5rem 0;border-bottom:1px solid rgba(128,128,128,.2)"><span>${rol}</span><strong>${n}</strong></div>`)
+                .join('');
+
+            const aviso = pct >= 90
+                ? '<p style="color:#ef4444;margin-top:1rem"><strong>Cerca del límite.</strong> Las conexiones nuevas pueden empezar a ser rechazadas.</p>'
+                : '';
+
+            panel.innerHTML = `
+                <div style="text-align:center;padding:2rem 1rem">
+                    <div style="font-size:3.5rem;font-weight:700;line-height:1;color:${color}">
+                        ${total} <span style="font-size:1.5rem;opacity:.6">/ ${LIMITE_CONEXIONES}</span>
+                    </div>
+                    <div style="opacity:.7;margin-top:.5rem">conexiones persistentes</div>
+                    <div style="height:8px;border-radius:4px;background:rgba(128,128,128,.2);margin:1.5rem auto 0;max-width:420px;overflow:hidden">
+                        <div style="height:100%;width:${Math.min(pct, 100)}%;background:${color}"></div>
+                    </div>
+                </div>
+                <div style="max-width:420px;margin:0 auto">${filas}</div>
+                ${aviso}
+                <p style="opacity:.55;font-size:.85rem;margin-top:1.5rem;text-align:center">
+                    Cada pestaña abierta es una conexión. Las que se cierran tardan unos
+                    segundos en desaparecer, hasta que vence el heartbeat.
+                </p>
+            `;
+        }
+
         function configurarRealtime() {
             supabase
                 .channel('admin-changes')

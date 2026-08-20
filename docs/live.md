@@ -30,10 +30,13 @@ siendo manejable:
    como en el `table:` de las suscripciones de realtime.
 3. **El login de `admin.html`** usa `rpc('facttic_verificar_admin', ...)` en vez
    de `select('admin_password')`.
+4. **Un contador de conexiones persistentes**: `dinamica.html` y `admin.html` se
+   registran en el canal de presence `facttic-conexiones`, y `admin.html` tiene
+   un tab "Conexiones" que las muestra. Ver más abajo.
 
 Para actualizar desde upstream: copiar los archivos nuevos y volver a aplicar
-esos tres cambios. `index.html` e `informe-2025.html` no tienen ninguno, así que
-esos se copian y listo.
+esos cuatro cambios. `index.html` e `informe-2025.html` no tienen ninguno, así
+que esos se copian y listo.
 
 ## El esquema
 
@@ -94,3 +97,36 @@ lectura no hay evento, y la recarga tampoco andaría.
 
 El repo de origen no declara licencia. Antes de tratar esto como propio conviene
 tener el permiso de sus autores, o que agreguen un LICENSE.
+
+## El tab de Conexiones
+
+Realtime tiene un techo de conexiones concurrentes por proyecto (Free ~200, Pro
+500; el número de tu plan está en el dashboard). Pasado ese punto las conexiones
+nuevas se rechazan, o sea que la dinámica se cae para quien llegue último —
+justo cuando más gente está entrando.
+
+Ese contador no se puede consultar: el endpoint de salud de Realtime está cerrado
+en Supabase hosted (da 401 o 500 con anon key y con service_role), y la
+Management API pide un token que no puede vivir en un HTML estático.
+
+Así que lo contamos nosotros con Presence, y no es una estimación: lo único que
+abre conexiones contra Realtime en este proyecto son `dinamica.html` y
+`admin.html`, y las dos se registran. `informe.html` no abre ninguna — hace dos
+`select` y nada más.
+
+Dos detalles que importan para que el número sea el correcto:
+
+**La clave de presence es por pestaña, no por dispositivo.** Cada pestaña
+mantiene su propio WebSocket y ocupa su propio lugar en la cuota, así que dos
+pestañas de la misma persona tienen que contar dos.
+
+**Los cuatro canales de `dinamica.html` son una sola conexión.** supabase-js
+multiplexa todos los canales de un cliente sobre el mismo socket, así que sumar
+`facttic-conexiones` no agrega una conexión.
+
+El umbral vive en `LIMITE_CONEXIONES`, arriba de la lógica en `admin.html`.
+Verde hasta el 60%, ámbar hasta el 90%, rojo de ahí en adelante.
+
+**Lo que no cuenta:** si algún día otra app usa este mismo proyecto de Supabase
+con realtime, sus conexiones gastan cuota y no aparecen acá. Y una conexión que
+muere tarda unos segundos en desaparecer, hasta que vence el heartbeat.

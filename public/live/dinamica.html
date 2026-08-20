@@ -1664,7 +1664,40 @@
         }
 
         // Suscripciones realtime
+
+        // --- Conexiones persistentes ------------------------------------
+        // Cada pestaña abierta mantiene un WebSocket contra Realtime, y Realtime
+        // tiene un techo de conexiones concurrentes por proyecto: pasado ese
+        // número, las nuevas se rechazan y la dinámica se cae para quien llegue
+        // último. Registrarse en este canal es lo que le permite al panel
+        // contarlas.
+        //
+        // Que la página se registre no es opcional para que el número sirva: una
+        // que conecta y no se registra gasta cuota igual y no aparece, o sea que
+        // el contador mentiría para abajo — el error peligroso.
+        //
+        // La clave es por pestaña y no por dispositivo a propósito: dos pestañas
+        // de la misma persona son dos WebSockets y ocupan dos lugares. Se genera
+        // al cargar y no se persiste, porque muere con la pestaña.
+        //
+        // Este canal no agrega una conexión: supabase-js multiplexa todos los
+        // canales del cliente sobre el mismo socket.
+        function registrarConexion(rol) {
+            const clave = 'tab-' + Math.random().toString(36).slice(2) + '-' + Date.now().toString(36);
+            const canal = supabase.channel('facttic-conexiones', {
+                config: { presence: { key: clave } }
+            });
+            canal.subscribe(async (estado) => {
+                if (estado === 'SUBSCRIBED') {
+                    await canal.track({ rol: rol, desde: new Date().toISOString() });
+                }
+            });
+            return canal;
+        }
+
         function configurarRealtime() {
+            registrarConexion('participante');
+
             // Suscribirse a cambios en participantes
             supabase
                 .channel('participantes-changes')
