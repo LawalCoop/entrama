@@ -399,13 +399,18 @@ no la custodia.
 
 ### La pantalla de reparto
 
-Entre tocar "Continuar" y ver el equipo hay una pantalla de unos tres segundos
-que muestra, uno por uno, los criterios con los que se está repartiendo. Está
+Entre tocar "Continuar" y ver el equipo hay una pantalla de unos cinco segundos
+y medio que muestra, uno por uno, los criterios con los que se está repartiendo. Está
 para que la asignación no parezca un sorteo: cada línea es un criterio que
 `asignar_equipo` usa de verdad, en el orden en que pesan.
 
 **Si se tocan los pesos de la función, hay que tocar esos textos** o van a estar
 mintiendo. Viven en `reproducirReparto`, en `dinamica.html`.
+
+Los tiempos están para poder leer, no para que se vea rápido: una línea cada
+1,1 segundos, y la última queda quieta 2,1 antes de pasar al equipo. La primera
+versión usaba 420 ms y no se llegaba a leer nada. Están como constantes al
+principio de `reproducirReparto`.
 
 La animación y la consulta arrancan juntas, no una después de la otra: la
 consulta vuelve en decenas de milisegundos y no tiene por qué esperar a una

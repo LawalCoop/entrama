@@ -595,8 +595,8 @@
             align-items: center;
             gap: 0.7rem;
             text-align: left;
-            font-size: 0.95rem;
-            line-height: 1.35;
+            font-size: 1.05rem;
+            line-height: 1.4;
             opacity: 0;
             transform: translateY(6px);
         }
@@ -2298,15 +2298,22 @@
             mostrarPantalla('pantallaRepartiendo');
 
             const items = [...lista.children];
-            const APARICION = 420;   // cada cuánto entra una línea
-            const TILDE = 620;       // cuánto tarda en tildarse la que entró
+
+            // Los tiempos están para poder leer, no para que se vea rápido: cada
+            // línea es una frase de unas ocho palabras, y con menos de un
+            // segundo entre una y otra no se llega. Con estos valores la
+            // pantalla dura unos 5 segundos y la última línea queda quieta un
+            // rato largo antes de pasar al equipo.
+            const APARICION = 1100;  // cada cuánto entra una línea
+            const TILDE = 800;       // cuánto tarda en tildarse la que entró
+            const CIERRE = 1300;     // cuánto queda la última en pantalla
 
             return new Promise(resolve => {
                 items.forEach((li, i) => {
                     setTimeout(() => li.classList.add('visible'), i * APARICION);
                     setTimeout(() => li.classList.add('listo'), i * APARICION + TILDE);
                 });
-                setTimeout(resolve, (items.length - 1) * APARICION + TILDE + 350);
+                setTimeout(resolve, (items.length - 1) * APARICION + TILDE + CIERRE);
             });
         }
 
