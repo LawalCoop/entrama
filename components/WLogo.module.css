@@ -1,6 +1,7 @@
-/* Llena el alto del panel. La imagen es cuadrada, así que el ancho iguala al
-   alto solo. El width/height del <img> quedan como hint de proporción para
-   evitar salto de layout; el alto real lo manda este CSS.
+/* Llena el alto del panel. El PNG es cuadrado, así que `aspect-ratio: 1` iguala
+   el ancho al alto solo — el mismo resultado que el width/height del <img> con
+   width:auto. `background-size: contain` ajusta la imagen a la caja sin
+   deformarla.
 
    El halo sigue la silueta de la W, no su caja: drop-shadow respeta el canal
    alfa del PNG, cosa que box-shadow no hace. Definido en globals.css, que es
@@ -8,7 +9,10 @@
 .w {
   display: block;
   height: 100%;
-  width: auto;
-  object-fit: contain;
+  aspect-ratio: 1 / 1;
+  background-image: var(--marca-w, url('/w-amarillo.png'));
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   filter: var(--halo);
 }

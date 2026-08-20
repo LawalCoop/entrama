@@ -28,6 +28,7 @@ export const useCombinacion = () => useContext(CombinacionContext)
  */
 export default function PaletteProvider({ children }: { children: ReactNode }) {
   const [paso, setPaso] = useState(0)
+  const [restaurado, setRestaurado] = useState(false)
   const combinacion = combinacionEn(paso)
 
   const siguiente = useCallback(() => {
@@ -50,11 +51,15 @@ export default function PaletteProvider({ children }: { children: ReactNode }) {
     } catch {
       // Sin storage disponible se arranca en la primera combinación.
     }
+    setRestaurado(true)
   }, [])
 
+  // No pintar hasta restaurar el color guardado: montar con el default y setear
+  // `data-palette` acá pisaría el valor que SCRIPT_PALETA ya aplicó pre-pintado
+  // y el fondo haría default→guardado con la transición de 0.3s — el parpadeo.
   useEffect(() => {
-    document.documentElement.dataset.palette = combinacion.a
-  }, [combinacion.a])
+    if (restaurado) document.documentElement.dataset.palette = combinacion.a
+  }, [combinacion.a, restaurado])
 
   // Precarga: sin esto, la primera vez que aparece cada color el logo parpadea.
   useEffect(() => {

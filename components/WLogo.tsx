@@ -1,34 +1,22 @@
-'use client'
-
-import { useCombinacion } from './PaletteProvider'
 import styles from './WLogo.module.css'
 
 /**
- * La W del header. Usa el Color A y cambia de archivo con la combinación.
+ * La W del header. Usa el Color A.
+ *
+ * Se pinta por CSS: `--marca-w` se define por paleta en globals.css y ya vale el
+ * color guardado antes del primer pintado, así la W no parpadea
+ * default→guardado como haría si el src dependiera del estado de React. Al
+ * cambiar de paleta, `data-palette` actualiza la variable y la imagen cambia
+ * sola, sin un render de React para el logo.
  *
  * El click lo maneja `BotonPaleta`, que la envuelve — igual que al triángulo de
  * las secciones, para que los dos se comporten igual.
  *
  * A diferencia del logotipo del footer, la W NO va recortada al contenido: la
  * marca necesita su aire para leerse, y sin él se deforma. Por eso el PNG es
- * cuadrado. Las medidas son las intrínsecas del archivo — no fijan el tamaño en
- * pantalla, que lo pone el CSS, pero le dan al browser la proporción antes de
- * que la imagen cargue y evitan el salto de layout.
+ * cuadrado. `aspect-ratio: 1` reproduce esa proporción (el mismo hint que daban
+ * width/height) y evita el salto de layout.
  */
-const ANCHO = 500
-const ALTO = 500
-
 export default function WLogo() {
-  const { a } = useCombinacion()
-
-  return (
-    <img
-      src={`/w-${a}.png`}
-      alt=""
-      width={ANCHO}
-      height={ALTO}
-      className={styles.w}
-      draggable={false}
-    />
-  )
+  return <div className={styles.w} aria-hidden="true" />
 }

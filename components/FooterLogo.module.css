@@ -3,8 +3,14 @@
    escalón, el peor caso de las 7 combinaciones da 4.05.
 
    El alto sale del footer, que lo fija: la imagen viene recortada al contenido
-   exacto, así que estos 100% son 100% de letras. */
+   exacto, así que estos 100% son 100% de letras. `aspect-ratio` convierte ese
+   alto en el ancho de la imagen (606:126), y `background-size: contain` la
+   ajusta a la caja sin deformarla. */
 .footerLogo {
   height: 100%;
-  width: auto;
+  aspect-ratio: 606 / 126;
+  background-image: var(--marca-lawal, url('/lawal-amarillo.png'));
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }

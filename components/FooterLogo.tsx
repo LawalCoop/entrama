@@ -1,28 +1,16 @@
-'use client'
-
-import { useCombinacion } from './PaletteProvider'
 import styles from './FooterLogo.module.css'
 
 /**
  * El logotipo Lawal del footer. Usa el Color A, el mismo que la W.
  *
- * Medidas intrínsecas del PNG recortado al contenido: son el hint de proporción
- * para el browser, no el tamaño en pantalla, que lo fija el CSS.
+ * Se pinta por CSS: `--marca-lawal` se define por paleta en globals.css y ya
+ * vale el color guardado antes del primer pintado, así el logo no parpadea
+ * default→guardado como haría si el src dependiera del estado de React.
+ *
+ * `aspect-ratio` reproduce la proporción intrínseca del PNG (recortado al
+ * contenido) — el mismo hint que daban width/height — y evita el salto de
+ * layout.
  */
-const ANCHO = 606
-const ALTO = 126
-
 export default function FooterLogo() {
-  const { a } = useCombinacion()
-
-  return (
-    <img
-      src={`/lawal-${a}.png`}
-      alt="Lawal"
-      width={ANCHO}
-      height={ALTO}
-      className={styles.footerLogo}
-      draggable={false}
-    />
-  )
+  return <div className={styles.footerLogo} role="img" aria-label="Lawal" />
 }

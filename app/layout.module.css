@@ -4,6 +4,8 @@
   min-height: 100dvh;
 }
 
+/* El cuerpo scrollea entero, y el header y el footer se quedan pegados a su
+   borde (sticky): el contenido pasa por debajo y el chrome no se mueve. */
 .content {
   flex: 1;
   display: flex;
@@ -26,6 +28,12 @@
   padding: 16px 56px;
   background: var(--superficie);
   border-top: 1px solid var(--borde);
+  /* Espejo del header: inmóvil al borde inferior mientras scrollea. */
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  /* Ancla para el botón de pantalla completa, que cuelga a la derecha. */
+  position: relative;
 }
 
 @media (max-width: 600px) {

@@ -1,0 +1,42 @@
+/* La caja del botón es un cuadrado del alto del footer, pero solo con las
+   esquinas pintadas: sin fondo ni borde, la marca se apoya en el logo. */
+.boton {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-a);
+  cursor: pointer;
+}
+
+.boton svg {
+  height: 62%;
+  width: auto;
+}
+
+.boton:hover {
+  color: var(--color-a-glow);
+}
+
+.boton:active {
+  transform: scale(0.92);
+}
+
+.boton:focus-visible {
+  outline: 2px solid var(--color-a);
+  outline-offset: -4px;
+  border-radius: 4px;
+}
+
+@media (max-width: 600px) {
+  .boton {
+    right: 0;
+  }
+}

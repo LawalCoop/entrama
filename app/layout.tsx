@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { Space_Grotesk, Inter } from 'next/font/google'
 import FooterLogo from '@/components/FooterLogo'
+import PantallaCompleta from '@/components/PantallaCompleta'
 import PaletteProvider from '@/components/PaletteProvider'
 import TopPanel from '@/components/TopPanel'
 import { CICLO, CLAVE, SECUENCIA } from '@/lib/paletas'
@@ -66,6 +67,7 @@ export default function RootLayout({
             <main className={styles.content}>{children}</main>
             <footer className={styles.footer}>
               <FooterLogo />
+              <PantallaCompleta />
             </footer>
           </div>
         </PaletteProvider>

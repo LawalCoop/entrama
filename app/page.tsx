@@ -5,7 +5,6 @@ import styles from './page.module.css'
 export default function Home() {
   return (
     <>
-      <p className={styles.subtitle}>¿Qué querés hacer?</p>
       <div className={styles.cards}>
         <SelectionCard
           href="/recolectar"

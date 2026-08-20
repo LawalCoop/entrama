@@ -10,6 +10,11 @@
   padding: 0 56px;
   background: var(--superficie);
   border-bottom: 1px solid var(--borde);
+  /* Fijo al tope mientras la página scrollea: el contenido pasa por debajo y
+     el header queda inmóvil. `z-index` lo mantiene sobre lo que se deslice. */
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 /* `align-self: center` para no estirarse: el panel usa stretch para que la W

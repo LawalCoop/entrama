@@ -11,7 +11,8 @@
  * Derivados (no son categorías nuevas): -glow y -tinte salen de su color,
  * --sombra sale del fondo, --ciclo-N es el juego de marca que se lee sobre el
  * fondo activo — los cuatro claros si el fondo es oscuro, los tres oscuros si
- * es claro.
+ * es claro. --texto-accento es la tinta legible sobre --color-a: oscura donde
+ * el A es claro y blanca donde el A es oscuro.
  *
  * Sobre un fondo dado solo se lee la mitad de la marca, así que A y B salen
  * siempre del grupo legible. Verificado: texto >= 4.58 (umbral 4.5), gráficos
@@ -26,7 +27,10 @@
   --texto: #F1EEE9;
   --texto-suave: #9298A1;
   --color-a: #FFBE69;
+  --texto-accento: #1F1D1C;
   --color-b: #8DA1B5;
+  --marca-w: url('/w-amarillo.png');
+  --marca-lawal: url('/lawal-amarillo.png');
   --color-a-glow: #FFDBAC;
   --color-a-tinte: #FFBE6922;
   --color-b-tinte: #8DA1B522;
@@ -47,7 +51,10 @@
   --texto: #F1EEE9;
   --texto-suave: #9298A1;
   --color-a: #468D81;
+  --texto-accento: #121A1D;
   --color-b: #FFBE69;
+  --marca-w: url('/w-verde.png');
+  --marca-lawal: url('/lawal-verde.png');
   --color-a-glow: #99C0BA;
   --color-a-tinte: #468D8122;
   --color-b-tinte: #FFBE6922;
@@ -68,7 +75,10 @@
   --texto: #F1EEE9;
   --texto-suave: #9298A1;
   --color-a: #DD5769;
+  --texto-accento: #1C161C;
   --color-b: #8DA1B5;
+  --marca-w: url('/w-rojo.png');
+  --marca-lawal: url('/lawal-rojo.png');
   --color-a-glow: #ECA3AC;
   --color-a-tinte: #DD576922;
   --color-b-tinte: #8DA1B522;
@@ -89,7 +99,10 @@
   --texto: #F1EEE9;
   --texto-suave: #9298A1;
   --color-a: #8DA1B5;
+  --texto-accento: #171B21;
   --color-b: #468D81;
+  --marca-w: url('/w-gris.png');
+  --marca-lawal: url('/lawal-gris.png');
   --color-a-glow: #C0CBD6;
   --color-a-tinte: #8DA1B522;
   --color-b-tinte: #468D8122;
@@ -110,7 +123,10 @@
   --texto: #191614;
   --texto-suave: #6B645D;
   --color-a: #4B3860;
+  --texto-accento: #FFFFFF;
   --color-b: #91486F;
+  --marca-w: url('/w-violeta.png');
+  --marca-lawal: url('/lawal-violeta.png');
   --color-a-glow: #615073;
   --color-a-tinte: #4B386022;
   --color-b-tinte: #91486F22;
@@ -131,7 +147,10 @@
   --texto: #191614;
   --texto-suave: #6B645D;
   --color-a: #91486F;
+  --texto-accento: #FFFFFF;
   --color-b: #202A33;
+  --marca-w: url('/w-morado.png');
+  --marca-lawal: url('/lawal-morado.png');
   --color-a-glow: #9E5E80;
   --color-a-tinte: #91486F22;
   --color-b-tinte: #202A3322;
@@ -152,7 +171,10 @@
   --texto: #191614;
   --texto-suave: #6B645D;
   --color-a: #202A33;
+  --texto-accento: #FFFFFF;
   --color-b: #4B3860;
+  --marca-w: url('/w-oscuro.png');
+  --marca-lawal: url('/lawal-oscuro.png');
   --color-a-glow: #3B444B;
   --color-a-tinte: #202A3322;
   --color-b-tinte: #4B386022;
@@ -182,6 +204,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
