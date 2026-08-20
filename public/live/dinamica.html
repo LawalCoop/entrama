@@ -2302,11 +2302,11 @@
             // Los tiempos están para poder leer, no para que se vea rápido: cada
             // línea es una frase de unas ocho palabras, y con menos de un
             // segundo entre una y otra no se llega. Con estos valores la
-            // pantalla dura unos 5 segundos y la última línea queda quieta un
+            // pantalla dura unos 7 segundos y la última línea queda quieta un
             // rato largo antes de pasar al equipo.
-            const APARICION = 1100;  // cada cuánto entra una línea
-            const TILDE = 800;       // cuánto tarda en tildarse la que entró
-            const CIERRE = 1300;     // cuánto queda la última en pantalla
+            const APARICION = 1400;  // cada cuánto entra una línea
+            const TILDE = 900;       // cuánto tarda en tildarse la que entró
+            const CIERRE = 1800;     // cuánto queda la última en pantalla
 
             return new Promise(resolve => {
                 items.forEach((li, i) => {
