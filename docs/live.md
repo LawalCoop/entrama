@@ -397,6 +397,28 @@ participante es lo que anon ya puede hacer. Tampoco es una barrera —con la ano
 key uno puede insertarse donde quiera, igual que antes—: ordena la asignación,
 no la custodia.
 
+### La pantalla de reparto
+
+Entre tocar "Continuar" y ver el equipo hay una pantalla de unos tres segundos
+que muestra, uno por uno, los criterios con los que se está repartiendo. Está
+para que la asignación no parezca un sorteo: cada línea es un criterio que
+`asignar_equipo` usa de verdad, en el orden en que pesan.
+
+**Si se tocan los pesos de la función, hay que tocar esos textos** o van a estar
+mintiendo. Viven en `reproducirReparto`, en `dinamica.html`.
+
+La animación y la consulta arrancan juntas, no una después de la otra: la
+consulta vuelve en decenas de milisegundos y no tiene por qué esperar a una
+animación, y la animación no tiene por qué cortarse por eso. Se muestra completa
+siempre, y si la consulta tarda más, la pantalla aguanta hasta que vuelva.
+
+Si la asignación falla, vuelve al formulario. Sin eso la pantalla de reparto
+quedaría girando para siempre y no habría forma de reintentar.
+
+El acento es el verde de marca y no `--equipo-actual`: en esa pantalla todavía no
+se sabe qué equipo tocó, y quien viene de una asignación anterior tiene esa
+variable con el color del equipo viejo.
+
 ### Cómo elige
 
 Le pone puntaje a cada equipo activo y se queda con el más bajo. Los pesos están

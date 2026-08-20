@@ -528,6 +528,116 @@
             background: var(--color-fondo);
         }
 
+        /* Pantalla de reparto.
+           Se muestra mientras Postgres elige el equipo, y está para que la
+           asignación no parezca un sorteo: cada línea es un criterio que el
+           algoritmo usa de verdad. Si se cambian los pesos de `asignar_equipo`,
+           cambiar también estos textos o van a estar mintiendo. */
+        .pantalla-repartiendo {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .pantalla-repartiendo h2 {
+            font-size: 1.6rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .reparto-subtitulo {
+            color: var(--color-texto-secundario);
+            margin-bottom: 2rem;
+        }
+
+        /* Un punto girando en una órbita: da la idea de "buscando un lugar"
+           mejor que una barra de progreso, que prometería un final calculable. */
+        .reparto-anillo {
+            width: 68px;
+            height: 68px;
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            position: relative;
+            animation: repartoGira 1.6s linear infinite;
+        }
+
+        /* Verde de marca fijo y no `--equipo-actual`: en esta pantalla todavía
+           no sabés qué equipo te tocó, y si venís de una asignación anterior esa
+           variable tiene el color del equipo viejo. Pintar de amarillo para
+           caer en uno violeta anticipa algo que no es. */
+        .reparto-punto {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #6ba54a;
+            position: absolute;
+            top: -7px;
+            left: 50%;
+            margin-left: -6px;
+        }
+
+        @keyframes repartoGira {
+            to { transform: rotate(360deg); }
+        }
+
+        .reparto-criterios {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.9rem;
+            max-width: 340px;
+            width: 100%;
+        }
+
+        .reparto-criterios li {
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.35;
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        .reparto-criterios li.visible {
+            animation: repartoAparece 0.45s ease-out forwards;
+        }
+
+        @keyframes repartoAparece {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* El tilde arranca vacío y se pinta cuando el criterio "se cumple", que
+           es puro relato: el que decide es Postgres, y ya decidió. Sirve para
+           que la espera tenga un ritmo en vez de ser una pantalla congelada. */
+        .reparto-criterios .tilde {
+            flex-shrink: 0;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: transparent;
+            transition: background 0.3s, border-color 0.3s, color 0.3s;
+        }
+
+        .reparto-criterios li.listo .tilde {
+            background: #6ba54a;
+            border-color: #6ba54a;
+            color: white;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .reparto-anillo { animation: none; }
+            .reparto-criterios li,
+            .reparto-criterios li.visible { opacity: 1; transform: none; animation: none; }
+        }
+
         .pantalla-cierre .header {
             margin-bottom: 1rem;
         }
@@ -977,6 +1087,14 @@
             <span>y</span>
             <a href="https://facttic.org.ar" target="_blank" rel="noopener noreferrer"><img class="logo-facttic" src="logo_facttic.png" alt="FACTTIC"></a>
         </footer>
+    </div>
+
+    <!-- PANTALLA 2: Repartiendo -->
+    <div class="pantalla pantalla-repartiendo" id="pantallaRepartiendo">
+        <div class="reparto-anillo"><div class="reparto-punto"></div></div>
+        <h2>Buscándote equipo</h2>
+        <p class="reparto-subtitulo">No es al azar. Estamos mirando…</p>
+        <ul class="reparto-criterios" id="repartoCriterios"></ul>
     </div>
 
     <!-- PANTALLA 3: Confirmación -->
@@ -1647,7 +1765,10 @@
             try {
                 registrarCooperativa(cooperativa);
 
-                const { data, error } = await supabase.rpc('asignar_equipo', {
+                // Las dos cosas arrancan juntas: la consulta no espera a la
+                // animación, y la animación se muestra completa aunque la
+                // consulta vuelva antes —que es lo habitual—.
+                const asignacion = supabase.rpc('asignar_equipo', {
                     p_device_id: estado.deviceId,
                     p_nombre: nombre,
                     p_cooperativa: cooperativa,
@@ -1655,6 +1776,11 @@
                     p_tipo_organizacion: tipoOrganizacion,
                     p_actividades: actividades
                 });
+
+                const [{ data, error }] = await Promise.all([
+                    asignacion,
+                    reproducirReparto(cooperativa)
+                ]);
 
                 if (error) throw error;
                 if (!data) throw new Error('La asignación no devolvió participante');
@@ -1675,6 +1801,9 @@
                 mostrarConfirmacion(true);
             } catch (error) {
                 console.error('Error asignando equipo:', error);
+                // Volver al formulario: si no, la pantalla de reparto se queda
+                // girando para siempre y no hay forma de reintentar.
+                mostrarPantalla('pantallaRegistro');
                 alert('No pudimos asignarte un equipo. Probá de nuevo.');
             } finally {
                 boton.disabled = false;
@@ -2139,6 +2268,47 @@
         // Popup de bienvenida al equipo
         let popupBienvenidaTimeout = null;
         let popupBienvenidaInterval = null;
+
+        /**
+         * La pantalla que se ve mientras se decide el equipo.
+         *
+         * Cada línea es un criterio que `asignar_equipo` usa de verdad, con el
+         * peso que tiene: primero no repetir organización, después mezclar
+         * miradas, y el tamaño parejo al final. Si se tocan los pesos de la
+         * función, hay que tocar estos textos o van a estar mintiendo.
+         *
+         * Devuelve una promesa que resuelve cuando terminó de mostrarse. Corre
+         * en paralelo con la consulta, no antes: la asignación no tiene por qué
+         * esperar a una animación, y la animación no tiene por qué cortarse si
+         * la consulta vuelve enseguida —que es lo normal—.
+         */
+        function reproducirReparto(cooperativa) {
+            const criterios = [
+                `Quiénes ya están, para no cruzarte con ${cooperativa}`,
+                'Que se mezclen los tipos de organización',
+                'Que convivan distintas actividades',
+                'Que los equipos queden parejos'
+            ];
+
+            const lista = document.getElementById('repartoCriterios');
+            lista.innerHTML = criterios.map(texto => `
+                <li><span class="tilde">✓</span><span>${texto}</span></li>
+            `).join('');
+
+            mostrarPantalla('pantallaRepartiendo');
+
+            const items = [...lista.children];
+            const APARICION = 420;   // cada cuánto entra una línea
+            const TILDE = 620;       // cuánto tarda en tildarse la que entró
+
+            return new Promise(resolve => {
+                items.forEach((li, i) => {
+                    setTimeout(() => li.classList.add('visible'), i * APARICION);
+                    setTimeout(() => li.classList.add('listo'), i * APARICION + TILDE);
+                });
+                setTimeout(resolve, (items.length - 1) * APARICION + TILDE + 350);
+            });
+        }
 
         function mostrarPopupBienvenida(equipo) {
             const popup = document.getElementById('popupBienvenida');
