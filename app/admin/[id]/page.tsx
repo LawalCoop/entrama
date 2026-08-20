@@ -56,7 +56,14 @@ export default async function Detalle({ params, searchParams }: Props) {
   )
 }
 
-function Campo({ label, valor }: { label: string; valor: string }) {
+/**
+ * Un campo vacío no se dibuja: `area` se dejó de preguntar, así que los
+ * problemas nuevos no la tienen, y una fila con la etiqueta y nada al lado se
+ * lee como si el dato se hubiera perdido.
+ */
+function Campo({ label, valor }: { label: string; valor: string | null }) {
+  if (!valor) return null
+
   return (
     <div className={styles.campo}>
       <dt className={styles.campoLabel}>{label}</dt>

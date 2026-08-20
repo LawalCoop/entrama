@@ -15,7 +15,8 @@ export type Problema = {
   creadoEn: Date
   nombre: string
   cooperativa: string
-  area: string
+  /** Se dejó de preguntar en el wizard; las filas viejas la tienen. */
+  area: string | null
   problema: string
   frecuencia: string
   impacto: string
@@ -47,7 +48,7 @@ type Fila = {
   creado_en: Date
   nombre: string
   cooperativa: string
-  area: string
+  area: string | null
   problema: string
   frecuencia: string
   impacto: string

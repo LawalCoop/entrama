@@ -5,20 +5,10 @@ import { useRouter } from 'next/navigation'
 import Wizard, { Step, useWizard } from '@/components/Wizard'
 import Cargando from '@/components/Cargando'
 import { leerPerfil, guardarPerfil, obtenerDeviceId, olvidarPerfil } from '@/lib/perfil'
-import { AREAS, FRECUENCIAS, IMPACTOS, LIMITE_PROBLEMA } from '@/lib/recolectar'
+import { FRECUENCIAS, IMPACTOS, LIMITE_PROBLEMA } from '@/lib/recolectar'
 import styles from './recolectar.module.css'
 
 const MENSAJE_ENVIO_ERROR = 'Hubo un problema al enviar. Revisá tu conexión e intentá de nuevo.'
-
-function PlusIcon() {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-      <circle cx={12} cy={12} r={10} />
-      <line x1={12} y1={8} x2={12} y2={16} />
-      <line x1={8} y1={12} x2={16} y2={12} />
-    </svg>
-  )
-}
 
 export default function Recolectar() {
   const router = useRouter()
@@ -87,7 +77,6 @@ export default function Recolectar() {
         <Step validate={(d) => !!((d.nombre as string)?.trim() && (d.cooperativa as string)?.trim())}>
           <PasoDatos />
         </Step>
-        <Step validate={(d) => !!((d.area as string)?.trim())}><PasoArea /></Step>
         <Step validate={(d) => !!((d.problema as string)?.trim())}><PasoProblema /></Step>
         <Step validate={(d) => !!(d.frecuencia && d.impacto)}><PasoImpacto /></Step>
         <Step><PasoResumen /></Step>
@@ -319,78 +308,13 @@ function Selector({ label, value, onChange, opciones }: {
   )
 }
 
-function PasoArea() {
-  const { data, set } = useWizard()
-  const selected = data.area as string | undefined
-  const [otra, setOtra] = useState('')
-  const [otraActiva, setOtraActiva] = useState(false)
-
-  function selectArea(area: string) {
-    setOtraActiva(false)
-    set('area', area)
-  }
-
-  function activarOtra() {
-    setOtraActiva(true)
-    set('area', otra || '')
-  }
-
-  return (
-    <>
-      <StepHeader
-        label={`Paso 2 de 5`}
-        title="¿En qué área trabajás?"
-        subtitle="Elegí el área donde encontrás el problema."
-      />
-      <div className={styles.options}>
-        {AREAS.map((area) => (
-          <button
-            key={area}
-            type="button"
-            className={`${styles.option} ${selected === area && !otraActiva ? styles.optionSelected : ''}`}
-            onClick={() => selectArea(area)}
-          >
-            {area}
-          </button>
-        ))}
-        {otraActiva ? (
-          <div className={`${styles.option} ${styles.optionSelected} ${styles.otraOpen}`}>
-            <span className={styles.otraToggle}>
-              <PlusIcon />
-              Otra
-            </span>
-            <input
-              className={styles.otraInput}
-              type="text"
-              placeholder="Escribí el área..."
-              value={otra}
-              onChange={(e) => {
-                setOtra(e.target.value)
-                set('area', e.target.value)
-              }}
-              autoFocus
-            />
-          </div>
-        ) : (
-          <button type="button" className={`${styles.option} ${styles.otraLabel}`} onClick={activarOtra}>
-            <PlusIcon />
-            Otra
-          </button>
-        )}
-      </div>
-    </>
-  )
-}
-
 function PasoProblema() {
   const { data, set } = useWizard()
-  const area = (data.area as string) || 'tu área'
   return (
     <>
       <StepHeader
-        label="Paso 3 de 5"
         title="¿Qué problema encontrás?"
-        subtitle={`Describí qué es lo que no funciona bien o podría mejorar en ${area}.`}
+        subtitle="Contanos qué es lo que no funciona bien o podría mejorar."
       />
       <textarea
         className={styles.textarea}
@@ -411,7 +335,7 @@ function PasoImpacto() {
   const { data, set } = useWizard()
   return (
     <>
-      <StepHeader label="Paso 4 de 5" title="¿Con qué frecuencia pasa?" />
+      <StepHeader title="¿Con qué frecuencia pasa?" />
       <div className={styles.chips}>
         {FRECUENCIAS.map((f) => (
           <button
@@ -471,7 +395,6 @@ function PasoResumen() {
   return (
     <>
       <StepHeader
-        label="Paso 5 de 5"
         title="Resumen"
         subtitle="Revisá lo que recolectamos antes de enviar."
       />
@@ -556,10 +479,23 @@ function Confirmacion({ onReset, onHome }: { onReset: () => void; onHome: () => 
   )
 }
 
-function StepHeader({ label, title, subtitle }: { label: string; title: string; subtitle?: string }) {
+/**
+ * La etiqueta de paso se calcula sola.
+ *
+ * Estaban escritas a mano —"Paso 3 de 5"— y con eso, sacar o agregar un paso
+ * dejaba mintiendo a todas las de abajo. El wizard ya sabe en cuál está y
+ * cuántos hay; que lo diga él.
+ *
+ * `label` sigue existiendo para el primer paso, que dice "Primero lo primero"
+ * en vez del número. Pasar cadena vacía la esconde.
+ */
+function StepHeader({ label, title, subtitle }: { label?: string; title: string; subtitle?: string }) {
+  const { current, total } = useWizard()
+  const texto = label ?? `Paso ${current + 1} de ${total}`
+
   return (
     <div className={styles.header}>
-      {label && <span className={styles.stepLabel}>{label}</span>}
+      {texto && <span className={styles.stepLabel}>{texto}</span>}
       <h2 className={styles.title}>{title}</h2>
       {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
     </div>

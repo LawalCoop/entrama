@@ -8,8 +8,6 @@
  * se queda vieja. Acá las dos puntas leen la misma definición.
  */
 
-export const AREAS = ['Producción', 'Logística', 'Administración', 'Comunicación', 'Ventas'] as const
-
 export const FRECUENCIAS = ['Diario', 'Semanal', 'Mensual', 'Rara vez'] as const
 
 export const IMPACTOS = [
@@ -33,9 +31,8 @@ export const LIMITE_CORTO = 120
 export const LIMITE_ACTIVIDADES = 20
 
 /**
- * `area` no se valida contra AREAS: el paso 2 ofrece "Otra" con texto libre, así
- * que la lista es una sugerencia, no un dominio cerrado. Frecuencia e impacto sí
- * son cerrados — no hay forma de elegir algo fuera de la lista en la UI.
+ * Frecuencia e impacto son dominios cerrados: no hay forma de elegir algo fuera
+ * de la lista en la UI, así que lo que venga distinto es un POST armado a mano.
  */
 const FRECUENCIAS_VALIDAS: ReadonlySet<string> = new Set(FRECUENCIAS)
 const IMPACTOS_VALIDOS: ReadonlySet<string> = new Set(IMPACTOS.map((i) => i.label))
@@ -43,7 +40,8 @@ const IMPACTOS_VALIDOS: ReadonlySet<string> = new Set(IMPACTOS.map((i) => i.labe
 export type Problema = {
   nombre: string
   cooperativa: string
-  area: string
+  /** Dónde está el problema. Se dejó de preguntar; las filas viejas lo tienen. */
+  area: string | null
   problema: string
   frecuencia: string
   impacto: string
@@ -87,9 +85,6 @@ export function validar(payload: unknown): Validacion {
   const cooperativa = texto(d.cooperativa, LIMITE_CORTO)
   if (!cooperativa) return { ok: false, motivo: `"cooperativa" es obligatoria (hasta ${LIMITE_CORTO} caracteres).` }
 
-  const area = texto(d.area, LIMITE_CORTO)
-  if (!area) return { ok: false, motivo: `"area" es obligatoria (hasta ${LIMITE_CORTO} caracteres).` }
-
   const problema = texto(d.problema, LIMITE_PROBLEMA)
   if (!problema) return { ok: false, motivo: `"problema" es obligatorio (hasta ${LIMITE_PROBLEMA} caracteres).` }
 
@@ -107,6 +102,9 @@ export function validar(payload: unknown): Validacion {
   // un problema, y /recolectar es anónimo y voluntario. Lo que venga mal
   // formado se descarta en silencio en vez de rechazar el envío entero —
   // perder el problema por una provincia rara sería el peor canje posible.
+  // `area` se dejó de preguntar en el wizard. Sigue aceptándose por si algún
+  // cliente viejo la manda, y va null si no viene.
+  const area = texto(d.area, LIMITE_CORTO)
   const provincia = texto(d.provincia, LIMITE_CORTO)
   const tipoOrganizacion = texto(d.tipoOrganizacion, LIMITE_CORTO)
   const actividades = Array.isArray(d.actividades)

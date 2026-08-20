@@ -243,48 +243,6 @@
   line-height: 1.45;
 }
 
-/* Otra with input */
-
-.otraToggle {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: none;
-  border: none;
-  color: var(--texto);
-  font-family: var(--font-heading), sans-serif;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 0;
-}
-
-.otraLabel {
-  font-size: 16px;
-}
-
-.otraOpen {
-  padding-top: 4px;
-  padding-bottom: 4px;
-}
-
-.otraInput {
-  flex: 1;
-  min-width: 0;
-  align-self: stretch;
-  padding: 0 12px;
-  background: var(--fondo);
-  border: 1px solid var(--borde);
-  border-radius: 8px;
-  color: var(--texto);
-  font-family: var(--font-heading), sans-serif;
-  font-size: 16px;
-  outline: none;
-}
-
-.otraInput:focus {
-  border-color: var(--color-a);
-}
-
 /* --- Chips (frecuencia) --- */
 
 .chips {
