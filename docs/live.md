@@ -187,13 +187,18 @@ La dinámica se usa para Alimentos Cooperativos (alimentoscooperativos.com), as�
 que `dinamica.html`, `admin.html` e `informe.html` llevan esa marca, y abajo un
 pie "Powered by Lawal y FACTTIC".
 
-**Los equipos siguen siendo los de FACTTIC.** Los seis, con sus temas y sus
-preguntas, son los del plenario 2025: esto fue un cambio de marca, no de
-contenido. Cargar los que correspondan se hace desde el panel de admin, o con una
-migración nueva.
+**El contenido de la actividad se edita desde el panel, no desde el repo.** Los
+equipos y sus preguntas se cargan en el tab de Equipos de `admin.html`, y cambian
+de una actividad a la siguiente. Al 2026-08-20 no son los seis ejes del plenario
+FACTTIC 2025: se reemplazaron al preparar la actividad siguiente.
 
-Las cooperativas ya no: desde que el catálogo es compartido (ver arriba) crece
-solo con lo que se escribe acá y en `/recolectar`.
+Esos seis originales, con sus temas y preguntas, siguen en
+`migrations/0003_facttic.sql`. Están ahí como la semilla con la que arrancó la
+base, no como el estado actual: la migración ya se aplicó y no se vuelve a
+correr, así que editarla no cambia nada en producción.
+
+Las cooperativas siguen el mismo camino, y además el catálogo es compartido (ver
+arriba): crece solo con lo que se escribe acá y en `/recolectar`.
 
 Lo que cambió, además de los textos:
 
