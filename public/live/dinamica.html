@@ -585,20 +585,39 @@
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 0.9rem;
-            max-width: 340px;
+            gap: 1.4rem;
+            max-width: 440px;
             width: 100%;
         }
 
+        /* `flex-start` y no `center`: cada criterio son dos líneas —qué y por
+           qué— y el tilde tiene que quedar a la altura de la primera, no en el
+           medio del bloque. */
         .reparto-criterios li {
             display: flex;
-            align-items: center;
-            gap: 0.7rem;
+            align-items: flex-start;
+            gap: 0.8rem;
             text-align: left;
-            font-size: 1.05rem;
-            line-height: 1.4;
             opacity: 0;
             transform: translateY(6px);
+        }
+
+        .reparto-texto {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+
+        .reparto-texto strong {
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.35;
+        }
+
+        .reparto-texto small {
+            font-size: 0.88rem;
+            line-height: 1.4;
+            color: var(--color-texto-secundario);
         }
 
         .reparto-criterios li.visible {
@@ -614,6 +633,7 @@
            que la espera tenga un ritmo en vez de ser una pantalla congelada. */
         .reparto-criterios .tilde {
             flex-shrink: 0;
+            margin-top: 1px;
             width: 22px;
             height: 22px;
             border-radius: 50%;
@@ -1104,7 +1124,7 @@
     <div class="pantalla pantalla-repartiendo" id="pantallaRepartiendo">
         <div class="reparto-anillo"><div class="reparto-punto"></div></div>
         <h2>Buscándote equipo</h2>
-        <p class="reparto-subtitulo">No es al azar. Estamos mirando…</p>
+        <p class="reparto-subtitulo">No es al azar. Buscamos que cada equipo sea diverso:</p>
         <ul class="reparto-criterios" id="repartoCriterios"></ul>
     </div>
 
@@ -2348,16 +2368,38 @@
          * la consulta vuelve enseguida —que es lo normal—.
          */
         function reproducirReparto(cooperativa) {
+            // Cada criterio va con el porqué debajo. Con sólo el qué —"que se
+            // mezclen los tipos de organización"— se entiende la regla pero no
+            // para qué está, que es lo único que hace que el reparto no parezca
+            // arbitrario.
             const criterios = [
-                `Quiénes ya están, para no cruzarte con ${cooperativa}`,
-                'Que se mezclen los tipos de organización',
-                'Que convivan distintas actividades',
-                'Que los equipos queden parejos'
+                {
+                    que: `Que no haya nadie más de ${cooperativa} en tu equipo`,
+                    porque: 'Entre ustedes ya se conocen: la idea es que trabajes con gente de otras organizaciones'
+                },
+                {
+                    que: 'Que se crucen tipos de organización distintos',
+                    porque: 'Una cooperativa, una universidad, un municipio y una mutual miran el mismo problema desde lugares distintos'
+                },
+                {
+                    que: 'Que se mezclen las actividades',
+                    porque: 'Que no queden todos del mismo rubro en la misma mesa'
+                },
+                {
+                    que: 'Que los equipos queden parejos',
+                    porque: 'Para que ninguno termine con el doble de gente que otro'
+                }
             ];
 
             const lista = document.getElementById('repartoCriterios');
-            lista.innerHTML = criterios.map(texto => `
-                <li><span class="tilde">✓</span><span>${texto}</span></li>
+            lista.innerHTML = criterios.map(c => `
+                <li>
+                    <span class="tilde">✓</span>
+                    <span class="reparto-texto">
+                        <strong>${c.que}</strong>
+                        <small>${c.porque}</small>
+                    </span>
+                </li>
             `).join('');
 
             mostrarPantalla('pantallaRepartiendo');

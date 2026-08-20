@@ -404,6 +404,11 @@ muestra, uno por uno, los criterios con los que se está repartiendo. Está
 para que la asignación no parezca un sorteo: cada línea es un criterio que
 `asignar_equipo` usa de verdad, en el orden en que pesan.
 
+Cada criterio va con el porqué debajo. Con sólo el qué —"que se mezclen los
+tipos de organización"— se entiende la regla pero no para qué está, que es lo
+único que hace que el reparto no parezca arbitrario. El primero nombra la
+organización de quien se está anotando, que es lo que lo vuelve concreto.
+
 **Si se tocan los pesos de la función, hay que tocar esos textos** o van a estar
 mintiendo. Viven en `reproducirReparto`, en `dinamica.html`.
 
