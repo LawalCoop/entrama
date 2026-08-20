@@ -1360,6 +1360,17 @@
         </div>
     </div>
 
+    <!-- Detalle de un problema recolectado en /recolectar -->
+    <div class="form-modal" id="modalProblema">
+        <div class="form-content">
+            <h2>Problema</h2>
+            <div id="problemaDetalle"></div>
+            <div class="form-actions">
+                <button class="btn btn-secondary btn-block" onclick="cerrarModal('modalProblema')">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <div class="form-modal" id="modalCooperativa">
         <div class="form-content">
             <h2 id="modalCooperativaTitulo">Nueva Cooperativa</h2>
@@ -2776,6 +2787,7 @@
         // navegador ya tiene las credenciales y las manda solas en un fetch
         // same-origin: no hace falta token ni contraseña en el JS.
         let paginaProblemas = 1;
+        let problemasEnPantalla = [];
 
         async function cargarProblemas(pagina) {
             const panel = document.getElementById('problemasPanel');
@@ -2807,6 +2819,10 @@
                 timeZone: 'America/Argentina/Buenos_Aires'
             });
 
+            // Se guardan para que el modal no tenga que volver a pedirlas, y para
+            // que el confirm de borrar pueda nombrar de quién es el aporte.
+            problemasEnPantalla = datos.problemas;
+
             const tarjetas = datos.problemas.map(pr => `
                 <div style="border:1px solid rgba(128,128,128,.25);border-radius:10px;padding:1rem;margin-bottom:.75rem">
                     <div style="display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-size:.85rem;opacity:.7">
@@ -2817,6 +2833,10 @@
                         ${esc(pr.area)} · ${esc(pr.frecuencia)} · ${esc(pr.impacto)}
                     </div>
                     <p style="margin-top:.75rem;white-space:pre-wrap;overflow-wrap:anywhere">${esc(pr.problema)}</p>
+                    <div style="display:flex;gap:.5rem;margin-top:.75rem">
+                        <button class="btn btn-secondary" onclick="verProblema('${pr.id}')">Ver</button>
+                        <button class="btn btn-danger" onclick="borrarProblema('${pr.id}')">Borrar</button>
+                    </div>
                 </div>
             `).join('');
 
@@ -2836,6 +2856,69 @@
                 ${tarjetas}
                 ${nav}
             `;
+        }
+
+
+        /** El registro completo, con los campos que la tarjeta no muestra. */
+        function verProblema(id) {
+            const pr = problemasEnPantalla.find(p => p.id === id);
+            if (!pr) return;
+
+            const esc = (t) => String(t == null ? '' : t)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            const fila = (etiqueta, valor) => valor
+                ? `<div style="display:flex;justify-content:space-between;gap:1rem;padding:.5rem 0;border-bottom:1px solid rgba(128,128,128,.2)">
+                     <span style="opacity:.7">${etiqueta}</span><strong>${esc(valor)}</strong>
+                   </div>`
+                : '';
+
+            document.getElementById('problemaDetalle').innerHTML = `
+                <p style="white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:1rem">${esc(pr.problema)}</p>
+                ${fila('Quién', pr.nombre)}
+                ${fila('Organización', pr.cooperativa)}
+                ${fila('Área', pr.area)}
+                ${fila('Frecuencia', pr.frecuencia)}
+                ${fila('Impacto', pr.impacto)}
+                ${fila('Provincia', pr.provincia)}
+                ${fila('Tipo de organización', pr.tipoOrganizacion)}
+                ${fila('Actividades', (pr.actividades || []).join(', '))}
+                ${fila('Cargado', new Date(pr.creadoEn).toLocaleString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' }))}
+            `;
+            document.getElementById('modalProblema').classList.add('activo');
+        }
+
+        /**
+         * Borra un problema. Es definitivo y no hay backup.
+         *
+         * Va por nuestra API y no por Supabase: `problemas` tiene RLS sin
+         * policies, así que la anon key no puede borrar ni queriendo. El fetch
+         * viaja con las credenciales que el navegador ya tiene, porque esta
+         * página está detrás del mismo proxy.
+         *
+         * El confirm nombra de quién es el aporte: hace más difícil borrar la
+         * fila equivocada por apurarse.
+         */
+        async function borrarProblema(id) {
+            const pr = problemasEnPantalla.find(p => p.id === id);
+            if (!pr) return;
+            if (!confirm(`¿Borrar el problema de ${pr.nombre} (${pr.cooperativa})?\n\nEs definitivo.`)) return;
+
+            try {
+                const res = await fetch('/api/admin/problemas/' + id, {
+                    method: 'DELETE',
+                    credentials: 'same-origin',
+                });
+                if (!res.ok && res.status !== 404) throw new Error('HTTP ' + res.status);
+            } catch (e) {
+                alert('No se pudo borrar. Probá de nuevo.');
+                return;
+            }
+
+            // Si era el último de la página, retroceder una: quedarse en una
+            // página vacía después de borrar se ve como si se hubiera roto algo.
+            if (problemasEnPantalla.length === 1 && paginaProblemas > 1) paginaProblemas--;
+            cargarProblemas(paginaProblemas);
         }
 
         function configurarRealtime() {

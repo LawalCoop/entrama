@@ -19,6 +19,10 @@ export type Problema = {
   problema: string
   frecuencia: string
   impacto: string
+  /** Perfil: opcional en el wizard, así que puede venir vacío. */
+  provincia: string | null
+  tipoOrganizacion: string | null
+  actividades: string[]
 }
 
 export type Pagina = {
@@ -30,7 +34,9 @@ export type Pagina = {
   paginas: number
 }
 
-const COLUMNAS = 'id, creado_en, nombre, cooperativa, area, problema, frecuencia, impacto'
+const COLUMNAS =
+  'id, creado_en, nombre, cooperativa, area, problema, frecuencia, impacto, ' +
+  'provincia, tipo_organizacion, actividades'
 
 /** Un uuid v4 tal como los genera `gen_random_uuid()`. */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -44,10 +50,20 @@ type Fila = {
   problema: string
   frecuencia: string
   impacto: string
+  provincia: string | null
+  tipo_organizacion: string | null
+  actividades: string[] | null
 }
 
-function aProblema({ creado_en, ...resto }: Fila): Problema {
-  return { ...resto, creadoEn: creado_en }
+function aProblema({ creado_en, tipo_organizacion, actividades, ...resto }: Fila): Problema {
+  return {
+    ...resto,
+    creadoEn: creado_en,
+    tipoOrganizacion: tipo_organizacion,
+    // Postgres devuelve null si la columna nunca se escribió; para quien
+    // consume, "sin actividades" es una lista vacía y no una ausencia.
+    actividades: actividades ?? [],
+  }
 }
 
 /**
@@ -107,5 +123,24 @@ export async function obtener(id: string): Promise<Problema | null> {
       [id],
     )
     return rows.length ? aProblema(rows[0]) : null
+  })
+}
+
+/**
+ * Borra un problema. Devuelve si existía.
+ *
+ * Chequea la forma del uuid antes de consultar, mismo motivo que `obtener`:
+ * `where id = 'abc'` no borra cero filas, tira un error de tipo de Postgres.
+ *
+ * Es definitivo y no hay backup. La decisión fue consciente: el panel necesita
+ * poder sacar spam o pruebas, y una fila oculta que igual hay que ir a limpiar
+ * después era más máquina de la que el caso justifica.
+ */
+export async function borrar(id: string): Promise<boolean> {
+  if (!UUID.test(id)) return false
+
+  return withClient(async (client) => {
+    const { rowCount } = await client.query('delete from problemas where id = $1', [id])
+    return rowCount === 1
   })
 }

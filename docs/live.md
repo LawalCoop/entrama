@@ -309,6 +309,19 @@ dos porque son cosas distintas: una protege la página, la otra el panel.
 
 El texto de cada problema se escapa antes de insertarlo en el DOM: es texto libre
 que escribió cualquiera desde un formulario público.
+
+**Ver** abre un modal con el registro completo, incluidos provincia, tipo de
+organización y actividades, que la tarjeta no muestra.
+
+**Borrar** es definitivo y no hay backup. Se decidió así a sabiendas: el panel
+necesita poder sacar spam o pruebas, y una fila oculta que igual hay que ir a
+limpiar después era más máquina de la que el caso justifica. El `confirm` nombra
+de quién es el aporte —"¿Borrar el problema de Martin (Lawal)?"— para que sea más
+difícil borrar la fila equivocada por apurarse.
+
+Va por `DELETE /api/admin/problemas/<id>` y no por Supabase, por lo mismo que la
+lectura: `problemas` tiene RLS sin policies, así que la anon key no puede borrar
+ni queriendo.
 ## La asignación automática de equipo
 
 Al anotarse ya salís con equipo: la pantalla de confirmación aparece de una, con
