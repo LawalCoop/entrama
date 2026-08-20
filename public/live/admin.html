@@ -1519,6 +1519,11 @@
             cargarDatos();
             configurarRealtime();
             iniciarConexiones();
+
+            // Entrar por un link con hash abre ese tab. Va acá y no al cargar la
+            // página porque antes del login no hay panel al que cambiarle el tab.
+            const tabInicial = location.hash.slice(1);
+            if (tabInicial) cambiarTab(tabInicial, true);
             estado.timerInterval = setInterval(actualizarTimer, 1000);
         }
 
@@ -2440,18 +2445,37 @@
         }
 
         // Tabs
-        function cambiarTab(tab) {
+        // Acá sí va el hash, al revés que en dinamica.html: un tab no depende de
+        // ningún estado, así que la URL no puede mentir sobre cuál corresponde.
+        // De paso quedan enlazables — se le puede pasar a alguien el link
+        // directo a #conexiones.
+        function cambiarTab(tab, desdeHistorial = false) {
+            // La validación va ANTES de apagar nada: si primero apagara todos los
+            // tabs y después abortara por un hash inventado, el panel quedaría sin
+            // ninguno activo, o sea en blanco. Salir temprano deja lo que había.
+            const boton = document.querySelector(`.tab[onclick^="cambiarTab('${tab}')"]`);
+            const contenido = document.getElementById(`tab-${tab}`);
+            if (!boton || !contenido) return;
+
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('activo'));
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('activo'));
 
-            document.querySelector(`.tab[onclick="cambiarTab('${tab}')"]`).classList.add('activo');
-            document.getElementById(`tab-${tab}`).classList.add('activo');
+            boton.classList.add('activo');
+            contenido.classList.add('activo');
+
+            if (!desdeHistorial && location.hash.slice(1) !== tab) {
+                history.pushState({ tab }, '', '#' + tab);
+            }
 
             // Los problemas se piden al abrir el tab y no al cargar la página:
             // son de otra app y no cambian por realtime, así que traerlos antes
             // de que alguien los mire sería una consulta al pedo en cada login.
             if (tab === 'problemas') cargarProblemas(paginaProblemas);
         }
+
+        window.addEventListener('popstate', (e) => {
+            cambiarTab(e.state?.tab ?? location.hash.slice(1) ?? 'dashboard', true);
+        });
 
         // Modales
         function cerrarModal(id) {

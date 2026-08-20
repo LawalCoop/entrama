@@ -1193,9 +1193,54 @@
         }
 
         // Navegación entre pantallas
-        function mostrarPantalla(id) {
+        // Las pantallas se cambian prendiendo una clase, así que para el navegador
+        // nunca pasaba nada: `history.length` se quedaba en 1 y el botón Atrás
+        // —o el gesto de deslizar desde el borde, que en celular es lo mismo y la
+        // gente hace por reflejo— sacaba de la dinámica en vez de volver un paso.
+        //
+        // Se apila una entrada por pantalla y `popstate` la devuelve. La entrada
+        // no cambia la URL a propósito: qué pantalla corresponde no lo decide la
+        // dirección sino el estado —si ya te anotaste, si tu equipo cerró— así
+        // que un `#pantallaCierre` sería una URL que puede mentir, y al recargar
+        // habría que decidir a quién creerle. Sin hash, recargar se comporta
+        // igual que antes de este cambio.
+        //
+        // Volver no deshace nada: si ya te anotaste seguís anotado. Es lo mismo
+        // que hace el botón "Cambiar de equipo", que ya existía.
+        function mostrarPantalla(id, desdeHistorial = false) {
             document.querySelectorAll('.pantalla').forEach(p => p.classList.remove('activa'));
             document.getElementById(id).classList.add('activa');
+
+            if (!desdeHistorial) {
+                // La primera pantalla reemplaza la entrada con la que se cargó
+                // la página en vez de apilar una nueva. Si apilara, esa entrada
+                // quedaría sin `state`, y al volver hasta ella `popstate`
+                // dispararía con state en null: la posición del historial se
+                // movería y la pantalla no, o sea un Atrás que no hace nada
+                // visible. Reemplazándola, volver desde la primera pantalla sale
+                // de la app, que es lo que corresponde.
+                if (history.state?.pantalla) {
+                    history.pushState({ pantalla: id }, '');
+                } else {
+                    history.replaceState({ pantalla: id }, '');
+                }
+            }
+        }
+
+        // Sin `state` es la entrada con la que se abrió la página: ahí Atrás
+        // tiene que salir de la app, no quedarse dando vueltas adentro.
+        window.addEventListener('popstate', (e) => {
+            if (e.state?.pantalla) {
+                mostrarPantalla(e.state.pantalla, true);
+            }
+        });
+
+        // Red de seguridad: si la pantalla inicial viene marcada con la clase en
+        // el HTML y nadie llama a mostrarPantalla al arrancar, la entrada de
+        // carga se quedaría sin `state` y pasaría lo mismo.
+        if (!history.state?.pantalla) {
+            const inicial = document.querySelector('.pantalla.activa');
+            if (inicial) history.replaceState({ pantalla: inicial.id }, '');
         }
 
         // Actualizar indicador de conexión

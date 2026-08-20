@@ -44,10 +44,12 @@ siendo manejable:
 6. **La marca es Alimentos Cooperativos**, no FACTTIC. Ver más abajo.
 7. **Un tab "Problemas"** con lo recolectado en `/recolectar`, y `admin.html`
    pasa a estar detrás del Basic Auth de `proxy.ts`. Ver más abajo.
+8. **El botón Atrás del navegador funciona**: las pantallas de `dinamica.html`,
+   los slides del deck y los tabs del admin apilan historial. Ver más abajo.
 
 Para actualizar desde upstream: copiar los archivos nuevos y volver a aplicar
-esos siete cambios. `index.html` e `informe-2025.html` no tienen ninguno, así
-que esos se copian y listo.
+esos ocho cambios. De `index.html` solo el `history: true`; `informe-2025.html`
+no tiene ninguno, así que ese se copia y listo.
 
 ## El esquema
 
@@ -388,3 +390,48 @@ te movería de grupo en medio de la charla.
 **La provincia pesa poco y no estaba entre los criterios pedidos.** Se pide como
 dato y se usa con peso 2, el más bajo, para desempatar. Si no tiene que influir,
 alcanza con ponerlo en 0.
+
+## El botón Atrás
+
+Antes no hacía nada útil en ninguna pantalla del live: las pantallas se cambian
+prendiendo una clase CSS y los tabs igual, así que para el navegador nunca pasaba
+nada. `history.length` se quedaba en 1 y Atrás —o el gesto de deslizar desde el
+borde, que en celular es lo mismo y la gente hace por reflejo— sacaba de la app
+en vez de volver un paso.
+
+El deck era el caso engañoso: reveal estaba con `hash: true`, así que la URL
+mostraba el slide (`#/3`) y parecía que el historial se llenaba. Pero `hash: true`
+sin `history: true` usa `replaceState`, que pisa la entrada actual en vez de
+agregar una.
+
+Ahora:
+
+| | Cómo |
+|---|---|
+| `index.html` | `history: true` en `Reveal.initialize` |
+| `dinamica.html` | `mostrarPantalla` apila; `popstate` devuelve |
+| `admin.html` | `cambiarTab` apila con hash; `popstate` devuelve |
+
+**La dinámica no toca la URL.** Podría poner `#pantallaCierre`, pero qué pantalla
+corresponde no lo decide la dirección sino el estado —si ya te anotaste, si tu
+equipo cerró— así que un hash podría mentir, y al recargar habría que decidir a
+quién creerle. Sin hash, recargar se comporta como antes de este cambio.
+
+**El admin sí usa hash**, al revés, porque un tab no depende de ningún estado:
+la URL no puede mentir. De paso quedan enlazables — `admin.html#conexiones` abre
+ese tab directo.
+
+**Volver no deshace nada.** Si ya te anotaste seguís anotado; si tu equipo cerró,
+sigue cerrado. Es lo mismo que hace el botón "Cambiar de equipo", que ya existía.
+
+Dos detalles de los que depende que funcione, y que salieron de probarlo:
+
+**La primera pantalla reemplaza la entrada de carga, no apila una nueva.** Si
+apilara, la entrada original quedaría sin `state`, y al volver hasta ella
+`popstate` dispararía con `state` en null: la posición del historial se movería y
+la pantalla no. El síntoma es un Atrás que no hace nada visible, y recién el
+siguiente sale de la app.
+
+**En `cambiarTab` la validación va antes de apagar los tabs.** Si primero apagara
+todos y después abortara por un hash inventado, el panel quedaría sin ninguno
+activo, o sea en blanco.

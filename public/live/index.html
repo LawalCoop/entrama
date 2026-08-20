@@ -1722,6 +1722,10 @@
         // Inicializar Reveal.js
         Reveal.initialize({
             hash: true,
+            // Sin esto reveal usa replaceState: la URL muestra el slide (#/3)
+            // pero el historial no crece, así que Atrás salía de la
+            // presentación en vez de volver un slide.
+            history: true,
             slideNumber: true,
             transition: 'fade',
             transitionSpeed: 'fast',
