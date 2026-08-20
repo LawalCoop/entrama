@@ -161,6 +161,28 @@ function item(f: Fila, ref: string, actividades: Map<string, string>): string {
   return `[${ref}] ${contexto || 'sin datos de contexto'} — ${f.frecuencia}, impacto ${f.impacto} — "${texto}"`
 }
 
+export type ProblemaRef = { id: string; texto: string }
+
+/**
+ * El mapa ref → problema que el prompt le mostró al agente.
+ *
+ * Lo usa la validación de las digestiones para saber qué refs eran válidos y
+ * cuáles quedaron sin agrupar. Sale de la misma función que arma el prompt a
+ * propósito: si la lógica de refs viviera duplicada, el día que cambie una de
+ * las dos copias la validación empezaría a rechazar digestiones buenas.
+ */
+export async function refsActuales(): Promise<Map<string, ProblemaRef>> {
+  const filas = await withClient(async (client) => {
+    const { rows } = await client.query<{ id: string; problema: string }>(
+      'select id, problema from problemas order by creado_en',
+    )
+    return rows
+  })
+
+  const mapa = refs(filas as Fila[])
+  return new Map(filas.map((f) => [mapa.get(f.id)!, { id: f.id, texto: f.problema }]))
+}
+
 export type Prompt = { texto: string; problemas: number }
 
 /** El prompt listo para copiar, con todos los problemas adentro. */

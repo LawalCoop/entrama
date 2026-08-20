@@ -704,3 +704,39 @@ El prompt viene de `GET /api/admin/digerir`, no se arma en el navegador: el pane
 solo tiene cargada la página de problemas que se está mirando y el prompt los
 necesita todos. Está detrás del proxy con razón: lleva adentro el texto de cada
 aporte.
+
+### Subir el resultado
+
+Debajo del generador, un textarea para pegar el JSON que devolvió el agente. Se
+guarda en `digestiones` (migración `0016`), una fila por subida; `/presentar` va
+a leer la última.
+
+**Se valida contra los problemas reales antes de guardar.** La guía le advierte
+al agente tres veces que no invente refs, que no los abrevie y que cubra todos
+los problemas — señal de que se equivoca seguido. Como el prompt lo generamos
+nosotros, sabemos exactamente qué refs le mostramos, así que faltantes,
+inventados y duplicados salen de comparar dos conjuntos:
+
+- refs que no corresponden a ningún problema → inventados
+- refs que aparecen en dos clusters → duplicados
+- problemas que no aparecen en ninguno → olvidados
+- menos de 3 clusters, o clusters vacíos
+
+Los faltantes se listan **con su texto y no solo el ref**. Hay un caso donde el
+mismatch no es culpa del agente: si entre generar el prompt y subir el resultado
+alguien cargó un problema, ese va a figurar como faltante. Viendo el texto se
+distingue de una.
+
+Por defecto **rechaza y no guarda nada**: una digestión incompleta haría
+desaparecer problemas de `/presentar` sin que nadie lo note. El botón "Subir
+igual" aparece recién después de ver el detalle —para que sea una decisión y no
+un clic distraído— y guarda con `completa = false`.
+
+**Los refs se resuelven a uuid al subir, no al leer.** Los refs son un prefijo
+del uuid y se alargan si dos colisionan, así que el mapa ref→problema depende de
+qué problemas existen. Si mañana se agrega o borra uno, una digestión vieja
+empezaría a apuntar a los problemas equivocados, en silencio. Resueltos al subir,
+queda congelada.
+
+De yapa, el parseo rescata el JSON envuelto en ```` ```json ````, que es lo que el
+agente hace más seguido pese a que se le pide que no.
