@@ -764,6 +764,12 @@ organización y provincia.
 **Sin realtime**, a propósito: una presentación que cambia sola mientras se
 proyecta es un problema, no una función.
 
+Pero **al día en cada visita**, que es otra cosa. La página llama a
+`connection()`: sin eso Next la prerenderiza en el build —no usa `searchParams`
+ni ninguna otra API de request, así que no tiene motivo para esperar— y serviría
+para siempre la digestión que existía cuando se deployó. Subir una nueva no
+cambiaría nada hasta el próximo build.
+
 Navega con flechas, espacio y PageUp/PageDown —lo que mandan los controles
 remotos de presentación—, Home y End, y con el botón Atrás del navegador, que
 apila historial desde el principio.
