@@ -60,13 +60,14 @@
             background-image: radial-gradient(circle at 50% 58%, rgba(107, 165, 74, 0.13), transparent 62%);
         }
 
-        /* El `padding-top` va acá y no en el `body`: separa el logo del borde
-           de arriba sin correr también el pie, que se quiere pegado abajo. */
+        /* El aire del logo va acá y no en el `body`: así lo separa a él sin
+           correr también el pie, que se quiere pegado abajo. */
         .marca {
             display: flex;
             justify-content: center;
             min-height: 0;
-            padding-top: clamp(0.6rem, 3vh, 2.2rem);
+            padding-top: clamp(1rem, 4vh, 3rem);
+            padding-bottom: clamp(0.5rem, 2vh, 1.5rem);
         }
 
         /* El logo manda en la portada: es lo primero que tiene que leerse
@@ -116,7 +117,7 @@
         }
 
         .antetitulo {
-            font-size: clamp(0.78rem, 1.9vh, 1.05rem);
+            font-size: clamp(0.88rem, 2.2vh, 1.2rem);
             letter-spacing: 0.22em;
             text-transform: uppercase;
             color: var(--verde-hondo);
@@ -124,7 +125,7 @@
         }
 
         h1 {
-            font-size: clamp(1.75rem, 6.2vh, 4.3rem);
+            font-size: clamp(1.95rem, 7vh, 4.9rem);
             line-height: 1.05;
             font-weight: 800;
             letter-spacing: -0.02em;
@@ -138,7 +139,7 @@
         /* Sólo la fecha. La ciudad ya la dice el antetítulo, y repetirla
            acá gastaba una línea entera en algo que el ojo ya leyó. */
         .fecha {
-            font-size: clamp(1rem, 2.7vh, 1.6rem);
+            font-size: clamp(1.1rem, 3.1vh, 1.85rem);
             font-weight: 600;
             color: var(--color-texto-secundario);
         }
@@ -173,8 +174,8 @@
             color: var(--color-texto-secundario);
         }
 
-        .pie img { height: 18px; width: auto; display: block; }
-        .pie img.logo-facttic { height: 21px; }
+        .pie img { height: 26px; width: auto; display: block; }
+        .pie img.logo-facttic { height: 30px; }
         .pie a { display: inline-flex; align-items: center; text-decoration: none; }
 
         /*
@@ -405,7 +406,6 @@
     </main>
 
     <footer class="pie">
-        <span>Powered by</span>
         <a href="https://lawal.coop" target="_blank" rel="noopener noreferrer"><img src="logo_lawal_oscuro.png" alt="Lawal"></a>
         <span>y</span>
         <a href="https://facttic.org.ar" target="_blank" rel="noopener noreferrer"><img class="logo-facttic" src="logo_facttic_oscuro.png" alt="FACTTIC"></a>
