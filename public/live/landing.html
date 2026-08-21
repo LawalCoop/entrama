@@ -252,9 +252,6 @@
             transform-origin: center bottom;
         }
 
-        .brote-2 { animation-delay: 2s; }
-        .brote-3 { animation-delay: 4s; }
-
         @keyframes brotar {
             0%, 100% { transform: scaleY(0.55); opacity: 0.35; }
             50%      { transform: scaleY(1); opacity: 0.9; }
@@ -303,6 +300,12 @@
                          curvados hacia adentro para que se lea como destello y
                          no como rombo. -->
                     <path id="chispa" d="M 0 -9 Q 1.6 -1.6 9 0 Q 1.6 1.6 0 9 Q -1.6 1.6 -9 0 Q -1.6 -1.6 0 -9 Z"/>
+
+                    <!-- Un brote, con la base en el origen: así cada copia se
+                         planta con un `translate` a su x y se escala sola. -->
+                    <g id="brote">
+                        <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"/>
+                    </g>
 
                     <!-- La comida que se pasan. Tres cosas distintas, no tres
                          copias de la misma: lo que circula es variado. -->
@@ -395,11 +398,27 @@
                     </use>
                 </g>
 
-                <!-- Tres brotes al pie: lo que se reconstruye empieza abajo. -->
+                <!--
+                  La franja de brotes al pie: lo que se reconstruye empieza
+                  abajo, y empieza en todas partes, no en el medio.
+
+                  Van de borde a borde del viewBox. Cada uno lleva su escala,
+                  su espejado y su retardo: alineados y del mismo tamaño se
+                  leerían como una cerca, y latiendo todos juntos, como una
+                  sola pieza que sube y baja.
+                -->
                 <g stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none">
-                    <path class="brote brote-1" d="M 150 392 q 0 -14 -8 -20 M 150 392 q 0 -10 8 -14"/>
-                    <path class="brote brote-2" d="M 200 396 q 0 -16 -9 -22 M 200 396 q 0 -11 9 -16"/>
-                    <path class="brote brote-3" d="M 250 392 q 0 -14 -8 -20 M 250 392 q 0 -10 8 -14"/>
+                    <g class="brote" style="animation-delay: 0s"><use href="#brote" transform="translate(12 394) scale(1)"/></g>
+                    <g class="brote" style="animation-delay: 1.6s"><use href="#brote" transform="translate(50 396) scale(-0.75 0.75)"/></g>
+                    <g class="brote" style="animation-delay: 3.2s"><use href="#brote" transform="translate(88 393) scale(1.15)"/></g>
+                    <g class="brote" style="animation-delay: 0.8s"><use href="#brote" transform="translate(124 396) scale(-0.85 0.85)"/></g>
+                    <g class="brote" style="animation-delay: 4.4s"><use href="#brote" transform="translate(160 394) scale(1.05)"/></g>
+                    <g class="brote" style="animation-delay: 2.4s"><use href="#brote" transform="translate(200 392) scale(1.25)"/></g>
+                    <g class="brote" style="animation-delay: 5.2s"><use href="#brote" transform="translate(240 395) scale(-0.9 0.9)"/></g>
+                    <g class="brote" style="animation-delay: 1.2s"><use href="#brote" transform="translate(276 393) scale(1.1)"/></g>
+                    <g class="brote" style="animation-delay: 3.8s"><use href="#brote" transform="translate(312 396) scale(-0.8 0.8)"/></g>
+                    <g class="brote" style="animation-delay: 0.4s"><use href="#brote" transform="translate(350 393) scale(1.2)"/></g>
+                    <g class="brote" style="animation-delay: 4.8s"><use href="#brote" transform="translate(386 395) scale(-0.95 0.95)"/></g>
                 </g>
             </svg>
         </div>
