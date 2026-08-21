@@ -552,11 +552,22 @@
             margin: 0;
         }
 
+        /* La marca, igual que en qr.html: la versión oscura del logo, que es la
+           que contrasta contra el blanco. No hereda el switch de modo claro
+           porque el overlay tampoco lo hereda. */
+        .qr-overlay .qr-logo {
+            height: clamp(40px, 6vh, 80px);
+            width: auto;
+            display: block;
+        }
+
         /* Se lleva el alto disponible: proyectado y de lejos, cuanto más grande
-           mejor. Acotado para que no se coma los textos de arriba y abajo. */
-        .qr-overlay img {
-            width: min(70vh, 70vw);
-            height: min(70vh, 70vw);
+           mejor. Acotado para que no se coma los textos de arriba y abajo — y
+           bajado de 70vh a 62vh al sumarse el logo, que come alto propio.
+           Va por clase y no por `img` a secas para no agarrar también al logo. */
+        .qr-overlay .qr-codigo {
+            width: min(62vh, 70vw);
+            height: min(62vh, 70vw);
             display: block;
         }
 
@@ -3198,8 +3209,9 @@
     <!-- QR para proyectar -->
     <div class="qr-overlay" id="qrOverlay" onclick="cerrarQR()">
         <div class="qr-caja">
+            <img class="qr-logo" src="logo_alimentos_oscuro.png" alt="Alimentos Cooperativos">
             <h2>Escaneá para sumarte</h2>
-            <img src="qr-live.svg" alt="Código QR que lleva a la dinámica">
+            <img class="qr-codigo" src="qr-live.svg" alt="Código QR que lleva a la dinámica">
             <p class="qr-url">entrama.vercel.app/live/</p>
         </div>
         <div class="qr-ayuda">Tocá en cualquier lado para cerrar</div>
