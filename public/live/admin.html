@@ -1079,20 +1079,24 @@
         }
 
         /* Estadísticas */
+        /* La pantalla no scrolea: lo que no entra scrolea adentro de su
+           tarjeta, igual que la lista de organizaciones de la vista de equipos.
+           Proyectando, una barra de scroll en la página es una barra que nadie
+           va a mover. */
         .vista-stats .stats-cuerpo {
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 1rem;
-            overflow-y: auto;
+            gap: 1.25rem;
+            overflow: hidden;
             min-height: 0;
         }
 
         /* Los números que se leen desde el fondo de la sala. */
         .vista-stats .stats-numeros {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 1rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.25rem;
             flex-shrink: 0;
         }
 
@@ -1104,36 +1108,43 @@
         }
 
         .vista-stats .stats-numero .valor {
-            font-size: 3.5rem;
+            font-size: 4.5rem;
             font-weight: bold;
             line-height: 1;
         }
 
         .vista-stats .stats-numero .etiqueta {
-            margin-top: 0.35rem;
-            font-size: 0.95rem;
+            margin-top: 0.4rem;
+            font-size: 1.2rem;
             color: var(--color-texto-secundario);
         }
 
         .vista-stats .stats-bloques {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
-            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr));
+            gap: 1.25rem;
+            flex: 1;
+            min-height: 0;
         }
 
+        /* El borde de arriba lleva el color de un equipo: el acento que ata la
+           pantalla con la paleta de la actividad, sin teñir la tarjeta entera. */
         .vista-stats .stats-bloque {
             background: var(--color-card);
             border-radius: 12px;
+            border-top: 4px solid var(--acento, var(--color-primary));
             padding: 1rem 1.25rem;
+            overflow-y: auto;
+            min-height: 0;
         }
 
         .vista-stats .stats-bloque h2 {
-            font-size: 1.15rem;
+            font-size: 1.5rem;
             margin-bottom: 0.75rem;
         }
 
         .vista-stats .stats-bloque .nota {
-            font-size: 0.85rem;
+            font-size: 1rem;
             font-weight: normal;
             color: var(--color-texto-secundario);
         }
@@ -1145,11 +1156,11 @@
         */
         .vista-stats .stats-barra {
             display: grid;
-            grid-template-columns: 11rem 1fr auto;
+            grid-template-columns: 13rem 1fr auto;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.3rem 0;
-            font-size: 1.05rem;
+            gap: 0.9rem;
+            padding: 0.4rem 0;
+            font-size: 1.35rem;
         }
 
         .vista-stats .stats-barra .nombre {
@@ -1161,7 +1172,7 @@
         .vista-stats .stats-barra .riel {
             background: rgba(128, 128, 128, 0.2);
             border-radius: 999px;
-            height: 0.85rem;
+            height: 1.1rem;
             overflow: hidden;
         }
 
@@ -1179,13 +1190,13 @@
         /* El segundo número de la barra: organizaciones detrás de las personas. */
         .vista-stats .stats-barra .valor .segundo {
             font-weight: normal;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             color: var(--color-texto-secundario);
         }
 
         .vista-stats .stats-vacio {
             color: var(--color-texto-secundario);
-            font-size: 1rem;
+            font-size: 1.2rem;
         }
 
         /* Modal Descripción */
@@ -2632,29 +2643,31 @@
                 </div>`;
         }
 
-        function bloqueStats(titulo, nota, filas) {
+        function bloqueStats(titulo, nota, filas, acento) {
             const cuerpo = filas.length
                 ? filas.join('')
                 : '<p class="stats-vacio">Todavía no hay datos.</p>';
             const subtitulo = nota ? ` <span class="nota">${nota}</span>` : '';
-            return `<div class="stats-bloque"><h2>${titulo}${subtitulo}</h2>${cuerpo}</div>`;
+            return `<div class="stats-bloque" style="--acento: ${acento}"><h2>${titulo}${subtitulo}</h2>${cuerpo}</div>`;
         }
 
-        function numeroStats(valor, etiqueta) {
-            return `<div class="stats-numero"><div class="valor">${valor}</div><div class="etiqueta">${etiqueta}</div></div>`;
+        function numeroStats(valor, etiqueta, color) {
+            return `<div class="stats-numero"><div class="valor" style="color: ${color}">${valor}</div><div class="etiqueta">${etiqueta}</div></div>`;
         }
 
-        /** Cuántas pestañas de la dinámica hay abiertas, sin contar los paneles. */
-        function conectadasAhora() {
-            if (!canalConexiones) return 0;
-            try {
-                return Object.values(canalConexiones.presenceState())
-                    .flat()
-                    .filter(e => e.rol !== 'admin')
-                    .length;
-            } catch {
-                return 0;
-            }
+        /**
+         * La paleta de la actividad: los colores de los equipos activos.
+         *
+         * Se usan de acento —el borde de cada tarjeta, cada barra, cada número
+         * grande— para que la pantalla se lea como parte de la misma dinámica y
+         * no como un tablero cualquiera. Sin equipos cargados cae en el verde de
+         * la marca, que es lo que había antes.
+         */
+        function paletaDeEquipos() {
+            const colores = (estado.equipos || [])
+                .filter(e => e.activo && e.color)
+                .map(e => e.color);
+            return colores.length ? colores : ['var(--color-primary)'];
         }
 
         function renderizarStats() {
@@ -2666,48 +2679,31 @@
 
             const gente = participantesUnicos();
             const equipos = (estado.equipos || []).filter(e => e.activo);
-            const cerrados = equipos.filter(e => e.cerrado).length;
+            const paleta = paletaDeEquipos();
+            const color = (i) => paleta[i % paleta.length];
 
             const numeros = [
-                numeroStats(gente.length, 'Personas anotadas'),
-                numeroStats(contarDistintos(gente, p => p.cooperativa), 'Organizaciones'),
-                numeroStats(contarDistintos(gente, p => p.provincia), 'Provincias'),
-                numeroStats(conectadasAhora(), 'Conectadas ahora'),
-                numeroStats(`${cerrados}<span class="segundo" style="font-size:2rem">/${equipos.length}</span>`, 'Equipos cerrados')
+                numeroStats(gente.length, 'Personas anotadas', color(0)),
+                numeroStats(contarDistintos(gente, p => p.cooperativa), 'Organizaciones', color(1)),
+                numeroStats(contarDistintos(gente, p => p.provincia), 'Provincias', color(2))
             ].join('');
-
-            // Equipos: la barra lleva el color del equipo, que es como se los
-            // nombra el resto de la actividad.
-            const porEquipo = equipos.map(e => {
-                const suyos = gente.filter(p => p.equipo_id === e.id);
-                return {
-                    nombre: e.nombre,
-                    color: e.color,
-                    personas: suyos.length,
-                    organizaciones: contarDistintos(suyos, p => p.cooperativa)
-                };
-            }).sort((a, b) => b.personas - a.personas);
-
-            const topEquipo = Math.max(1, ...porEquipo.map(e => e.personas));
-            const filasEquipo = porEquipo.map(e =>
-                barraStats(e.nombre, e.personas, topEquipo, e.color, e.organizaciones));
 
             const porTipo = agrupar(gente, p => [familiaDe(p)]);
             const topTipo = Math.max(1, ...porTipo.map(t => t.personas));
-            const filasTipo = porTipo.map(t =>
-                barraStats(etiquetaDeFamilia(t.clave), t.personas, topTipo, 'var(--color-primary)', t.organizaciones));
+            const filasTipo = porTipo.map((t, i) =>
+                barraStats(etiquetaDeFamilia(t.clave), t.personas, topTipo, color(i), t.organizaciones));
 
             const porActividad = agrupar(gente, p => (p.actividades || []));
             const topActividad = Math.max(1, ...porActividad.map(a => a.personas));
-            const filasActividad = porActividad.slice(0, 10).map(a =>
-                barraStats(nombreDeActividad(a.clave), a.personas, topActividad, 'var(--color-primary)', a.organizaciones));
+            const filasActividad = porActividad.slice(0, 8).map((a, i) =>
+                barraStats(nombreDeActividad(a.clave), a.personas, topActividad, color(i), a.organizaciones));
 
             // Provincias: las ocho más grandes y el resto sumado. Una lista de
             // veinticuatro no entra proyectada, y la cola son casi todas en uno.
             const porProvincia = agrupar(gente, p => [p.provincia || '']);
             const topProvincia = Math.max(1, ...porProvincia.map(p => p.personas));
-            const filasProvincia = porProvincia.slice(0, 8).map(p =>
-                barraStats(p.clave, p.personas, topProvincia, 'var(--color-primary)'));
+            const filasProvincia = porProvincia.slice(0, 8).map((p, i) =>
+                barraStats(p.clave, p.personas, topProvincia, color(i)));
             const cola = porProvincia.slice(8);
             if (cola.length) {
                 const suma = cola.reduce((n, p) => n + p.personas, 0);
@@ -2723,15 +2719,14 @@
             cuerpo.innerHTML = `
                 <div class="stats-numeros">${numeros}</div>
                 <div class="stats-bloques">
-                    ${bloqueStats('Cómo quedó el reparto', 'personas · organizaciones distintas', filasEquipo)}
-                    ${bloqueStats('Tipo de organización', 'personas · organizaciones distintas', filasTipo)}
-                    ${bloqueStats('Actividad', 'personas · organizaciones distintas', filasActividad)}
-                    ${bloqueStats('Provincia', 'personas', filasProvincia)}
+                    ${bloqueStats('Tipo de organización', 'personas · organizaciones', filasTipo, color(0))}
+                    ${bloqueStats('Actividad', 'personas · organizaciones', filasActividad, color(1))}
+                    ${bloqueStats('Provincia', 'personas', filasProvincia, color(2))}
                 </div>
                 <div class="stats-numeros">
-                    ${numeroStats(accionables, 'Accionables escritos')}
-                    ${numeroStats(terminadas, 'Personas que terminaron')}
-                    ${numeroStats(recientes, 'Anotadas en los últimos 10 min')}
+                    ${numeroStats(accionables, 'Accionables escritos', color(3))}
+                    ${numeroStats(terminadas, 'Personas que terminaron', color(4))}
+                    ${numeroStats(recientes, 'Anotadas en los últimos 10 min', color(5))}
                 </div>`;
         }
 
