@@ -45,7 +45,8 @@ siendo manejable:
 7. **Un tab "Problemas"** con lo recolectado en `/recolectar`, y `admin.html`
    pasa a estar detrás del Basic Auth de `proxy.ts`. Ver más abajo.
 8. **La asignación de equipo es automática** al anotarse, y el registro pide
-   provincia, tipo de organización y actividades. Ver más abajo.
+   provincia, tipo de organización, actividades y un email opcional. Ver más
+   abajo.
 9. **Un equipo cerrado se puede reabrir** desde el dashboard del admin. Ver más
    abajo.
 10. **El botón Atrás del navegador funciona**: las pantallas de `dinamica.html`,
@@ -99,6 +100,15 @@ consola abierta puede mover el timer o editar un equipo sin saber la contraseña
 Cerrarlo requiere que las 14 escrituras de `admin.html` pasen por funciones
 `security definer` que reciban la contraseña, o auth de verdad con Supabase Auth.
 Se decidió no hacerlo por ahora.
+
+**Eso incluye el email del registro.** `facttic_participantes` se lee con
+`select to anon using (true)` y la anon key viaja en el HTML, así que los emails
+que deja la gente en `/live` son legibles por cualquiera que abra la página y la
+saque; `informe.html`, que es público, además los recibe en su `select('*')`
+aunque no los muestre. Se decidió así a sabiendas, para que el campo tuviera el
+mismo trato que el resto del perfil. Los emails de `/recolectar` no comparten
+este problema: viven en `problemas`, que tiene RLS sin políticas y sólo se lee
+por Postgres directo desde el servidor.
 
 ## Realtime
 
@@ -346,8 +356,8 @@ dos porque son cosas distintas: una protege la página, la otra el panel.
 El texto de cada problema se escapa antes de insertarlo en el DOM: es texto libre
 que escribió cualquiera desde un formulario público.
 
-**Ver** abre un modal con el registro completo, incluidos provincia, tipo de
-organización y actividades, que la tarjeta no muestra.
+**Ver** abre un modal con el registro completo, incluidos email, provincia, tipo
+de organización y actividades, que la tarjeta no muestra.
 
 **Borrar** es definitivo y no hay backup. Se decidió así a sabiendas: el panel
 necesita poder sacar spam o pruebas, y una fila oculta que igual hay que ir a
@@ -378,9 +388,17 @@ no en el catálogo `cooperativas`: ese catálogo es público, editable y compart
 con `/recolectar`, así que un dato equivocado ahí se propagaría a todas las
 personas de esa organización.
 
+Y un **email, opcional**, que es el único campo del registro que no es
+obligatorio: no lo usa el reparto de equipos, es sólo para poder volver a
+escribirle a quien quiera. Si lo que se escribe no parece un email aparece un
+aviso al pie del campo, pero no bloquea nada y se guarda igual — un mail con un
+typo se puede mirar y arreglar; uno descartado por nuestra validación, no.
+
 Para que no haya que tipearlo una vez por persona, el formulario autocompleta
 desde alguien de la misma organización que ya se haya anotado. Falla en
-silencio: si no anda, los campos quedan vacíos y se completan a mano.
+silencio: si no anda, los campos quedan vacíos y se completan a mano. **El email
+queda afuera de ese autocompletado**, a propósito: es personal y no
+organizacional, así que no hay nada que heredar de quien se anotó antes.
 
 Los tres niveles del Estado (municipal, provincial, nacional) se guardan por
 separado para poder leer después quién vino, pero a la hora de mezclar cuentan
@@ -668,12 +686,13 @@ lo lee la otra sin que haya que transportar nada. No hay cookies en ninguna de
 las dos — una cookie sirve para que el *servidor* sepa quién sos, y acá quien lo
 necesita es el formulario, que corre en el mismo navegador donde está el dato.
 
-Las seis claves las inventó `dinamica.html` y ahora las escriben las dos:
+Las siete claves las inventó `dinamica.html` y ahora las escriben las dos:
 
 | Clave | Qué es |
 |---|---|
 | `facttic_device_id` | uuid del navegador; en la dinámica es cómo te reconoce al volver |
 | `facttic_nombre` · `facttic_cooperativa` | |
+| `facttic_email` | opcional en los dos formularios |
 | `facttic_provincia` · `facttic_tipo_organizacion` · `facttic_actividades` | |
 
 En Entrama se acceden solo desde `lib/perfil.ts`, que además envuelve cada
@@ -685,7 +704,7 @@ algunos navegadores— y una excepción al montar dejaría el paso 1 en blanco.
 es peor que un nombre viejo.
 
 **Qué se ve:** quien se anotó en la dinámica abre `/recolectar` y encuentra los
-cinco campos completos, con un renglón que lo dice y un "No soy yo" que limpia
+seis campos completos, con un renglón que lo dice y un "No soy yo" que limpia
 todo —incluido el `device_id`, porque si no alguien en una computadora prestada
 seguiría mandando problemas atados al dispositivo de otra persona—. Y al revés:
 quien primero pasa por `/recolectar` llega a la dinámica con el registro

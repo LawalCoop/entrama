@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Wizard, { Step, useWizard } from '@/components/Wizard'
 import Cargando from '@/components/Cargando'
 import { leerPerfil, guardarPerfil, obtenerDeviceId, olvidarPerfil } from '@/lib/perfil'
-import { FRECUENCIAS, IMPACTOS, LIMITE_PROBLEMA } from '@/lib/recolectar'
+import { FRECUENCIAS, IMPACTOS, LIMITE_PROBLEMA, PARECE_EMAIL } from '@/lib/recolectar'
 import styles from './recolectar.module.css'
 
 const MENSAJE_ENVIO_ERROR = 'Hubo un problema al enviar. Revisá tu conexión e intentá de nuevo.'
@@ -51,6 +51,7 @@ export default function Recolectar() {
       guardarPerfil({
         nombre: ((data.nombre as string) ?? '').trim(),
         cooperativa: ((data.cooperativa as string) ?? '').trim(),
+        email: ((data.email as string) ?? '').trim(),
         provincia: (data.provincia as string) ?? '',
         tipoOrganizacion: (data.tipoOrganizacion as string) ?? '',
         actividades: (data.actividades as string[]) ?? [],
@@ -60,6 +61,7 @@ export default function Recolectar() {
       setRetomarCon({
         nombre: data.nombre,
         cooperativa: data.cooperativa,
+        email: data.email,
         provincia: data.provincia,
         tipoOrganizacion: data.tipoOrganizacion,
         actividades: data.actividades,
@@ -205,12 +207,16 @@ function PasoDatos() {
   const { cooperativas, provincias, tipos, actividades } = useCatalogos()
   const [precargado, setPrecargado] = useState(false)
   const elegidas = (data.actividades as string[]) ?? []
+  const email = ((data.email as string) ?? '').trim()
+  // Recién cuando ya hay un arroba escrito. Quejarse desde la primera letra
+  // sería ruido sobre algo que todavía está a medio tipear.
+  const mostrarAviso = email.includes('@') && !PARECE_EMAIL.test(email)
 
   /**
    * Precarga con lo que quedó de la última vez, propia o de la dinámica.
    *
    * Las dos apps viven en el mismo origen, así que comparten `localStorage`:
-   * quien se anotó en /live ya tiene estos cinco campos guardados y acá
+   * quien se anotó en /live ya tiene estos seis campos guardados y acá
    * aparecen solos.
    *
    * Corre una sola vez y solo si el paso está vacío: si volviste con el botón
@@ -224,6 +230,7 @@ function PasoDatos() {
 
     set('nombre', perfil.nombre)
     set('cooperativa', perfil.cooperativa)
+    if (perfil.email) set('email', perfil.email)
     if (perfil.provincia) set('provincia', perfil.provincia)
     if (perfil.tipoOrganizacion) set('tipoOrganizacion', perfil.tipoOrganizacion)
     if (perfil.actividades.length) set('actividades', perfil.actividades)
@@ -234,7 +241,7 @@ function PasoDatos() {
 
   function noSoyYo() {
     olvidarPerfil()
-    for (const campo of ['nombre', 'cooperativa', 'provincia', 'tipoOrganizacion']) set(campo, '')
+    for (const campo of ['nombre', 'cooperativa', 'email', 'provincia', 'tipoOrganizacion']) set(campo, '')
     set('actividades', [])
     setPrecargado(false)
   }
@@ -278,9 +285,21 @@ function PasoDatos() {
           sugerencias={cooperativas}
         />
 
-        {/* Los tres de abajo son opcionales: el paso avanza sin ellos. El
+        {/* Los de abajo son opcionales: el paso avanza sin ellos. El
             "(opcional)" va en la etiqueta y no en un cartel aparte para que se
             lea justo donde se decide si completarlos. */}
+        <Field
+          label="Email (opcional)"
+          placeholder="Ej: maria@cooperativa.coop"
+          value={(data.email as string) ?? ''}
+          onChange={(v) => set('email', v)}
+          tipo="email"
+          autoComplete="email"
+          /* Avisa, no bloquea: el botón sigue habilitado y lo escrito se manda
+             igual. Preferimos guardar un mail con un typo —que alguien puede
+             mirar y arreglar— antes que perderlo por una validación nuestra. */
+          aviso={mostrarAviso ? 'Eso no parece un email. Lo mandamos igual, pero revisalo.' : undefined}
+        />
         <Selector
           label="Provincia (opcional)"
           value={(data.provincia as string) ?? ''}
@@ -533,13 +552,22 @@ function StepHeader({ label, title, subtitle }: { label?: string; title: string;
   )
 }
 
-function Field({ label, placeholder, value, onChange, sugerencias }: {
+function Field({ label, placeholder, value, onChange, sugerencias, tipo, autoComplete, aviso }: {
   label: string
   placeholder: string
   value: string
   onChange: (v: string) => void
   /** Si viene, el campo autocompleta contra esta lista sin dejar de aceptar texto libre. */
   sugerencias?: string[]
+  /** El `type` del input. Por defecto texto; el email lo cambia para el teclado del celular. */
+  tipo?: 'text' | 'email'
+  /**
+   * Va apagado por defecto: los campos con `<datalist>` ya sugieren solos, y
+   * encima el autocompletado del browser tapa esa lista.
+   */
+  autoComplete?: string
+  /** Un aviso al pie del campo. No bloquea nada; sólo avisa. */
+  aviso?: string
 }) {
   // `<datalist>` nativo en vez de un combo propio: el browser se encarga del
   // filtrado, del teclado y de la accesibilidad, y en celular sale el
@@ -552,13 +580,13 @@ function Field({ label, placeholder, value, onChange, sugerencias }: {
     <label className={styles.field}>
       <span className={styles.fieldLabel}>{label}</span>
       <input
-        type="text"
+        type={tipo ?? 'text'}
         className={styles.input}
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         list={listaId}
-        autoComplete="off"
+        autoComplete={autoComplete ?? 'off'}
       />
       {sugerencias && sugerencias.length > 0 && (
         <datalist id={listaId}>
@@ -567,6 +595,7 @@ function Field({ label, placeholder, value, onChange, sugerencias }: {
           ))}
         </datalist>
       )}
+      {aviso && <span className={styles.aviso}>{aviso}</span>}
     </label>
   )
 }

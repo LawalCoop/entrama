@@ -2047,6 +2047,9 @@
         }
 
         // Participantes
+        const escaparHtml = (t) => String(t == null ? '' : t)
+            .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
         function renderizarParticipantes() {
             const container = document.getElementById('participantesLista');
 
@@ -2061,7 +2064,12 @@
                 // equipos. Sin esto los datos se recolectan y no se ven en
                 // ningún lado, y no hay forma de revisar por qué alguien cayó
                 // donde cayó.
+                //
+                // El email va escapado: es texto libre que escribió cualquiera
+                // y esto se mete con innerHTML. (`nombre` y `cooperativa`, más
+                // abajo, vienen sin escapar de antes; eso es aparte.)
                 const perfil = [
+                    escaparHtml(p.email),
                     p.provincia,
                     ETIQUETAS_TIPO[p.tipo_organizacion] || p.tipo_organizacion,
                     (p.actividades || []).map(nombreDeActividad).join(', ')
@@ -3011,6 +3019,7 @@
                 <p style="white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:1rem">${esc(pr.problema)}</p>
                 ${fila('Quién', pr.nombre)}
                 ${fila('Organización', pr.cooperativa)}
+                ${fila('Email', pr.email)}
                 ${fila('Área', pr.area)}
                 ${fila('Frecuencia', pr.frecuencia)}
                 ${fila('Impacto', pr.impacto)}

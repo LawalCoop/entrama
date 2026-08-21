@@ -23,6 +23,26 @@ export const LIMITE_PROBLEMA = 1000
 export const LIMITE_CORTO = 120
 
 /**
+ * Tope del email. Es el máximo que permite la RFC 5321, y va aparte de
+ * `LIMITE_CORTO` porque `texto()` rechaza lo que se pasa en vez de recortarlo:
+ * con 120 un email largo entraría como null y se perdería sin que nadie se
+ * entere.
+ */
+export const LIMITE_EMAIL = 254
+
+/**
+ * Con qué se decide si algo "parece" un email.
+ *
+ * Deliberadamente flojo: algo, un arroba, algo, un punto, algo. No valida de
+ * verdad —eso sólo lo hace mandar un mail— y sólo alimenta un aviso; nunca
+ * bloquea un envío ni descarta lo que la persona escribió.
+ *
+ * `dinamica.html` tiene una copia de esta misma expresión: usa scripts
+ * clásicos y no puede importar un módulo. Si cambia acá, cambiar allá.
+ */
+export const PARECE_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+/**
  * Cuántas actividades se guardan como mucho.
  *
  * El formulario ofrece las del catálogo, así que en uso normal son pocas; el
@@ -46,6 +66,7 @@ export type Problema = {
   frecuencia: string
   impacto: string
   /** Perfil, opcional: el wizard los pide pero no bloquea si faltan. */
+  email: string | null
   provincia: string | null
   tipoOrganizacion: string | null
   actividades: string[]
@@ -98,13 +119,18 @@ export function validar(payload: unknown): Validacion {
     return { ok: false, motivo: '"impacto" no es una de las opciones válidas.' }
   }
 
-  // Los tres de perfil no bloquean: son datos de contexto, no parte de contar
-  // un problema, y /recolectar es anónimo y voluntario. Lo que venga mal
-  // formado se descarta en silencio en vez de rechazar el envío entero —
-  // perder el problema por una provincia rara sería el peor canje posible.
+  // Los de perfil no bloquean: son datos de contexto, no parte de contar un
+  // problema, y /recolectar es anónimo y voluntario. Lo que venga mal formado
+  // se descarta en silencio en vez de rechazar el envío entero — perder el
+  // problema por una provincia rara sería el peor canje posible.
   // `area` se dejó de preguntar en el wizard. Sigue aceptándose por si algún
   // cliente viejo la manda, y va null si no viene.
   const area = texto(d.area, LIMITE_CORTO)
+  // El email no se valida acá y es a propósito: el formulario ya avisa si no
+  // parece uno, y quien lo mande igual quiso dejarlo. Descartarlo en silencio
+  // sería perder el único dato de contacto que dio, que no es lo mismo que
+  // perder una provincia.
+  const email = texto(d.email, LIMITE_EMAIL)
   const provincia = texto(d.provincia, LIMITE_CORTO)
   const tipoOrganizacion = texto(d.tipoOrganizacion, LIMITE_CORTO)
   const actividades = Array.isArray(d.actividades)
@@ -120,7 +146,7 @@ export function validar(payload: unknown): Validacion {
     ok: true,
     valor: {
       nombre, cooperativa, area, problema, frecuencia, impacto,
-      provincia, tipoOrganizacion, actividades, deviceId,
+      email, provincia, tipoOrganizacion, actividades, deviceId,
     },
   }
 }

@@ -47,6 +47,7 @@ export default async function Detalle({ params, searchParams }: Props) {
       <dl className={styles.campos}>
         <Campo label="Quién" valor={problema.nombre} />
         <Campo label="Cooperativa" valor={problema.cooperativa} />
+        <Campo label="Email" valor={problema.email} />
         <Campo label="Área" valor={problema.area} />
         <Campo label="Frecuencia" valor={problema.frecuencia} />
         <Campo label="Impacto" valor={problema.impacto} />

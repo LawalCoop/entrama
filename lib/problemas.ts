@@ -21,6 +21,7 @@ export type Problema = {
   frecuencia: string
   impacto: string
   /** Perfil: opcional en el wizard, así que puede venir vacío. */
+  email: string | null
   provincia: string | null
   tipoOrganizacion: string | null
   actividades: string[]
@@ -38,7 +39,7 @@ export type Pagina = {
 
 const COLUMNAS =
   'id, creado_en, nombre, cooperativa, area, problema, frecuencia, impacto, ' +
-  'provincia, tipo_organizacion, actividades, device_id'
+  'email, provincia, tipo_organizacion, actividades, device_id'
 
 /** Un uuid v4 tal como los genera `gen_random_uuid()`. */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -52,6 +53,7 @@ type Fila = {
   problema: string
   frecuencia: string
   impacto: string
+  email: string | null
   provincia: string | null
   tipo_organizacion: string | null
   actividades: string[] | null

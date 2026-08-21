@@ -362,6 +362,17 @@
 
         .aviso-autocompletado.activo { display: block; }
 
+        /* El aviso del email. Mismo tono que el de arriba —no falló nada, es un
+           "fijate"— pero pegado al campo en vez de al pie del formulario. */
+        .aviso-campo {
+            display: none;
+            margin-top: 0.4rem;
+            font-size: 0.85rem;
+            color: var(--color-texto-secundario);
+        }
+
+        .aviso-campo.activo { display: block; }
+
         .form-group input:focus,
         .form-group select:focus {
             outline: none;
@@ -1037,6 +1048,12 @@
             </div>
 
             <div class="form-group">
+                <label for="inputEmailRegistro">Tu email <span class="label-nota">opcional</span></label>
+                <input type="email" id="inputEmailRegistro" placeholder="Ej: juan@cooperativa.coop" inputmode="email" autocomplete="email">
+                <p class="aviso-campo" id="avisoEmail">Eso no parece un email. Lo guardamos igual, pero revisalo.</p>
+            </div>
+
+            <div class="form-group">
                 <label for="inputCooperativaRegistro">Tu organización</label>
                 <input type="text" id="inputCooperativaRegistro" list="listaCooperativas" placeholder="Escribí para buscar..." autocomplete="off">
                 <datalist id="listaCooperativas"></datalist>
@@ -1508,6 +1525,12 @@
          *
          * No pisa lo que la persona ya haya tocado: si vino a corregir algo,
          * elegir de nuevo la organización no se lo deshace.
+         *
+         * El email queda deliberadamente afuera, del `select` y del chequeo de
+         * `yaCargado`: es personal y no organizacional, así que no hay nada que
+         * heredar de quien se anotó antes. Y si contara para `yaCargado`,
+         * escribir tu mail antes de elegir tu organización apagaría en silencio
+         * este autocompletado.
          */
         async function autocompletarPerfil(cooperativa) {
             if (!cooperativa) return;
@@ -1533,6 +1556,25 @@
             document.getElementById('inputTipoOrganizacion').value = perfil.tipo_organizacion || '';
             marcarActividades(perfil.actividades);
             document.getElementById('avisoAutocompletado').classList.add('activo');
+        }
+
+        /**
+         * Prende o apaga el aviso del email.
+         *
+         * Avisa y nada más: el botón sigue habilitado y lo escrito se manda
+         * igual. Guardar un mail con un typo —que alguien puede mirar y
+         * arreglar— es mejor que perderlo por una validación nuestra.
+         *
+         * La expresión es una copia de `PARECE_EMAIL` en lib/recolectar.ts:
+         * esta página usa scripts clásicos y no puede importar el módulo. Si
+         * cambia allá, cambiar acá.
+         */
+        function revisarEmail() {
+            const valor = document.getElementById('inputEmailRegistro').value.trim();
+            // Recién cuando ya hay un arroba: quejarse desde la primera letra
+            // sería ruido sobre algo que todavía está a medio tipear.
+            const mal = valor.includes('@') && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valor);
+            document.getElementById('avisoEmail').classList.toggle('activo', mal);
         }
 
         // Utilidades
@@ -1793,6 +1835,7 @@
         async function continuarRegistro() {
             const nombre = document.getElementById('inputNombreRegistro').value.trim();
             const cooperativa = document.getElementById('inputCooperativaRegistro').value.trim();
+            const email = document.getElementById('inputEmailRegistro').value.trim();
             const provincia = document.getElementById('inputProvincia').value;
             const tipoOrganizacion = document.getElementById('inputTipoOrganizacion').value;
             const actividades = actividadesElegidas();
@@ -1831,11 +1874,16 @@
                 return;
             }
 
+            // El email no tiene su `if`: es opcional, y si está mal escrito el
+            // aviso de abajo del campo ya se ve. Cortar acá lo volvería
+            // obligatorio de hecho.
+
             // Guardar en estado y localStorage
             estado.nombreUsuario = nombre;
             estado.cooperativaUsuario = cooperativa;
             localStorage.setItem('facttic_nombre', nombre);
             localStorage.setItem('facttic_cooperativa', cooperativa);
+            localStorage.setItem('facttic_email', email);
             localStorage.setItem('facttic_provincia', provincia);
             localStorage.setItem('facttic_tipo_organizacion', tipoOrganizacion);
             localStorage.setItem('facttic_actividades', JSON.stringify(actividades));
@@ -1859,7 +1907,8 @@
                     p_cooperativa: cooperativa,
                     p_provincia: provincia,
                     p_tipo_organizacion: tipoOrganizacion,
-                    p_actividades: actividades
+                    p_actividades: actividades,
+                    p_email: email || null
                 });
 
                 const [{ data, error }] = await Promise.all([
@@ -2005,6 +2054,11 @@
                             device_id: estado.deviceId,
                             nombre,
                             cooperativa,
+                            // De localStorage porque acá no pasa por el
+                            // formulario: este camino se alcanza desde la lista
+                            // de equipos, no desde el registro. Tirarlo sería
+                            // perder algo que la persona ya escribió.
+                            email: localStorage.getItem('facttic_email') || null,
                             equipo_id: equipoId,
                             terminado: false
                         })
@@ -2258,6 +2312,10 @@
                 // Limpiar localStorage
                 localStorage.removeItem('facttic_nombre');
                 localStorage.removeItem('facttic_cooperativa');
+                // El email también: es personal, y esto dice "se borrará tu
+                // registro". Dejarlo sería precargarle el mail de otra persona
+                // a quien use esta misma máquina después.
+                localStorage.removeItem('facttic_email');
                 localStorage.removeItem('facttic_device_id');
 
                 // Limpiar estado
@@ -2270,6 +2328,8 @@
                 // Limpiar inputs
                 document.getElementById('inputNombreRegistro').value = '';
                 document.getElementById('inputCooperativaRegistro').value = '';
+                document.getElementById('inputEmailRegistro').value = '';
+                document.getElementById('avisoEmail').classList.remove('activo');
 
                 // Recargar contadores
                 const { data: participantes } = await supabase.from('facttic_participantes').select('*');
@@ -2648,6 +2708,7 @@
         document.getElementById('inputCooperativaRegistro').addEventListener('change', (e) => {
             autocompletarPerfil(e.target.value.trim());
         });
+        document.getElementById('inputEmailRegistro').addEventListener('input', revisarEmail);
         document.getElementById('btnCambiarEquipo').addEventListener('click', cambiarEquipo);
         document.getElementById('btnLogout').addEventListener('click', (e) => { e.preventDefault(); logout(); });
         document.getElementById('btnTerminamos').addEventListener('click', mostrarPantallaCierre);
@@ -2700,6 +2761,9 @@
 
             // El perfil de la vez anterior, para no re-tipear al volver a entrar
             // desde el mismo dispositivo.
+            const emailGuardado = localStorage.getItem('facttic_email');
+            if (emailGuardado) document.getElementById('inputEmailRegistro').value = emailGuardado;
+
             const provinciaGuardada = localStorage.getItem('facttic_provincia');
             if (provinciaGuardada) document.getElementById('inputProvincia').value = provinciaGuardada;
 

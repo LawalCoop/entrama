@@ -19,6 +19,7 @@ const CLAVES = {
   deviceId: 'facttic_device_id',
   nombre: 'facttic_nombre',
   cooperativa: 'facttic_cooperativa',
+  email: 'facttic_email',
   provincia: 'facttic_provincia',
   tipoOrganizacion: 'facttic_tipo_organizacion',
   actividades: 'facttic_actividades',
@@ -27,6 +28,7 @@ const CLAVES = {
 export type Perfil = {
   nombre: string
   cooperativa: string
+  email: string
   provincia: string
   tipoOrganizacion: string
   actividades: string[]
@@ -74,6 +76,10 @@ export function leerPerfil(): Perfil | null {
   return {
     nombre,
     cooperativa,
+    // Fuera del guard de arriba a propósito: un email suelto no alcanza para
+    // decir que hay perfil. Si contara, el cartel de "completamos tus datos"
+    // aparecería sobre un formulario vacío.
+    email: leer(CLAVES.email) ?? '',
     provincia: leer(CLAVES.provincia) ?? '',
     tipoOrganizacion: leer(CLAVES.tipoOrganizacion) ?? '',
     actividades,
@@ -83,6 +89,7 @@ export function leerPerfil(): Perfil | null {
 export function guardarPerfil(p: Perfil): void {
   escribir(CLAVES.nombre, p.nombre)
   escribir(CLAVES.cooperativa, p.cooperativa)
+  escribir(CLAVES.email, p.email)
   escribir(CLAVES.provincia, p.provincia)
   escribir(CLAVES.tipoOrganizacion, p.tipoOrganizacion)
   escribir(CLAVES.actividades, JSON.stringify(p.actividades))

@@ -165,6 +165,14 @@
   gap: 6px;
 }
 
+/* El aviso del email. Va con el tono de `.precargado` y no con el de `.error`:
+   no falló nada, es sólo un "fijate". El cartel rojo está reservado para lo que
+   impide seguir. */
+.aviso {
+  font-size: 13px;
+  color: var(--texto-suave);
+}
+
 .fieldLabel {
   font-family: var(--font-heading), sans-serif;
   font-size: 13px;
