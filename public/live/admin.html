@@ -815,29 +815,55 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 1rem;
+            gap: 0.85rem;
+            padding: 1rem;
+            /* Con todo más grande, una card angosta podría no dar abasto: mejor
+               que recorte adentro del cartel y no que se derrame sobre la card. */
+            overflow: hidden;
             z-index: 10;
         }
 
         .vista-proyectable .equipo-proyectable .overlay-terminado .listo-equipo-nombre {
-            font-size: 1.3rem;
+            font-size: 2rem;
             font-weight: 600;
             color: rgba(255, 255, 255, 0.9);
         }
 
         .vista-proyectable .equipo-proyectable .overlay-terminado .listo-texto {
-            font-size: 2rem;
+            font-size: 3.4rem;
             font-weight: 700;
             color: white;
+            line-height: 1;
+        }
+
+        /* Quiénes lo hicieron. La card en LISTO tapaba al equipo entero con un
+           cartel, y era la única que dejaba de decir quién había participado. */
+        .vista-proyectable .equipo-proyectable .overlay-terminado .listo-stats {
+            display: flex;
+            gap: 2.5rem;
+            color: white;
+            text-align: center;
+        }
+
+        .vista-proyectable .equipo-proyectable .overlay-terminado .listo-stats .n {
+            display: block;
+            font-size: 2.6rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .vista-proyectable .equipo-proyectable .overlay-terminado .listo-stats .que {
+            font-size: 1rem;
+            opacity: 0.85;
         }
 
         .vista-proyectable .equipo-proyectable .overlay-terminado .btn-ver-resultados-overlay {
             background: rgba(255, 255, 255, 0.25);
             border: 2px solid rgba(255, 255, 255, 0.5);
             color: white;
-            padding: 0.75rem 1.5rem;
+            padding: 0.9rem 2rem;
             border-radius: 10px;
-            font-size: 1.1rem;
+            font-size: 1.4rem;
             font-weight: 600;
             cursor: pointer;
             transition: background 0.2s;
@@ -984,11 +1010,42 @@
             flex-shrink: 0;
         }
 
+        /* Los botones de tamaño, del lado opuesto al de cerrar. */
+        .modal-resultados .controles-resultados {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .modal-resultados .btn-tamano {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .modal-resultados.modo-claro .btn-tamano {
+            background: rgba(0, 0, 0, 0.1);
+            color: #1e293b;
+        }
+
+        /* `--escala-resultados` la mueven esos dos botones. Toca la reflexión y
+           los accionables, que es lo que la sala tiene que poder leer; los
+           títulos y el pie se quedan como están para que agrandar el texto no
+           empuje todo fuera de la pantalla. */
         .modal-resultados .reflexion-texto {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 16px;
             padding: 1.5rem;
-            font-size: 1.4rem;
+            font-size: calc(1.4rem * var(--escala-resultados, 1));
             line-height: 1.7;
             flex: 1;
             overflow-y: auto;
@@ -1031,14 +1088,82 @@
         }
 
         .modal-resultados .accionable-item .texto {
-            font-size: 1.4rem;
+            font-size: calc(1.4rem * var(--escala-resultados, 1));
             line-height: 1.4;
         }
 
         .modal-resultados .accionable-item .responsable {
-            font-size: 1rem;
+            font-size: calc(1rem * var(--escala-resultados, 1));
             color: #94a3b8;
             margin-top: 0.25rem;
+        }
+
+        /* Pie: los dos números y la cinta con los nombres. */
+        .modal-resultados .resultados-pie {
+            flex-shrink: 0;
+            margin-top: 1.5rem;
+            padding-top: 1.25rem;
+            border-top: 1px solid rgba(128, 128, 128, 0.25);
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+        }
+
+        .modal-resultados .pie-numeros {
+            display: flex;
+            gap: 2.5rem;
+            flex-shrink: 0;
+            text-align: center;
+        }
+
+        .modal-resultados .pie-numeros .n {
+            display: block;
+            font-size: 2.4rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .modal-resultados .pie-numeros .que {
+            font-size: 1rem;
+            color: var(--color-texto-secundario);
+        }
+
+        .modal-resultados.modo-claro .pie-numeros .que {
+            color: #64748b;
+        }
+
+        /*
+            La cinta con los nombres de las organizaciones.
+            Esta sí da la vuelta en loop y no va y vuelve como la de las
+            estadísticas: son muchos nombres seguidos, y una ida y vuelta sobre
+            un recorrido tan largo tardaría una eternidad en devolverte al
+            principio. El contenido va duplicado y el desplazamiento llega hasta
+            la mitad justa, así que el corte cae donde empieza la copia y no se
+            ve costura.
+        */
+        .modal-resultados .pie-marquesina {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            font-size: 1.3rem;
+        }
+
+        .modal-resultados .pie-marquesina .cinta {
+            display: inline-flex;
+            white-space: nowrap;
+        }
+
+        .modal-resultados .pie-marquesina .cinta.corriendo {
+            animation: cinta var(--duracion, 30s) linear infinite;
+        }
+
+        .modal-resultados .pie-marquesina .cinta > span {
+            padding-right: 2rem;
+        }
+
+        @keyframes cinta {
+            from { transform: none; }
+            to   { transform: translateX(-50%); }
         }
 
         /* Botones en vista proyectable */
@@ -1864,6 +1989,11 @@
     <div class="modal-resultados" id="modalResultados">
         <button class="cerrar-modal" onclick="cerrarModalResultados()">✕</button>
 
+        <div class="controles-resultados">
+            <button class="btn-tamano" onclick="cambiarEscalaResultados(-1)" title="Achicar el texto" aria-label="Achicar el texto">−</button>
+            <button class="btn-tamano" onclick="cambiarEscalaResultados(1)" title="Agrandar el texto" aria-label="Agrandar el texto">+</button>
+        </div>
+
         <div class="slide-header">
             <div class="equipo-titulo" id="resultadosTitulo"></div>
             <div class="equipo-tema" id="resultadosTema"></div>
@@ -1881,6 +2011,16 @@
                     <!-- Se llena con JS -->
                 </div>
             </div>
+        </div>
+
+        <!-- Quiénes lo hicieron. Va al pie y no arriba: primero lo que el grupo
+             produjo, después quiénes lo produjeron. -->
+        <div class="resultados-pie">
+            <div class="pie-numeros">
+                <div><span class="n" id="resultadosPersonas">0</span><span class="que">personas</span></div>
+                <div><span class="n" id="resultadosOrganizaciones">0</span><span class="que">organizaciones</span></div>
+            </div>
+            <div class="pie-marquesina" id="resultadosCinta"></div>
         </div>
     </div>
 
@@ -2641,6 +2781,10 @@
                             <div class="overlay-terminado" style="background: ${equipo.color}">
                                 <div class="listo-equipo-nombre">${equipo.nombre}</div>
                                 <div class="listo-texto">✓ LISTO</div>
+                                <div class="listo-stats">
+                                    <div><span class="n">${total}</span><span class="que">personas</span></div>
+                                    <div><span class="n">${cooperativas.length}</span><span class="que">organizaciones</span></div>
+                                </div>
                                 <button class="btn-ver-resultados-overlay" onclick="event.stopPropagation(); mostrarResultados('${equipo.id}')">Ver resultados</button>
                             </div>
                         ` : ''}
@@ -3127,7 +3271,94 @@
                 </div>
             `).join('');
 
-            document.getElementById('modalResultados').classList.add('activo');
+            // Quiénes lo hicieron. Deduplicados igual que en todo el resto:
+            // una persona por nombre y organización, una organización por
+            // nombre sin distinguir mayúsculas.
+            const gente = participantesUnicos().filter(p => p.equipo_id === equipoId);
+            const organizaciones = organizacionesDe(gente);
+
+            document.getElementById('resultadosPersonas').textContent = gente.length;
+            document.getElementById('resultadosOrganizaciones').textContent = organizaciones.length;
+
+            const cinta = document.getElementById('resultadosCinta');
+            const texto = organizaciones.join(' · ');
+            // Duplicado para que el loop no tenga costura; si no hay nadie, la
+            // cinta queda vacía en vez de mostrar un separador suelto.
+            cinta.innerHTML = texto
+                ? `<div class="cinta"><span>${escaparHtml(texto)} · </span><span>${escaparHtml(texto)} · </span></div>`
+                : '';
+
+            const modal = document.getElementById('modalResultados');
+            modal.style.setProperty('--escala-resultados', escalaResultados());
+            modal.classList.add('activo');
+
+            // Después de mostrarlo, que es cuando se puede medir.
+            ajustarCinta();
+        }
+
+        /** Los nombres de las organizaciones, sin repetir y como se escribieron. */
+        function organizacionesDe(gente) {
+            const mapa = new Map();
+            for (const p of gente) {
+                const nombre = (p.cooperativa || '').trim();
+                if (!nombre) continue;
+                const clave = nombre.toLowerCase();
+                if (!mapa.has(clave)) mapa.set(clave, nombre);
+            }
+            return [...mapa.values()];
+        }
+
+        /**
+         * Pone a andar la cinta sólo si los nombres no entran.
+         *
+         * Con pocas organizaciones entra todo y moverlo sería un adorno que
+         * distrae; el ancho se mide sobre una sola de las dos copias, que es lo
+         * que realmente tiene que caber.
+         */
+        function ajustarCinta() {
+            const marco = document.getElementById('resultadosCinta');
+            const cinta = marco && marco.querySelector('.cinta');
+            if (!cinta) return;
+
+            const mitad = cinta.scrollWidth / 2;
+            if (mitad > marco.clientWidth) {
+                // Unos 60 px por segundo: rápido para no aburrir, lento para leer.
+                cinta.style.setProperty('--duracion', Math.max(12, (mitad * 2) / 60).toFixed(0) + 's');
+                cinta.classList.add('corriendo');
+            } else {
+                cinta.classList.remove('corriendo');
+            }
+        }
+
+        /*
+         * El tamaño de letra de la reflexión y los accionables.
+         *
+         * Uno solo para el modal y no uno por equipo: es la misma pantalla que
+         * se abre y se cierra, y tener que reacomodarla en cada equipo sería
+         * peor que elegir una vez.
+         */
+        const CLAVE_ESCALA_RESULTADOS = 'facttic_escala_resultados';
+
+        function escalaResultados() {
+            try {
+                const valor = parseFloat(localStorage.getItem(CLAVE_ESCALA_RESULTADOS));
+                return isFinite(valor) && valor > 0 ? valor : 1;
+            } catch {
+                return 1;
+            }
+        }
+
+        function cambiarEscalaResultados(pasos) {
+            const escala = Math.min(ESCALA_MAX, Math.max(ESCALA_MIN, escalaResultados() + pasos * ESCALA_PASO));
+            try {
+                localStorage.setItem(CLAVE_ESCALA_RESULTADOS, String(escala));
+            } catch {
+                // Vale para esta sesión y no se recuerda.
+            }
+            document.getElementById('modalResultados').style.setProperty('--escala-resultados', escala);
+
+            // El texto más grande puede empujar el ancho disponible del pie.
+            ajustarCinta();
         }
 
         function cerrarModalResultados() {
