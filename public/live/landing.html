@@ -60,14 +60,21 @@
             background-image: radial-gradient(circle at 50% 58%, rgba(107, 165, 74, 0.13), transparent 62%);
         }
 
-        .marca { display: flex; justify-content: center; min-height: 0; }
+        /* El `padding-top` va acá y no en el `body`: separa el logo del borde
+           de arriba sin correr también el pie, que se quiere pegado abajo. */
+        .marca {
+            display: flex;
+            justify-content: center;
+            min-height: 0;
+            padding-top: clamp(0.6rem, 3vh, 2.2rem);
+        }
 
         /* El logo manda en la portada: es lo primero que tiene que leerse
            desde el fondo de la sala. El `min-height: 0` de arriba y el de la
            escena son los que dejan que, si la pantalla es baja, lo que ceda
            sea la ilustración y no aparezca scroll. */
         .marca img {
-            height: clamp(76px, 24vh, 216px);
+            height: clamp(64px, 19vh, 172px);
             width: auto;
             max-width: 100%;
             object-fit: contain;
