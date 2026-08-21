@@ -2787,7 +2787,10 @@
 
             const accionables = equipos.reduce((n, e) =>
                 n + (e.accionables || []).filter(a => (a || '').trim()).length, 0);
-            const terminadas = gente.filter(p => p.terminado).length;
+            // El cierre lo manda el grupo, no cada persona: `terminado` en el
+            // participante es cómo lo ve su propia pantalla, y contar eso decía
+            // cuánta gente apretó un botón, no cuánto avanzó la actividad.
+            const gruposTerminados = equipos.filter(e => e.cerrado).length;
             const hace10 = Date.now() - 10 * 60 * 1000;
             const recientes = gente.filter(p => p.created_at && new Date(p.created_at).getTime() >= hace10).length;
 
@@ -2800,7 +2803,7 @@
                 </div>
                 <div class="stats-numeros">
                     ${numeroStats(accionables, 'Accionables escritos', color(3))}
-                    ${numeroStats(terminadas, 'Personas que terminaron', color(4))}
+                    ${numeroStats(gruposTerminados, 'Grupos que terminaron', color(4))}
                     ${numeroStats(recientes, 'Anotadas en los últimos 10 min', color(5))}
                 </div>`;
 
