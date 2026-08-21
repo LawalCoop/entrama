@@ -153,6 +153,42 @@ Verde hasta el 60%, ámbar hasta el 90%, rojo de ahí en adelante.
 con realtime, sus conexiones gastan cuota y no aparecen acá. Y una conexión que
 muere tarda unos segundos en desaparecer, hasta que vence el heartbeat.
 
+## El QR para sumarse
+
+Dos formas de que la sala llegue a la dinámica sin tipear nada:
+
+- **Desde la vista proyectable**, el botón *📱 QR para sumarse* lo abre a
+  pantalla completa encima de los equipos. Se cierra tocando en cualquier lado o
+  con Escape.
+- **`/live/qr.html`**, para que alguien lo abra en su celular y lo levante para
+  que otros lo escaneen.
+
+Las dos apuntan a `https://entrama.vercel.app/live/`, que redirige a la
+dinámica.
+
+El código es **un archivo estático**, `public/live/qr-live.svg`. La URL no
+cambia, así que no hay razón para cargar una librería y dibujarlo en el momento:
+así funciona sin internet, sin depender de un CDN y sin un script más. Está
+generado con corrección de errores **alta**, que es lo que lo hace legible
+proyectado, de lejos y en diagonal —a un tercio del código tapado sigue
+leyéndose—.
+
+Las dos pantallas van en **blanco**, aunque la proyectable esté en modo oscuro:
+una cámara lee mucho mejor un código negro sobre blanco, y acá la pantalla hace
+de papel. Por eso el popup del QR tampoco hereda el switch de modo claro.
+
+Para regenerarlo si algún día cambia la URL, con `segno`:
+
+```
+segno.make('https://entrama.vercel.app/live/', error='h').save(
+    'public/live/qr-live.svg', kind='svg', scale=1, border=2,
+    dark='#111827', light='#ffffff')
+```
+
+y agregarle al `<svg>` el `viewBox="0 0 37 37"`, `width/height="100%"` y
+`shape-rendering="crispEdges"` que tiene el actual: sin eso no escala, o escala
+borroso.
+
 ## El catálogo de cooperativas
 
 `cooperativas` no lleva prefijo porque dejó de ser de la dinámica: la comparte

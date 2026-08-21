@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sumate a la dinámica</title>
+    <style>
+        /*
+         * La pantalla para que alguien levante el celular y los demás le
+         * escaneen el código.
+         *
+         * Va en claro y no en el oscuro del resto de la app: la cámara de otro
+         * teléfono lee mucho mejor un código negro sobre blanco a pleno brillo
+         * que uno sobre un fondo oscuro, sobre todo de lejos y en una sala con
+         * luz despareja.
+         */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #ffffff;
+            color: #111827;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .logo { height: 42px; width: auto; }
+
+        h1 {
+            font-size: clamp(1.3rem, 5vw, 1.8rem);
+            font-weight: 700;
+        }
+
+        /* El QR manda: se lleva todo el espacio que sobre, acotado para que en
+           una pantalla ancha no quede una plancha gigante con los bordes
+           cortados. */
+        .qr {
+            width: min(78vw, 62vh, 520px);
+            aspect-ratio: 1;
+            display: block;
+        }
+
+        .url {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: clamp(0.85rem, 3.2vw, 1rem);
+            color: #4b5563;
+            word-break: break-all;
+        }
+
+        .pie {
+            font-size: 0.75rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pie img { height: 13px; width: auto; display: block; }
+        .pie img.logo-facttic { height: 15px; }
+        .pie a { display: inline-flex; align-items: center; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <img class="logo" src="logo_alimentos_oscuro.png" alt="Alimentos Cooperativos">
+
+    <h1>Escaneá para sumarte</h1>
+
+    <img class="qr" src="qr-live.svg" alt="Código QR que lleva a la dinámica">
+
+    <p class="url">entrama.vercel.app/live/</p>
+
+    <p class="pie">
+        <span>Powered by</span>
+        <a href="https://lawal.coop" target="_blank" rel="noopener noreferrer"><img src="logo_lawal_oscuro.png" alt="Lawal"></a>
+        <span>y</span>
+        <a href="https://facttic.org.ar" target="_blank" rel="noopener noreferrer"><img class="logo-facttic" src="logo_facttic_oscuro.png" alt="FACTTIC"></a>
+    </p>
+</body>
+</html>

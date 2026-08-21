@@ -512,6 +512,68 @@
             color: var(--color-texto-secundario);
         }
 
+        /*
+         * El QR proyectado, para que la sala lo escanee desde su asiento.
+         *
+         * Fondo blanco aunque la proyectable esté en oscuro: una cámara lee
+         * mucho mejor un código negro sobre blanco, y acá la pantalla es el
+         * papel. Por eso tampoco hereda el modo claro/oscuro del switch.
+         *
+         * Va por encima de la vista proyectable (z-index 200), así que 300.
+         */
+        .qr-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            background: #ffffff;
+            color: #111827;
+            padding: 2rem;
+            cursor: pointer;
+        }
+
+        .qr-overlay.activo { display: flex; }
+
+        .qr-overlay .qr-caja {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.2rem;
+            text-align: center;
+        }
+
+        .qr-overlay h2 {
+            font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        /* Se lleva el alto disponible: proyectado y de lejos, cuanto más grande
+           mejor. Acotado para que no se coma los textos de arriba y abajo. */
+        .qr-overlay img {
+            width: min(70vh, 70vw);
+            height: min(70vh, 70vw);
+            display: block;
+        }
+
+        .qr-overlay .qr-url {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: clamp(1rem, 2vw, 1.4rem);
+            color: #4b5563;
+            margin: 0;
+        }
+
+        .qr-overlay .qr-ayuda {
+            position: absolute;
+            bottom: 1.2rem;
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
         /* Modo claro */
         .vista-proyectable.modo-claro {
             background: #f1f5f9;
@@ -1429,6 +1491,7 @@
                 <span class="slider"></span>
                 <span class="switch-label">☀️ Modo claro</span>
             </label>
+            <button class="btn btn-secondary" onclick="abrirQR()">📱 QR para sumarse</button>
             <button class="btn btn-secondary cerrar" onclick="cerrarVistaProyectable()">✕ Cerrar</button>
         </div>
         <div class="header-proyectable">
@@ -2013,6 +2076,23 @@
          * En la dinámica el cambio llega por realtime: a quien esté en la
          * pantalla de "¡Listo!" lo devuelve a la de su equipo.
          */
+        /**
+         * El QR a pantalla completa, encima de la vista proyectable.
+         *
+         * El código es un archivo estático (`qr-live.svg`) y no algo que se
+         * genere en el momento: la URL no cambia, así que no hace falta cargar
+         * una librería ni depender de que haya internet para dibujarlo. Está
+         * generado con corrección de errores alta, que es lo que hace que se
+         * lea proyectado, de lejos y en diagonal.
+         */
+        function abrirQR() {
+            document.getElementById('qrOverlay').classList.add('activo');
+        }
+
+        function cerrarQR() {
+            document.getElementById('qrOverlay').classList.remove('activo');
+        }
+
         async function reabrirEquipo(id) {
             const { error } = await supabase
                 .from('facttic_equipos')
@@ -3099,6 +3179,12 @@
             }, 3000);
         }
 
+        // Escape cierra el QR. Se conduce desde el teclado con la proyección en
+        // pantalla, y buscar el mouse para volver a los equipos es un bache.
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') cerrarQR();
+        });
+
         // Enter para login
         document.getElementById('passwordInput').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') login();
@@ -3109,5 +3195,15 @@
             mostrarAdmin();
         }
     </script>
+    <!-- QR para proyectar -->
+    <div class="qr-overlay" id="qrOverlay" onclick="cerrarQR()">
+        <div class="qr-caja">
+            <h2>Escaneá para sumarte</h2>
+            <img src="qr-live.svg" alt="Código QR que lleva a la dinámica">
+            <p class="qr-url">entrama.vercel.app/live/</p>
+        </div>
+        <div class="qr-ayuda">Tocá en cualquier lado para cerrar</div>
+    </div>
+
 </body>
 </html>
