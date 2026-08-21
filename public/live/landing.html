@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Encuentro de Alimentos Cooperativos · Rosario 2026</title>
+    <style>
+        /*
+         * La portada del encuentro: logo, dónde, cuándo y el lema.
+         *
+         * Está pensada para quedar puesta y no tocarse más —proyectada en la
+         * sala, o en una tablet sobre la mesa de acreditación—. De ahí las dos
+         * decisiones que mandan sobre todo lo demás:
+         *
+         * 1. **No se scrollea.** El alto es `100dvh` con `overflow: hidden`, y
+         *    todo mide en `clamp()` sobre unidades de viewport. Nadie va a
+         *    estar ahí para arrastrar la pantalla: lo que no entra, no existe.
+         *
+         * 2. **Todo loopea, para siempre.** Ninguna animación termina
+         *    (`infinite` / `repeatCount="indefinite"`) ni deja un estado final
+         *    distinto del inicial. Una animación que corre una vez y se congela
+         *    deja la pantalla muerta a los diez segundos de encenderla.
+         *
+         * Va en oscuro como el resto de la app (`dinamica.html`), no en el
+         * blanco de `qr.html`: ese blanco está para que la cámara de otro
+         * teléfono lea el código, y acá no hay nada que escanear.
+         */
+        :root {
+            --color-fondo: #0f172a;
+            --color-texto: #f1f5f9;
+            --color-texto-secundario: #94a3b8;
+            /* El verde de Alimentos Cooperativos, igual que en la dinámica. */
+            --verde: #6ba54a;
+            --verde-claro: #8fc46b;
+            --trigo: #e8a33d;
+            --tomate: #d96f4a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { height: 100%; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--color-fondo);
+            color: var(--color-texto);
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: clamp(0.5rem, 2vh, 1.5rem);
+            padding: clamp(1rem, 3.5vh, 2.5rem) clamp(1rem, 4vw, 3rem);
+            /* Un resplandor verde detrás de la ronda. Es un degradé quieto: la
+               única forma de que el fondo tenga temperatura sin sumar una
+               animación más que compita con la del centro. */
+            background-image: radial-gradient(circle at 50% 55%, rgba(107, 165, 74, 0.16), transparent 60%);
+        }
+
+        .marca { display: flex; justify-content: center; }
+        .marca img { height: clamp(30px, 6vh, 54px); width: auto; }
+
+        /* En pantalla apaisada —el proyector, que es el caso real— el texto y
+           la ronda van uno al lado del otro. Apilados desperdiciarían todo el
+           ancho y obligarían a achicar la tipografía hasta no leerse de lejos. */
+        .escena {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            align-items: center;
+            justify-items: center;
+            gap: clamp(0.5rem, 2vh, 1.5rem);
+            min-height: 0;
+        }
+
+        @media (min-width: 820px) and (min-aspect-ratio: 1/1) {
+            .escena {
+                grid-template-rows: 1fr;
+                grid-template-columns: 1.1fr 0.9fr;
+                gap: clamp(1rem, 4vw, 4rem);
+            }
+            .texto { text-align: left; justify-items: start; }
+            .lugar { justify-content: flex-start; }
+        }
+
+        .texto {
+            display: grid;
+            gap: clamp(0.4rem, 1.6vh, 1rem);
+            justify-items: center;
+            text-align: center;
+            min-width: 0;
+        }
+
+        .antetitulo {
+            font-size: clamp(0.7rem, 1.7vh, 0.95rem);
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--verde-claro);
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: clamp(1.75rem, 6.2vh, 4.2rem);
+            line-height: 1.05;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            text-wrap: balance;
+        }
+
+        /* "reconstrucción" en verde: el lema es un movimiento de un estado al
+           otro, y el color marca hacia dónde va sin tener que explicarlo. */
+        h1 .destino { color: var(--verde-claro); }
+
+        .lugar {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.5rem, 1.5vw, 0.9rem);
+            flex-wrap: wrap;
+            justify-content: center;
+            font-size: clamp(0.95rem, 2.6vh, 1.5rem);
+            font-weight: 600;
+        }
+
+        .lugar .ciudad { color: var(--color-texto); }
+        .lugar .sep { color: var(--verde); }
+        .lugar .fecha { color: var(--color-texto-secundario); font-weight: 500; }
+
+        /* El SVG se lleva lo que sobra, sin empujar nada: `min-height: 0` en la
+           cadena de grids es lo que evita que un hijo flexible desborde el alto
+           fijo del body y devuelva el scroll que no queremos. */
+        .ronda {
+            display: grid;
+            place-items: center;
+            min-height: 0;
+            min-width: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .ronda svg {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            display: block;
+        }
+
+        .pie {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            font-size: clamp(0.62rem, 1.3vh, 0.75rem);
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--color-texto-secundario);
+        }
+
+        .pie img { height: 13px; width: auto; display: block; }
+        .pie img.logo-facttic { height: 15px; }
+        .pie a { display: inline-flex; align-items: center; text-decoration: none; }
+
+        /*
+         * La ronda: seis personas pasándose comida alrededor de una olla.
+         *
+         * Nadie es el centro. La comida da vueltas y vuelve, que es lo que
+         * hace que el loop no se note como loop: no hay principio ni final
+         * porque el gesto que muestra tampoco los tiene.
+         */
+
+        /* Las personas respiran, con el arranque corrido una de otra. Todas al
+           mismo tiempo latirían como un solo bloque; corridas, la ronda parece
+           gente y no un engranaje. */
+        .persona {
+            animation: respirar 4s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center;
+        }
+
+        @keyframes respirar {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50%      { transform: translateY(-3px) scale(1.04); }
+        }
+
+        /* El círculo punteado gira despacio y sin pausa: `linear` y una vuelta
+           entera, así el fotograma final es idéntico al primero y el salto del
+           loop no se ve. */
+        .orbita {
+            animation: girar 60s linear infinite;
+            transform-box: view-box;
+            transform-origin: 200px 200px;
+        }
+
+        @keyframes girar {
+            from { transform: rotate(0deg); }
+            to   { transform: rotate(360deg); }
+        }
+
+        .olla { animation: hervir 3.2s ease-in-out infinite; transform-box: fill-box; transform-origin: center bottom; }
+
+        @keyframes hervir {
+            0%, 100% { transform: scaleY(1); }
+            50%      { transform: scaleY(1.03); }
+        }
+
+        /* El vapor sube, se abre y se desvanece. Vuelve a empezar con opacidad
+           0, no con 1: si no, cada repetición arrancaría con un parpadeo. */
+        .vapor {
+            animation: subir 3.6s ease-out infinite;
+            transform-box: fill-box;
+            transform-origin: center bottom;
+        }
+
+        .vapor-2 { animation-delay: 1.2s; }
+        .vapor-3 { animation-delay: 2.4s; }
+
+        @keyframes subir {
+            0%   { opacity: 0; transform: translateY(6px) scaleX(0.6); }
+            25%  { opacity: 0.55; }
+            100% { opacity: 0; transform: translateY(-30px) scaleX(1.3); }
+        }
+
+        /* El brote del pie: crece, y en vez de desaparecer vuelve a encogerse.
+           Cerrar el ciclo sobre el mismo estado es lo que permite que loopee
+           sin cortes. */
+        .brote {
+            animation: brotar 6s ease-in-out infinite;
+            transform-box: fill-box;
+            transform-origin: center bottom;
+        }
+
+        .brote-2 { animation-delay: 2s; }
+        .brote-3 { animation-delay: 4s; }
+
+        @keyframes brotar {
+            0%, 100% { transform: scaleY(0.55); opacity: 0.35; }
+            50%      { transform: scaleY(1); opacity: 0.9; }
+        }
+
+        /*
+         * Si en la máquina que proyecta alguien pidió menos movimiento, se lo
+         * respeta: queda la misma escena, quieta y completa. Nada de lo que
+         * anima acá aporta información que no esté también en el cuadro fijo.
+         */
+        @media (prefers-reduced-motion: reduce) {
+            .persona, .orbita, .olla, .vapor, .brote { animation: none; }
+            .vapor { opacity: 0.4; }
+            .comida { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <header class="marca">
+        <img src="logo_alimentos_claro.png" alt="Alimentos Cooperativos">
+    </header>
+
+    <main class="escena">
+        <div class="texto">
+            <p class="antetitulo">Encuentro en Rosario</p>
+
+            <h1>De la resistencia<br>a la <span class="destino">reconstrucción</span></h1>
+
+            <p class="lugar">
+                <span class="ciudad">Rosario</span>
+                <span class="sep">·</span>
+                <span class="fecha">21, 22 y 23 de agosto de 2026</span>
+            </p>
+        </div>
+
+        <div class="ronda">
+            <!-- `aria-hidden`: es decorativo. Lo que la animación cuenta ya
+                 está escrito al lado, y anunciarlo de nuevo sólo estorbaría. -->
+            <svg viewBox="0 0 400 400" role="presentation" aria-hidden="true" focusable="false">
+                <defs>
+                    <!-- Una persona sola, instanciada seis veces con <use>. Que
+                         todas salgan del mismo glifo es a propósito: en la
+                         ronda nadie tiene una forma distinta. -->
+                    <g id="persona">
+                        <circle cx="0" cy="-15" r="9"/>
+                        <path d="M -14 13 a 14 14 0 0 1 28 0 z"/>
+                    </g>
+
+                    <!-- La comida que se pasan. Tres cosas distintas, no tres
+                         copias de la misma: lo que circula es variado. -->
+                    <g id="tomate">
+                        <circle cx="0" cy="0" r="8" fill="#d96f4a"/>
+                        <path d="M 0 -8 q 6 -6 10 -3 q -3 6 -10 4 z" fill="#6ba54a"/>
+                    </g>
+
+                    <g id="pan">
+                        <rect x="-10" y="-6" width="20" height="12" rx="6" fill="#e8a33d"/>
+                        <path d="M -5 -3 l 3 -2 M 0 -3 l 3 -2 M 5 -3 l 3 -2" stroke="#b97c22" stroke-width="1.6" stroke-linecap="round" fill="none"/>
+                    </g>
+
+                    <g id="espiga">
+                        <path d="M 0 8 L 0 -8" stroke="#8fc46b" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M 0 -6 q 6 -1 7 -6 q -6 0 -7 4 z M 0 -1 q 6 -1 7 -6 q -6 0 -7 4 z M 0 4 q 6 -1 7 -6 q -6 0 -7 4 z" fill="#e8a33d"/>
+                        <path d="M 0 -6 q -6 -1 -7 -6 q 6 0 7 4 z M 0 -1 q -6 -1 -7 -6 q 6 0 7 4 z M 0 4 q -6 -1 -7 -6 q 6 0 7 4 z" fill="#e8a33d"/>
+                    </g>
+                </defs>
+
+                <!-- El círculo por el que va la comida, dibujado tenue: se ve
+                     que hay un camino, y que el camino se cierra. -->
+                <circle class="orbita" cx="200" cy="200" r="98" fill="none"
+                        stroke="#6ba54a" stroke-opacity="0.35" stroke-width="1.5"
+                        stroke-dasharray="4 10" stroke-linecap="round"/>
+
+                <!-- La olla del medio: lo que se cocina entre todos. -->
+                <g class="vapor vapor-1" fill="none" stroke="#8fc46b" stroke-width="3" stroke-linecap="round">
+                    <path d="M 186 182 q 4 -8 0 -16"/>
+                </g>
+                <g class="vapor vapor-2" fill="none" stroke="#8fc46b" stroke-width="3" stroke-linecap="round">
+                    <path d="M 200 178 q 4 -9 0 -18"/>
+                </g>
+                <g class="vapor vapor-3" fill="none" stroke="#8fc46b" stroke-width="3" stroke-linecap="round">
+                    <path d="M 214 182 q 4 -8 0 -16"/>
+                </g>
+
+                <g class="olla">
+                    <path d="M 164 190 h 72 l -7 30 a 14 14 0 0 1 -14 11 h -30 a 14 14 0 0 1 -14 -11 z" fill="#6ba54a"/>
+                    <rect x="158" y="184" width="84" height="9" rx="4.5" fill="#8fc46b"/>
+                </g>
+
+                <!-- Las seis personas. Van sobre un radio de 118 y la comida
+                     sobre uno de 98: pasa por delante, entre las manos y la
+                     olla, en vez de chocarse contra los cuerpos. -->
+                <g fill="#f1f5f9">
+                    <g class="persona" style="animation-delay: 0s"><use href="#persona" transform="translate(200 82)"/></g>
+                    <g class="persona" style="animation-delay: 0.66s" fill="#8fc46b"><use href="#persona" transform="translate(302 141)"/></g>
+                    <g class="persona" style="animation-delay: 1.33s"><use href="#persona" transform="translate(302 259)"/></g>
+                    <g class="persona" style="animation-delay: 2s" fill="#e8a33d"><use href="#persona" transform="translate(200 318)"/></g>
+                    <g class="persona" style="animation-delay: 2.66s"><use href="#persona" transform="translate(98 259)"/></g>
+                    <g class="persona" style="animation-delay: 3.33s" fill="#d96f4a"><use href="#persona" transform="translate(98 141)"/></g>
+                </g>
+
+                <!--
+                  La comida girando, con <animateMotion> y `repeatCount
+                  ="indefinite"`.
+
+                  El camino es un círculo cerrado que empieza y termina en el
+                  mismo punto (200,102), así que la vuelta no tiene costura.
+                  Los `begin` negativos arrancan las tres piezas ya empezadas y
+                  repartidas —a un tercio y a dos tercios del recorrido—: sin
+                  eso saldrían juntas del mismo lugar y la primera vuelta se
+                  vería distinta de todas las que siguen.
+                -->
+                <g class="comida">
+                    <use href="#tomate">
+                        <animateMotion dur="18s" repeatCount="indefinite" begin="0s"
+                                       path="M 200 102 a 98 98 0 1 1 0 196 a 98 98 0 1 1 0 -196"/>
+                    </use>
+                    <use href="#pan">
+                        <animateMotion dur="18s" repeatCount="indefinite" begin="-6s"
+                                       path="M 200 102 a 98 98 0 1 1 0 196 a 98 98 0 1 1 0 -196"/>
+                    </use>
+                    <use href="#espiga">
+                        <animateMotion dur="18s" repeatCount="indefinite" begin="-12s"
+                                       path="M 200 102 a 98 98 0 1 1 0 196 a 98 98 0 1 1 0 -196"/>
+                    </use>
+                </g>
+
+                <!-- Tres brotes al pie: lo que se reconstruye empieza abajo. -->
+                <g stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none">
+                    <path class="brote brote-1" d="M 150 392 q 0 -14 -8 -20 M 150 392 q 0 -10 8 -14"/>
+                    <path class="brote brote-2" d="M 200 396 q 0 -16 -9 -22 M 200 396 q 0 -11 9 -16"/>
+                    <path class="brote brote-3" d="M 250 392 q 0 -14 -8 -20 M 250 392 q 0 -10 8 -14"/>
+                </g>
+            </svg>
+        </div>
+    </main>
+
+    <footer class="pie">
+        <span>Powered by</span>
+        <a href="https://lawal.coop" target="_blank" rel="noopener noreferrer"><img src="logo_lawal_claro.png" alt="Lawal"></a>
+        <span>y</span>
+        <a href="https://facttic.org.ar" target="_blank" rel="noopener noreferrer"><img class="logo-facttic" src="logo_facttic.png" alt="FACTTIC"></a>
+    </footer>
+</body>
+</html>
