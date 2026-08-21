@@ -1083,6 +1083,30 @@
            tarjeta, igual que la lista de organizaciones de la vista de equipos.
            Proyectando, una barra de scroll en la página es una barra que nadie
            va a mover. */
+        /* El fondo de las tarjetas sale de una variable para que el modo claro
+           lo cambie en un solo lugar. Antes usaban `--color-card` directo, que
+           es azul oscuro, así que en modo claro quedaban oscuras sobre claro. */
+        .vista-stats { --fondo-tarjeta: var(--color-card); }
+        .vista-stats.modo-claro { --fondo-tarjeta: white; }
+
+        .vista-stats.modo-claro .stats-numero,
+        .vista-stats.modo-claro .stats-bloque {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .vista-stats.modo-claro .stats-bloque h2 { color: #1e293b; }
+
+        .vista-stats.modo-claro .stats-numero .etiqueta,
+        .vista-stats.modo-claro .stats-bloque .nota,
+        .vista-stats.modo-claro .stats-bloque .paginacion,
+        .vista-stats.modo-claro .stats-barra .nombre,
+        .vista-stats.modo-claro .stats-barra .valor { color: #1e293b; }
+
+        .vista-stats.modo-claro .stats-numero .etiqueta,
+        .vista-stats.modo-claro .stats-bloque .nota,
+        .vista-stats.modo-claro .stats-bloque .paginacion,
+        .vista-stats.modo-claro .stats-barra .segundo { color: #64748b; }
+
         .vista-stats .stats-cuerpo {
             flex: 1;
             display: flex;
@@ -1101,7 +1125,7 @@
         }
 
         .vista-stats .stats-numero {
-            background: var(--color-card);
+            background: var(--fondo-tarjeta);
             border-radius: 12px;
             padding: 1rem;
             text-align: center;
@@ -1134,7 +1158,7 @@
            recortar la lista sería peor todavía: dejaría afuera justo a las
            organizaciones que vinieron con una sola persona. */
         .vista-stats .stats-bloque {
-            background: var(--color-card);
+            background: var(--fondo-tarjeta);
             border-radius: 12px;
             border-top: 4px solid var(--acento, var(--color-primary));
             padding: 1rem 1.25rem;
@@ -1175,13 +1199,29 @@
             —la etiqueta va pegada a su barra— y no dependen de distinguir
             colores desde lejos.
         */
+        /*
+            La fila es un gráfico de barras, no una etiqueta con un adorno al
+            lado. Se saca el riel gris —sugería un porcentaje de algo, y acá no
+            hay total— y la barra pasa a ser el dato: todas arrancan en la misma
+            x, así que el largo se compara solo. El número viaja pegado a la
+            punta en vez de alineado a la derecha: si estuviera en una columna
+            fija, el ojo compararía números en vez de largos, que es justo lo que
+            no queremos que haga falta.
+        */
         .vista-stats .stats-barra {
             display: grid;
-            grid-template-columns: 13rem 1fr auto;
+            grid-template-columns: 0.9rem 12rem 1fr;
             align-items: center;
-            gap: 0.9rem;
-            padding: 0.4rem 0;
+            gap: 0.75rem;
+            padding: 0.35rem 0;
             font-size: 1.35rem;
+        }
+
+        /* El cuadradito de color, que ata cada fila con la paleta de los equipos. */
+        .vista-stats .stats-barra .marca {
+            width: 0.9rem;
+            height: 0.9rem;
+            border-radius: 3px;
         }
 
         .vista-stats .stats-barra .nombre {
@@ -1190,29 +1230,41 @@
             white-space: nowrap;
         }
 
-        .vista-stats .stats-barra .riel {
-            background: rgba(128, 128, 128, 0.2);
-            border-radius: 999px;
-            height: 1.1rem;
-            overflow: hidden;
+        .vista-stats .stats-barra .medida {
+            white-space: nowrap;
         }
 
         .vista-stats .stats-barra .relleno {
-            height: 100%;
-            border-radius: 999px;
-            min-width: 2px;
+            display: inline-block;
+            vertical-align: middle;
+            height: 1.5rem;
+            border-radius: 4px;
+            min-width: 4px;
+            transition: width 0.4s ease-out;
         }
 
         .vista-stats .stats-barra .valor {
+            margin-left: 0.6rem;
+            vertical-align: middle;
             font-weight: 600;
             font-variant-numeric: tabular-nums;
         }
 
-        /* El segundo número de la barra: organizaciones detrás de las personas. */
         .vista-stats .stats-barra .valor .segundo {
             font-weight: normal;
             font-size: 0.95rem;
             color: var(--color-texto-secundario);
+        }
+
+        /* El cambio de tanda entra con un desplazamiento corto. Sin nada, la
+           lista se reemplaza de golpe y se lee como que cambió el dato. */
+        @keyframes entrarTanda {
+            from { opacity: 0; transform: translateY(0.6rem); }
+            to   { opacity: 1; transform: none; }
+        }
+
+        .vista-stats .stats-filas.cambiando {
+            animation: entrarTanda 0.45s ease-out;
         }
 
         .vista-stats .stats-vacio {
@@ -2653,14 +2705,18 @@
             return clave === 'estado' ? 'Estado' : nombreDeTipo(clave);
         }
 
+        // Hasta dónde puede llegar la barra más larga. No llega a 100 porque el
+        // número viaja pegado a su punta y necesita lugar para entrar.
+        const BARRA_MAX = 78;
+
         function barraStats(nombre, valor, maximo, color, segundo) {
-            const pct = maximo > 0 ? Math.max(2, Math.round((valor / maximo) * 100)) : 0;
+            const pct = maximo > 0 ? Math.max(1.5, (valor / maximo) * BARRA_MAX) : 0;
             const extra = segundo == null ? '' : ` <span class="segundo">· ${segundo} org.</span>`;
             return `
                 <div class="stats-barra">
+                    <span class="marca" style="background: ${color}"></span>
                     <span class="nombre" title="${escaparHtml(nombre)}">${escaparHtml(nombre)}</span>
-                    <span class="riel"><span class="relleno" style="width: ${pct}%; background: ${color}"></span></span>
-                    <span class="valor">${valor}${extra}</span>
+                    <span class="medida"><span class="relleno" style="width: ${pct.toFixed(1)}%; background: ${color}"></span><span class="valor">${valor}${extra}</span></span>
                 </div>`;
         }
 
@@ -2693,9 +2749,10 @@
          */
         const paginaDeBloque = {};
 
-        function aplicarPaginacion() {
+        function aplicarPaginacion(soloClave, animar) {
             document.querySelectorAll('#statsCuerpo .stats-filas').forEach(contenedor => {
                 const clave = contenedor.dataset.bloque;
+                if (soloClave && clave !== soloClave) return;
                 const filas = [...contenedor.children];
                 if (!filas.length) return;
 
@@ -2717,17 +2774,44 @@
 
                 const indicador = document.querySelector(`[data-indicador="${clave}"]`);
                 if (indicador) indicador.textContent = paginas > 1 ? `${pagina + 1}/${paginas}` : '';
+
+                // Sólo cuando la tanda cambió de verdad. Animar también en el
+                // refresco de datos de cada tres segundos haría parpadear la
+                // pantalla sin que hubiera pasado nada.
+                if (animar && paginas > 1) {
+                    contenedor.classList.remove('cambiando');
+                    void contenedor.offsetWidth; // fuerza el reinicio de la animación
+                    contenedor.classList.add('cambiando');
+                }
             });
         }
 
-        function avanzarPaginas() {
+        function avanzarBloque(clave) {
             const vista = document.getElementById('vistaStats');
             if (!vista || !vista.classList.contains('activo')) return;
-            for (const clave of Object.keys(paginaDeBloque)) paginaDeBloque[clave]++;
-            aplicarPaginacion();
+            if (!(clave in paginaDeBloque)) return;
+
+            paginaDeBloque[clave]++;
+            aplicarPaginacion(clave, true);
         }
 
-        setInterval(avanzarPaginas, 5000);
+        /*
+         * Cada bloque rota por su cuenta, desfasado de los otros.
+         *
+         * Los tres saltando juntos convertían la pantalla entera en un
+         * parpadeo cada cinco segundos, y no dejaba leer ninguno: cuando
+         * empezabas con el segundo, ya se te había ido el primero. Escalonados,
+         * en cualquier momento hay algo quieto para mirar.
+         */
+        const BLOQUES = ['tipo', 'actividad', 'provincia'];
+        const CADA = 5000;
+
+        BLOQUES.forEach((clave, i) => {
+            setTimeout(
+                () => setInterval(() => avanzarBloque(clave), CADA),
+                (i * CADA) / BLOQUES.length,
+            );
+        });
 
         function numeroStats(valor, etiqueta, color) {
             return `<div class="stats-numero"><div class="valor" style="color: ${color}">${valor}</div><div class="etiqueta">${etiqueta}</div></div>`;
