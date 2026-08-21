@@ -1078,6 +1078,116 @@
             font-weight: 600;
         }
 
+        /* Estadísticas */
+        .vista-stats .stats-cuerpo {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        /* Los números que se leen desde el fondo de la sala. */
+        .vista-stats .stats-numeros {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .vista-stats .stats-numero {
+            background: var(--color-card);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .vista-stats .stats-numero .valor {
+            font-size: 3.5rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .vista-stats .stats-numero .etiqueta {
+            margin-top: 0.35rem;
+            font-size: 0.95rem;
+            color: var(--color-texto-secundario);
+        }
+
+        .vista-stats .stats-bloques {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+            gap: 1rem;
+        }
+
+        .vista-stats .stats-bloque {
+            background: var(--color-card);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+        }
+
+        .vista-stats .stats-bloque h2 {
+            font-size: 1.15rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .vista-stats .stats-bloque .nota {
+            font-size: 0.85rem;
+            font-weight: normal;
+            color: var(--color-texto-secundario);
+        }
+
+        /*
+            Barras y no tortas: proyectadas se leen mejor, no necesitan leyenda
+            —la etiqueta va pegada a su barra— y no dependen de distinguir
+            colores desde lejos.
+        */
+        .vista-stats .stats-barra {
+            display: grid;
+            grid-template-columns: 11rem 1fr auto;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.3rem 0;
+            font-size: 1.05rem;
+        }
+
+        .vista-stats .stats-barra .nombre {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .vista-stats .stats-barra .riel {
+            background: rgba(128, 128, 128, 0.2);
+            border-radius: 999px;
+            height: 0.85rem;
+            overflow: hidden;
+        }
+
+        .vista-stats .stats-barra .relleno {
+            height: 100%;
+            border-radius: 999px;
+            min-width: 2px;
+        }
+
+        .vista-stats .stats-barra .valor {
+            font-weight: 600;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* El segundo número de la barra: organizaciones detrás de las personas. */
+        .vista-stats .stats-barra .valor .segundo {
+            font-weight: normal;
+            font-size: 0.85rem;
+            color: var(--color-texto-secundario);
+        }
+
+        .vista-stats .stats-vacio {
+            color: var(--color-texto-secundario);
+            font-size: 1rem;
+        }
+
         /* Modal Descripción */
         .modal-descripcion {
             position: fixed;
@@ -1526,10 +1636,11 @@
     <div class="vista-proyectable" id="vistaProyectable">
         <div class="controles-proyectable izquierda">
             <label class="switch-tema">
-                <input type="checkbox" id="switchModoClaro" onchange="toggleModoClaro()">
+                <input type="checkbox" id="switchModoClaro" onchange="toggleModoClaro(this)">
                 <span class="slider"></span>
                 <span class="switch-label">☀️ Modo claro</span>
             </label>
+            <button class="btn btn-secondary" onclick="abrirVistaStats()">📊 Stats</button>
         </div>
         <div class="controles-proyectable">
             <button class="btn btn-secondary" onclick="abrirQR()">📱 QR para sumarse</button>
@@ -1542,6 +1653,48 @@
             <div class="timer-grande" id="timerProyectable">--:--</div>
         </div>
         <div class="equipos-proyectable" id="equiposProyectable">
+            <!-- Se llena con JS -->
+        </div>
+
+        <footer class="pie-marca">
+            <span>Powered by</span>
+            <a href="https://lawal.coop" target="_blank" rel="noopener noreferrer">
+                <img class="logo-en-oscuro" src="logo_lawal_claro.png" alt="Lawal">
+                <img class="logo-en-claro" src="logo_lawal_oscuro.png" alt="Lawal">
+            </a>
+            <span>y</span>
+            <a href="https://facttic.org.ar" target="_blank" rel="noopener noreferrer">
+                <img class="logo-facttic logo-en-oscuro" src="logo_facttic.png" alt="FACTTIC">
+                <img class="logo-facttic logo-en-claro" src="logo_facttic_oscuro.png" alt="FACTTIC">
+            </a>
+        </footer>
+    </div>
+
+    <!--
+        Estadísticas.
+
+        Comparte la clase `vista-proyectable` a propósito: así hereda el fondo, el
+        modo claro, los controles, el header y el pie sin duplicar una línea de
+        CSS. `vista-stats` sólo cambia lo que va adentro.
+    -->
+    <div class="vista-proyectable vista-stats" id="vistaStats">
+        <div class="controles-proyectable izquierda">
+            <label class="switch-tema">
+                <input type="checkbox" id="switchModoClaroStats" onchange="toggleModoClaro(this)">
+                <span class="slider"></span>
+                <span class="switch-label">☀️ Modo claro</span>
+            </label>
+        </div>
+        <div class="controles-proyectable">
+            <button class="btn btn-secondary" onclick="volverAEquipos()">← Equipos</button>
+            <button class="btn btn-secondary cerrar" onclick="cerrarVistaStats()">✕ Cerrar</button>
+        </div>
+        <div class="header-proyectable">
+            <img class="logo-en-oscuro" src="logo_alimentos_claro.png" alt="Alimentos Cooperativos" style="height: 50px;">
+            <img class="logo-en-claro" src="logo_alimentos_oscuro.png" alt="Alimentos Cooperativos" style="height: 50px;">
+            <h1>Estadísticas</h1>
+        </div>
+        <div class="stats-cuerpo" id="statsCuerpo">
             <!-- Se llena con JS -->
         </div>
 
@@ -1739,6 +1892,7 @@
             renderizarCooperativas();
             renderizarParticipantes();
             renderizarVistaProyectable();
+            renderizarStats();
         }
 
         // Dashboard
@@ -2362,6 +2516,240 @@
             }).join('');
         }
 
+        /*
+         * Estadísticas de la dinámica.
+         *
+         * Todo sale de lo que el panel ya tiene cargado —participantes, equipos
+         * y el canal de presencia—, así que no hay consulta nueva ni endpoint
+         * que mantener, y los números se actualizan con el mismo pulso que el
+         * resto: realtime más el refresco de cada 3 segundos.
+         *
+         * No muestra nombres ni emails. Es una pantalla que se proyecta en una
+         * sala, y el criterio ya está tomado en otras partes del proyecto: lo
+         * que se ve de lejos es agregado.
+         */
+
+        // El catálogo de tipos vive en la base desde la 0012, y ETIQUETAS_TIPO
+        // quedó corto —le faltan Federación y Confederación, que entraron con la
+        // 0018—. Se pide una vez a /api/opciones, que es público, y las
+        // etiquetas de acá quedan de respaldo: el mismo arreglo que ya hace
+        // dinamica.html.
+        let catalogoTipos = {};
+
+        fetch('/api/opciones')
+            .then(r => r.json())
+            .then(d => {
+                for (const t of (d.tipos || [])) catalogoTipos[t.slug] = t.nombre;
+                renderizarStats();
+            })
+            .catch(() => {
+                // Sin catálogo se usan las de respaldo. No hay nada que la
+                // persona pueda hacer al respecto.
+            });
+
+        function nombreDeTipo(slug) {
+            return catalogoTipos[slug] || ETIQUETAS_TIPO[slug] || slug;
+        }
+
+        const normalizar = (t) => (t || '').trim().toLowerCase();
+
+        /** Una persona por nombre+organización, igual que la vista de equipos. */
+        function participantesUnicos() {
+            const mapa = new Map();
+            for (const p of (estado.participantes || [])) {
+                const clave = normalizar((p.nombre || '') + '|' + (p.cooperativa || ''));
+                if (!mapa.has(clave)) mapa.set(clave, p);
+            }
+            return [...mapa.values()];
+        }
+
+        /** Cuántos valores distintos y no vacíos devuelve `obtener`. */
+        function contarDistintos(lista, obtener) {
+            const vistos = new Set();
+            for (const item of lista) {
+                const v = normalizar(obtener(item));
+                if (v) vistos.add(v);
+            }
+            return vistos.size;
+        }
+
+        /**
+         * Agrupa y cuenta dos cosas por grupo: personas y organizaciones
+         * distintas.
+         *
+         * Son números distintos y los dos importan: una cooperativa que mandó
+         * cinco personas pesa cinco veces en el primero y una sola en el
+         * segundo. Para "cuánta gente de este tipo hay en la sala" sirve el
+         * primero; para "qué tipo de organizaciones vinieron", el segundo.
+         *
+         * `claves` devuelve un array, así que la misma función sirve para tipo
+         * —una por persona— y para actividades —varias—.
+         */
+        function agrupar(lista, claves) {
+            const mapa = new Map();
+
+            for (const p of lista) {
+                for (const clave of claves(p)) {
+                    if (!clave) continue;
+                    if (!mapa.has(clave)) mapa.set(clave, { personas: 0, organizaciones: new Set() });
+                    const grupo = mapa.get(clave);
+                    grupo.personas++;
+                    const org = normalizar(p.cooperativa);
+                    if (org) grupo.organizaciones.add(org);
+                }
+            }
+
+            return [...mapa.entries()]
+                .map(([clave, g]) => ({ clave, personas: g.personas, organizaciones: g.organizaciones.size }))
+                .sort((a, b) => b.personas - a.personas);
+        }
+
+        /**
+         * La familia de organización, que junta los tres niveles del Estado.
+         *
+         * Mismo criterio con el que se arman los equipos —`familia_organizacion`
+         * en la base—, así que la pantalla cuenta lo mismo que el algoritmo. Si
+         * la columna generada no vino, se deduce del prefijo.
+         */
+        function familiaDe(p) {
+            if (p.familia_organizacion) return p.familia_organizacion;
+            const tipo = p.tipo_organizacion || '';
+            return tipo.startsWith('estado-') ? 'estado' : tipo;
+        }
+
+        function etiquetaDeFamilia(clave) {
+            return clave === 'estado' ? 'Estado' : nombreDeTipo(clave);
+        }
+
+        function barraStats(nombre, valor, maximo, color, segundo) {
+            const pct = maximo > 0 ? Math.max(2, Math.round((valor / maximo) * 100)) : 0;
+            const extra = segundo == null ? '' : ` <span class="segundo">· ${segundo} org.</span>`;
+            return `
+                <div class="stats-barra">
+                    <span class="nombre" title="${escaparHtml(nombre)}">${escaparHtml(nombre)}</span>
+                    <span class="riel"><span class="relleno" style="width: ${pct}%; background: ${color}"></span></span>
+                    <span class="valor">${valor}${extra}</span>
+                </div>`;
+        }
+
+        function bloqueStats(titulo, nota, filas) {
+            const cuerpo = filas.length
+                ? filas.join('')
+                : '<p class="stats-vacio">Todavía no hay datos.</p>';
+            const subtitulo = nota ? ` <span class="nota">${nota}</span>` : '';
+            return `<div class="stats-bloque"><h2>${titulo}${subtitulo}</h2>${cuerpo}</div>`;
+        }
+
+        function numeroStats(valor, etiqueta) {
+            return `<div class="stats-numero"><div class="valor">${valor}</div><div class="etiqueta">${etiqueta}</div></div>`;
+        }
+
+        /** Cuántas pestañas de la dinámica hay abiertas, sin contar los paneles. */
+        function conectadasAhora() {
+            if (!canalConexiones) return 0;
+            try {
+                return Object.values(canalConexiones.presenceState())
+                    .flat()
+                    .filter(e => e.rol !== 'admin')
+                    .length;
+            } catch {
+                return 0;
+            }
+        }
+
+        function renderizarStats() {
+            const cuerpo = document.getElementById('statsCuerpo');
+            // Se dibuja sólo si está a la vista: la llaman el refresco de cada 3
+            // segundos y cada evento de realtime, y calcular esto con la
+            // pantalla cerrada sería trabajo tirado.
+            if (!cuerpo || !document.getElementById('vistaStats').classList.contains('activo')) return;
+
+            const gente = participantesUnicos();
+            const equipos = (estado.equipos || []).filter(e => e.activo);
+            const cerrados = equipos.filter(e => e.cerrado).length;
+
+            const numeros = [
+                numeroStats(gente.length, 'Personas anotadas'),
+                numeroStats(contarDistintos(gente, p => p.cooperativa), 'Organizaciones'),
+                numeroStats(contarDistintos(gente, p => p.provincia), 'Provincias'),
+                numeroStats(conectadasAhora(), 'Conectadas ahora'),
+                numeroStats(`${cerrados}<span class="segundo" style="font-size:2rem">/${equipos.length}</span>`, 'Equipos cerrados')
+            ].join('');
+
+            // Equipos: la barra lleva el color del equipo, que es como se los
+            // nombra el resto de la actividad.
+            const porEquipo = equipos.map(e => {
+                const suyos = gente.filter(p => p.equipo_id === e.id);
+                return {
+                    nombre: e.nombre,
+                    color: e.color,
+                    personas: suyos.length,
+                    organizaciones: contarDistintos(suyos, p => p.cooperativa)
+                };
+            }).sort((a, b) => b.personas - a.personas);
+
+            const topEquipo = Math.max(1, ...porEquipo.map(e => e.personas));
+            const filasEquipo = porEquipo.map(e =>
+                barraStats(e.nombre, e.personas, topEquipo, e.color, e.organizaciones));
+
+            const porTipo = agrupar(gente, p => [familiaDe(p)]);
+            const topTipo = Math.max(1, ...porTipo.map(t => t.personas));
+            const filasTipo = porTipo.map(t =>
+                barraStats(etiquetaDeFamilia(t.clave), t.personas, topTipo, 'var(--color-primary)', t.organizaciones));
+
+            const porActividad = agrupar(gente, p => (p.actividades || []));
+            const topActividad = Math.max(1, ...porActividad.map(a => a.personas));
+            const filasActividad = porActividad.slice(0, 10).map(a =>
+                barraStats(nombreDeActividad(a.clave), a.personas, topActividad, 'var(--color-primary)', a.organizaciones));
+
+            // Provincias: las ocho más grandes y el resto sumado. Una lista de
+            // veinticuatro no entra proyectada, y la cola son casi todas en uno.
+            const porProvincia = agrupar(gente, p => [p.provincia || '']);
+            const topProvincia = Math.max(1, ...porProvincia.map(p => p.personas));
+            const filasProvincia = porProvincia.slice(0, 8).map(p =>
+                barraStats(p.clave, p.personas, topProvincia, 'var(--color-primary)'));
+            const cola = porProvincia.slice(8);
+            if (cola.length) {
+                const suma = cola.reduce((n, p) => n + p.personas, 0);
+                filasProvincia.push(barraStats(`Otras ${cola.length}`, suma, topProvincia, 'var(--color-texto-secundario)'));
+            }
+
+            const accionables = equipos.reduce((n, e) =>
+                n + (e.accionables || []).filter(a => (a || '').trim()).length, 0);
+            const terminadas = gente.filter(p => p.terminado).length;
+            const hace10 = Date.now() - 10 * 60 * 1000;
+            const recientes = gente.filter(p => p.created_at && new Date(p.created_at).getTime() >= hace10).length;
+
+            cuerpo.innerHTML = `
+                <div class="stats-numeros">${numeros}</div>
+                <div class="stats-bloques">
+                    ${bloqueStats('Cómo quedó el reparto', 'personas · organizaciones distintas', filasEquipo)}
+                    ${bloqueStats('Tipo de organización', 'personas · organizaciones distintas', filasTipo)}
+                    ${bloqueStats('Actividad', 'personas · organizaciones distintas', filasActividad)}
+                    ${bloqueStats('Provincia', 'personas', filasProvincia)}
+                </div>
+                <div class="stats-numeros">
+                    ${numeroStats(accionables, 'Accionables escritos')}
+                    ${numeroStats(terminadas, 'Personas que terminaron')}
+                    ${numeroStats(recientes, 'Anotadas en los últimos 10 min')}
+                </div>`;
+        }
+
+        function abrirVistaStats() {
+            document.getElementById('vistaStats').classList.add('activo');
+            renderizarStats();
+        }
+
+        function cerrarVistaStats() {
+            document.getElementById('vistaStats').classList.remove('activo');
+        }
+
+        /** Volver a los equipos deja la proyección donde estaba antes del desvío. */
+        function volverAEquipos() {
+            cerrarVistaStats();
+            abrirVistaProyectable();
+        }
+
         function abrirVistaProyectable() {
             document.getElementById('vistaProyectable').classList.add('activo');
             renderizarVistaProyectable();
@@ -2371,22 +2759,35 @@
             document.getElementById('vistaProyectable').classList.remove('activo');
         }
 
-        function toggleModoClaro() {
-            const checkbox = document.getElementById('switchModoClaro');
+        /**
+         * El modo claro, que ahora tiene dos interruptores: el de la vista de
+         * equipos y el de la de estadísticas.
+         *
+         * `origen` es el que la persona tocó; los demás se sincronizan. Cada
+         * pantalla necesita el suyo porque la otra está oculta mientras una se
+         * proyecta, y quedarse sin poder cambiar de tema en medio de una
+         * presentación —porque el switch está en la pantalla que no estás
+         * viendo— sería exactamente el momento en que hace falta.
+         */
+        function toggleModoClaro(origen) {
+            const activo = (origen || document.getElementById('switchModoClaro')).checked;
+
+            document.querySelectorAll('.switch-tema input').forEach(c => { c.checked = activo; });
+
             const elementos = [
                 document.getElementById('vistaProyectable'),
+                document.getElementById('vistaStats'),
                 document.getElementById('modalResultados'),
                 document.getElementById('modalDescripcion')
             ];
-            elementos.forEach(el => el.classList.toggle('modo-claro', checkbox.checked));
-            localStorage.setItem('facttic_modo_claro', checkbox.checked);
+            elementos.forEach(el => el.classList.toggle('modo-claro', activo));
+            localStorage.setItem('facttic_modo_claro', activo);
         }
 
         // Inicializar modo claro desde localStorage
         function initModoClaro() {
             const modoClaro = localStorage.getItem('facttic_modo_claro') === 'true';
-            const checkbox = document.getElementById('switchModoClaro');
-            checkbox.checked = modoClaro;
+            document.querySelectorAll('.switch-tema input').forEach(c => { c.checked = modoClaro; });
             if (modoClaro) {
                 toggleModoClaro();
             }
@@ -3286,6 +3687,7 @@
                 renderizarDashboard();
                 renderizarParticipantes();
                 renderizarVistaProyectable();
+                renderizarStats();
             }, 3000);
         }
 
