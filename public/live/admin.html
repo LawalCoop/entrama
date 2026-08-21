@@ -666,11 +666,13 @@
         }
 
         .vista-proyectable.modo-claro .equipo-proyectable .btn-ver-descripcion,
+        .vista-proyectable.modo-claro .equipo-proyectable .btn-tamano,
         .vista-proyectable.modo-claro .equipo-proyectable .btn-google-doc-proyectable {
             background: rgba(0, 0, 0, 0.05);
         }
 
         .vista-proyectable.modo-claro .equipo-proyectable .btn-ver-descripcion:hover,
+        .vista-proyectable.modo-claro .equipo-proyectable .btn-tamano:hover,
         .vista-proyectable.modo-claro .equipo-proyectable .btn-google-doc-proyectable:hover {
             background: rgba(0, 0, 0, 0.1);
         }
@@ -778,7 +780,7 @@
         }
 
         .vista-proyectable .equipo-proyectable .nombre {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 600;
         }
 
@@ -851,9 +853,12 @@
             opacity: 0.2;
         }
 
+        /* `--escala-lista` la pone cada card: es lo que mueven el + y el − de
+           abajo, y por eso el tamaño se escribe como un múltiplo y no como un
+           número fijo. Sin la variable —una card recién dibujada— vale 1. */
         .vista-proyectable .equipo-proyectable .cooperativas-lista {
             margin-top: 0.5rem;
-            font-size: 1.1rem;
+            font-size: calc(1.1rem * var(--escala-lista, 1));
             color: var(--color-texto);
             line-height: 1.6;
             flex: 1;
@@ -1044,6 +1049,7 @@
         }
 
         .vista-proyectable .equipo-proyectable .btn-ver-descripcion,
+        .vista-proyectable .equipo-proyectable .btn-tamano,
         .vista-proyectable .equipo-proyectable .btn-google-doc-proyectable {
             padding: 0.4rem 0.75rem;
             background: transparent;
@@ -1056,8 +1062,20 @@
         }
 
         .vista-proyectable .equipo-proyectable .btn-ver-descripcion:hover,
+        .vista-proyectable .equipo-proyectable .btn-tamano:hover,
         .vista-proyectable .equipo-proyectable .btn-google-doc-proyectable:hover {
             background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Más angostos que "Ver descripción": son un solo carácter, y al lado de
+           un botón con texto quedarían enormes. El ancho fijo hace que el + y el
+           − no bailen entre una card y otra. */
+        .vista-proyectable .equipo-proyectable .btn-tamano {
+            width: 2.25rem;
+            padding: 0.4rem 0;
+            font-size: 1.1rem;
+            line-height: 1;
+            font-weight: 600;
         }
 
         /* Modal Descripción */
@@ -2230,6 +2248,64 @@
         }
 
         // Vista proyectable
+        /*
+         * El tamaño de letra de la lista de organizaciones, uno por equipo.
+         *
+         * Vive en localStorage y no en el DOM porque la vista proyectable se
+         * vuelve a dibujar entera con cada evento de realtime —alguien que se
+         * anota, un equipo que cierra—, y un estilo puesto sobre el nodo se
+         * perdería solo en medio de la proyección. Guardado, además sobrevive a
+         * recargar la página, que durante una actividad es justo cuando menos
+         * ganas hay de volver a acomodar seis cards.
+         *
+         * Es por navegador y no por equipo en la base a propósito: esto es cómo
+         * se ve en la máquina que proyecta, no un dato de la dinámica.
+         */
+        const CLAVE_ESCALAS = 'facttic_escalas_proyectable';
+        const ESCALA_PASO = 0.15;
+        const ESCALA_MIN = 0.7;
+        const ESCALA_MAX = 3;
+
+        function leerEscalas() {
+            try {
+                const crudo = JSON.parse(localStorage.getItem(CLAVE_ESCALAS) || '{}');
+                return crudo && typeof crudo === 'object' ? crudo : {};
+            } catch {
+                // Storage bloqueado o basura adentro: se proyecta en el tamaño
+                // de siempre, que es un problema bastante menor.
+                return {};
+            }
+        }
+
+        function escalaDeEquipo(id) {
+            const valor = leerEscalas()[id];
+            return typeof valor === 'number' && isFinite(valor) ? valor : 1;
+        }
+
+        /**
+         * Mueve un paso el tamaño de un equipo. `pasos` es +1 o -1.
+         *
+         * Toca la card directamente en vez de volver a renderizar: redibujar
+         * todo por un cambio de tipografía haría parpadear la proyección
+         * delante de la sala, y encima reiniciaría el scroll de las listas
+         * largas.
+         */
+        function cambiarEscalaEquipo(id, pasos) {
+            const escala = Math.min(ESCALA_MAX, Math.max(ESCALA_MIN, escalaDeEquipo(id) + pasos * ESCALA_PASO));
+
+            const escalas = leerEscalas();
+            escalas[id] = escala;
+            try {
+                localStorage.setItem(CLAVE_ESCALAS, JSON.stringify(escalas));
+            } catch {
+                // Sin storage el cambio vale igual para esta sesión; lo que se
+                // pierde es recordarlo en la próxima.
+            }
+
+            const card = document.querySelector(`.equipo-proyectable[data-equipo="${id}"]`);
+            if (card) card.style.setProperty('--escala-lista', escala);
+        }
+
         function renderizarVistaProyectable() {
             const container = document.getElementById('equiposProyectable');
 
@@ -2258,7 +2334,7 @@
                 const debatiendo = total > 0 && !equipoListo;
 
                 return `
-                    <div class="equipo-proyectable ${equipoListo ? 'todos-terminados' : ''} ${debatiendo ? 'debatiendo' : ''}" style="border-color: ${equipo.color}">
+                    <div class="equipo-proyectable ${equipoListo ? 'todos-terminados' : ''} ${debatiendo ? 'debatiendo' : ''}" data-equipo="${equipo.id}" style="border-color: ${equipo.color}; --escala-lista: ${escalaDeEquipo(equipo.id)}">
                         ${equipoListo ? `
                             <div class="overlay-terminado" style="background: ${equipo.color}">
                                 <div class="listo-equipo-nombre">${equipo.nombre}</div>
@@ -2277,6 +2353,8 @@
                         <div class="cooperativas-lista">${cooperativas.join(', ') || '-'}</div>
                         <div class="botones-equipo">
                             <button class="btn-ver-descripcion" onclick="event.stopPropagation(); mostrarDescripcion('${equipo.id}')" style="border-color: ${equipo.color}; color: ${equipo.color}">Ver descripción</button>
+                            <button class="btn-tamano" onclick="event.stopPropagation(); cambiarEscalaEquipo('${equipo.id}', -1)" style="border-color: ${equipo.color}; color: ${equipo.color}" title="Achicar la letra de las organizaciones" aria-label="Achicar la letra de las organizaciones">−</button>
+                            <button class="btn-tamano" onclick="event.stopPropagation(); cambiarEscalaEquipo('${equipo.id}', 1)" style="border-color: ${equipo.color}; color: ${equipo.color}" title="Agrandar la letra de las organizaciones" aria-label="Agrandar la letra de las organizaciones">+</button>
                             ${equipo.google_doc ? `<a href="${equipo.google_doc}" target="_blank" class="btn-google-doc-proyectable" style="border-color: ${equipo.color}; color: ${equipo.color}">📄 Doc</a>` : ''}
                         </div>
                     </div>
