@@ -1145,7 +1145,12 @@
             flex: 1;
             min-width: 0;
             overflow: hidden;
-            font-size: 1.3rem;
+            font-size: 2.6rem;
+            /* La banda va más alta que el texto: son los nombres de quienes
+               estuvieron, y apretados contra el borde se leían como una nota al
+               pie en vez de como el cierre de la pantalla. */
+            padding: 0.75rem 0;
+            line-height: 1.3;
         }
 
         .modal-resultados .pie-marquesina .cinta {
@@ -1157,8 +1162,9 @@
             animation: cinta var(--duracion, 30s) linear infinite;
         }
 
+        /* En `em` para que la separación entre nombres acompañe al cuerpo. */
         .modal-resultados .pie-marquesina .cinta > span {
-            padding-right: 2rem;
+            padding-right: 1.2em;
         }
 
         @keyframes cinta {
