@@ -1238,6 +1238,56 @@
                         <input type="text" id="accionable10" placeholder="Accionable...">
                         <input type="text" id="responsable10" class="input-responsable" placeholder="Responsable...">
                     </div>
+                    <div class="accionable-input">
+                        <span class="numero">11</span>
+                        <input type="text" id="accionable11" placeholder="Accionable...">
+                        <input type="text" id="responsable11" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">12</span>
+                        <input type="text" id="accionable12" placeholder="Accionable...">
+                        <input type="text" id="responsable12" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">13</span>
+                        <input type="text" id="accionable13" placeholder="Accionable...">
+                        <input type="text" id="responsable13" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">14</span>
+                        <input type="text" id="accionable14" placeholder="Accionable...">
+                        <input type="text" id="responsable14" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">15</span>
+                        <input type="text" id="accionable15" placeholder="Accionable...">
+                        <input type="text" id="responsable15" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">16</span>
+                        <input type="text" id="accionable16" placeholder="Accionable...">
+                        <input type="text" id="responsable16" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">17</span>
+                        <input type="text" id="accionable17" placeholder="Accionable...">
+                        <input type="text" id="responsable17" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">18</span>
+                        <input type="text" id="accionable18" placeholder="Accionable...">
+                        <input type="text" id="responsable18" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">19</span>
+                        <input type="text" id="accionable19" placeholder="Accionable...">
+                        <input type="text" id="responsable19" class="input-responsable" placeholder="Responsable...">
+                    </div>
+                    <div class="accionable-input">
+                        <span class="numero">20</span>
+                        <input type="text" id="accionable20" placeholder="Accionable...">
+                        <input type="text" id="responsable20" class="input-responsable" placeholder="Responsable...">
+                    </div>
                 </div>
                 <div class="contador-accionables" id="contadorAccionables">0 accionables completados</div>
             </div>
@@ -1312,6 +1362,20 @@
         // Las actividades ya no viven acá: están en la tabla `actividades`, porque
         // el formulario deja sumar la que falte y tiene que quedar disponible
         // para quien se anote después. Se cargan en `estado.actividades`.
+
+        /*
+         * Cuántos accionables entran en el formulario de cierre.
+         *
+         * Eran diez y quedaron cortos: un grupo que armó una lista más larga la
+         * escribió entera en el campo de reflexión, que es el único multilínea,
+         * y su cierre terminó con la reflexión llena de acciones y los diez
+         * casilleros vacíos.
+         *
+         * El número vive acá y no repetido en cada bucle para que cambiarlo sea
+         * una línea. Los `id` del HTML —accionable1 … accionable20— tienen que
+         * acompañarlo.
+         */
+        const CASILLEROS_ACCIONABLES = 20;
 
         let estado = {
             provincias: [],
@@ -2132,7 +2196,7 @@
             const responsables = equipo.responsables || [];
 
             document.getElementById('inputReflexion').value = reflexion;
-            for (let i = 1; i <= 10; i++) {
+            for (let i = 1; i <= CASILLEROS_ACCIONABLES; i++) {
                 document.getElementById(`accionable${i}`).value = accionables[i - 1] || '';
                 document.getElementById(`responsable${i}`).value = responsables[i - 1] || '';
             }
@@ -2171,7 +2235,7 @@
         // Actualizar contador de accionables
         function actualizarContadorAccionables() {
             let completados = 0;
-            for (let i = 1; i <= 10; i++) {
+            for (let i = 1; i <= CASILLEROS_ACCIONABLES; i++) {
                 if (document.getElementById(`accionable${i}`).value.trim()) {
                     completados++;
                 }
@@ -2193,7 +2257,7 @@
             const reflexion = document.getElementById('inputReflexion').value.trim();
             const accionables = [];
             const responsables = [];
-            for (let i = 1; i <= 10; i++) {
+            for (let i = 1; i <= CASILLEROS_ACCIONABLES; i++) {
                 accionables.push(document.getElementById(`accionable${i}`).value.trim());
                 responsables.push(document.getElementById(`responsable${i}`).value.trim());
             }
@@ -2718,7 +2782,7 @@
 
         // Listeners para actualizar contador de accionables
         document.getElementById('inputReflexion').addEventListener('input', actualizarContadorAccionables);
-        for (let i = 1; i <= 10; i++) {
+        for (let i = 1; i <= CASILLEROS_ACCIONABLES; i++) {
             document.getElementById(`accionable${i}`).addEventListener('input', actualizarContadorAccionables);
         }
 
