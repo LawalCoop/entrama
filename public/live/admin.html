@@ -1129,13 +1129,34 @@
 
         /* El borde de arriba lleva el color de un equipo: el acento que ata la
            pantalla con la paleta de la actividad, sin teñir la tarjeta entera. */
+        /* No scrolea: lo que no entra se muestra por tandas, rotando cada cinco
+           segundos. Scrolear proyectando no sirve —nadie va a mover esa barra— y
+           recortar la lista sería peor todavía: dejaría afuera justo a las
+           organizaciones que vinieron con una sola persona. */
         .vista-stats .stats-bloque {
             background: var(--color-card);
             border-radius: 12px;
             border-top: 4px solid var(--acento, var(--color-primary));
             padding: 1rem 1.25rem;
-            overflow-y: auto;
+            overflow: hidden;
             min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .vista-stats .stats-filas {
+            flex: 1;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Qué tanda se está viendo. Chiquito: es una ayuda para entender que la
+           lista rota, no un dato de la actividad. */
+        .vista-stats .stats-bloque .paginacion {
+            float: right;
+            font-size: 1rem;
+            font-weight: normal;
+            color: var(--color-texto-secundario);
         }
 
         .vista-stats .stats-bloque h2 {
@@ -2643,13 +2664,70 @@
                 </div>`;
         }
 
-        function bloqueStats(titulo, nota, filas, acento) {
+        function bloqueStats(clave, titulo, nota, filas, acento) {
             const cuerpo = filas.length
-                ? filas.join('')
+                ? `<div class="stats-filas" data-bloque="${clave}">${filas.join('')}</div>`
                 : '<p class="stats-vacio">Todavía no hay datos.</p>';
             const subtitulo = nota ? ` <span class="nota">${nota}</span>` : '';
-            return `<div class="stats-bloque" style="--acento: ${acento}"><h2>${titulo}${subtitulo}</h2>${cuerpo}</div>`;
+            return `<div class="stats-bloque" style="--acento: ${acento}">`
+                + `<h2>${titulo}${subtitulo}<span class="paginacion" data-indicador="${clave}"></span></h2>`
+                + cuerpo
+                + '</div>';
         }
+
+        /*
+         * Las tandas.
+         *
+         * Ninguna lista se recorta: si no entra entera, se muestra lo que entra
+         * y a los cinco segundos la que sigue, y así en round robin. Cortar en
+         * un "otras N" borraría del mapa justo a las organizaciones que vinieron
+         * con una sola persona, que son las que más necesitan estar.
+         *
+         * Cuántas filas entran se mide en pantalla y no se fija de antemano: el
+         * alto depende del proyector y del cuerpo de letra, y un número clavado
+         * acá dejaría un hueco en una pantalla o cortaría una fila en otra.
+         *
+         * En qué página va cada bloque vive acá afuera porque la pantalla se
+         * vuelve a dibujar entera cada tres segundos: si el índice viviera en el
+         * DOM, la rotación se reiniciaría sola antes de completarse.
+         */
+        const paginaDeBloque = {};
+
+        function aplicarPaginacion() {
+            document.querySelectorAll('#statsCuerpo .stats-filas').forEach(contenedor => {
+                const clave = contenedor.dataset.bloque;
+                const filas = [...contenedor.children];
+                if (!filas.length) return;
+
+                // Se miden todas visibles: una fila escondida mide cero, y con
+                // eso la cuenta de cuántas entran daría cualquier cosa.
+                filas.forEach(f => { f.style.display = ''; });
+
+                const alto = filas[0].offsetHeight || 1;
+                const porPagina = Math.max(1, Math.floor(contenedor.clientHeight / alto));
+                const paginas = Math.ceil(filas.length / porPagina);
+
+                const pagina = (paginaDeBloque[clave] || 0) % paginas;
+                paginaDeBloque[clave] = pagina;
+
+                const desde = pagina * porPagina;
+                filas.forEach((f, i) => {
+                    f.style.display = (i >= desde && i < desde + porPagina) ? '' : 'none';
+                });
+
+                const indicador = document.querySelector(`[data-indicador="${clave}"]`);
+                if (indicador) indicador.textContent = paginas > 1 ? `${pagina + 1}/${paginas}` : '';
+            });
+        }
+
+        function avanzarPaginas() {
+            const vista = document.getElementById('vistaStats');
+            if (!vista || !vista.classList.contains('activo')) return;
+            for (const clave of Object.keys(paginaDeBloque)) paginaDeBloque[clave]++;
+            aplicarPaginacion();
+        }
+
+        setInterval(avanzarPaginas, 5000);
 
         function numeroStats(valor, etiqueta, color) {
             return `<div class="stats-numero"><div class="valor" style="color: ${color}">${valor}</div><div class="etiqueta">${etiqueta}</div></div>`;
@@ -2695,20 +2773,17 @@
 
             const porActividad = agrupar(gente, p => (p.actividades || []));
             const topActividad = Math.max(1, ...porActividad.map(a => a.personas));
-            const filasActividad = porActividad.slice(0, 8).map((a, i) =>
+            const filasActividad = porActividad.map((a, i) =>
                 barraStats(nombreDeActividad(a.clave), a.personas, topActividad, color(i), a.organizaciones));
 
-            // Provincias: las ocho más grandes y el resto sumado. Una lista de
-            // veinticuatro no entra proyectada, y la cola son casi todas en uno.
+            // Todas las provincias, sin recortar. Las que trajeron una sola
+            // persona son las que menos pueden permitirse desaparecer en un
+            // "otras N": lo que no entra en pantalla se muestra en la tanda
+            // siguiente.
             const porProvincia = agrupar(gente, p => [p.provincia || '']);
             const topProvincia = Math.max(1, ...porProvincia.map(p => p.personas));
-            const filasProvincia = porProvincia.slice(0, 8).map((p, i) =>
+            const filasProvincia = porProvincia.map((p, i) =>
                 barraStats(p.clave, p.personas, topProvincia, color(i)));
-            const cola = porProvincia.slice(8);
-            if (cola.length) {
-                const suma = cola.reduce((n, p) => n + p.personas, 0);
-                filasProvincia.push(barraStats(`Otras ${cola.length}`, suma, topProvincia, 'var(--color-texto-secundario)'));
-            }
 
             const accionables = equipos.reduce((n, e) =>
                 n + (e.accionables || []).filter(a => (a || '').trim()).length, 0);
@@ -2719,15 +2794,17 @@
             cuerpo.innerHTML = `
                 <div class="stats-numeros">${numeros}</div>
                 <div class="stats-bloques">
-                    ${bloqueStats('Tipo de organización', 'personas · organizaciones', filasTipo, color(0))}
-                    ${bloqueStats('Actividad', 'personas · organizaciones', filasActividad, color(1))}
-                    ${bloqueStats('Provincia', 'personas', filasProvincia, color(2))}
+                    ${bloqueStats('tipo', 'Tipo de organización', 'personas · organizaciones', filasTipo, color(0))}
+                    ${bloqueStats('actividad', 'Actividad', 'personas · organizaciones', filasActividad, color(1))}
+                    ${bloqueStats('provincia', 'Provincia', 'personas', filasProvincia, color(2))}
                 </div>
                 <div class="stats-numeros">
                     ${numeroStats(accionables, 'Accionables escritos', color(3))}
                     ${numeroStats(terminadas, 'Personas que terminaron', color(4))}
                     ${numeroStats(recientes, 'Anotadas en los últimos 10 min', color(5))}
                 </div>`;
+
+            aplicarPaginacion();
         }
 
         function abrirVistaStats() {
