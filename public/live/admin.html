@@ -466,6 +466,16 @@
             gap: 1rem;
         }
 
+        /*
+         * El switch va del lado opuesto a los botones. En el medio de la barra
+         * está el título con el timer, y los tres controles juntos contra el
+         * borde derecho se le venían encima.
+         */
+        .vista-proyectable .controles-proyectable.izquierda {
+            right: auto;
+            left: 0.5rem;
+        }
+
         .vista-proyectable .switch-tema {
             display: flex;
             align-items: center;
@@ -1496,12 +1506,14 @@
 
     <!-- Vista Proyectable -->
     <div class="vista-proyectable" id="vistaProyectable">
-        <div class="controles-proyectable">
+        <div class="controles-proyectable izquierda">
             <label class="switch-tema">
                 <input type="checkbox" id="switchModoClaro" onchange="toggleModoClaro()">
                 <span class="slider"></span>
                 <span class="switch-label">☀️ Modo claro</span>
             </label>
+        </div>
+        <div class="controles-proyectable">
             <button class="btn btn-secondary" onclick="abrirQR()">📱 QR para sumarse</button>
             <button class="btn btn-secondary cerrar" onclick="cerrarVistaProyectable()">✕ Cerrar</button>
         </div>
