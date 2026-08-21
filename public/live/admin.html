@@ -1267,10 +1267,37 @@
             border-radius: 3px;
         }
 
+        /*
+            Marquesina en vez de puntos suspensivos.
+            "Santiago del Est…" obliga a completar el nombre de memoria, y en una
+            pantalla que mira una sala entera eso es pedirle a alguien que
+            adivine si dice lo que él vino a representar. El nombre entero pasa,
+            aunque tarde.
+
+            Va y vuelve en vez de dar la vuelta en loop: el salto del final al
+            principio se lee como un parpadeo, y esperar a que vuelva a pasar la
+            parte que te perdiste es peor que verla volver.
+
+            Las paradas en 12% y 88% dejan el nombre quieto en cada punta el
+            tiempo suficiente para leerlo. Sólo se mueven los que no entran: al
+            resto no se les toca nada.
+        */
         .vista-stats .stats-barra .nombre {
             overflow: hidden;
-            text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        .vista-stats .stats-barra .nombre .texto {
+            display: inline-block;
+        }
+
+        .vista-stats .stats-barra .nombre.marquesina .texto {
+            animation: marquesina var(--duracion, 6s) ease-in-out infinite alternate;
+        }
+
+        @keyframes marquesina {
+            0%, 12%   { transform: none; }
+            88%, 100% { transform: translateX(calc(-1 * var(--desborde, 0px))); }
         }
 
         .vista-stats .stats-barra .medida {
@@ -2741,7 +2768,7 @@
             return `
                 <div class="stats-barra">
                     <span class="marca" style="background: ${color}"></span>
-                    <span class="nombre" title="${escaparHtml(nombre)}">${escaparHtml(nombre)}</span>
+                    <span class="nombre" title="${escaparHtml(nombre)}"><span class="texto">${escaparHtml(nombre)}</span></span>
                     <span class="medida"><span class="relleno" style="width: ${pct.toFixed(1)}%; background: ${color}"></span><span class="valor">${valor}</span></span>
                 </div>`;
         }
@@ -2855,6 +2882,8 @@
                 const indicador = document.querySelector(`[data-indicador="${clave}"]`);
                 if (indicador) indicador.textContent = paginas > 1 ? `${pagina + 1}/${paginas}` : '';
 
+                marcarMarquesinas(contenedor);
+
                 // Sólo cuando la tanda cambió de verdad. Animar también en el
                 // refresco de datos de cada tres segundos haría parpadear la
                 // pantalla sin que hubiera pasado nada.
@@ -2864,6 +2893,40 @@
                     contenedor.classList.add('cambiando');
                 }
             });
+        }
+
+        /**
+         * Pone a correr los nombres que no entran, y deja quietos a los que sí.
+         *
+         * Se mide acá y no se decide de antemano porque depende de todo lo que
+         * cambia en vivo: el ancho de la tarjeta, el tamaño de letra que le
+         * pusieron con los + y −, y qué nombres cayeron en esta tanda. Sólo
+         * mide las filas visibles: una escondida mide cero y saldrían todas
+         * corriendo.
+         *
+         * La duración es proporcional al recorrido, así que un nombre que
+         * desborda poco no tarda lo mismo que uno que desborda mucho: todos se
+         * leen a la misma velocidad.
+         */
+        function marcarMarquesinas(contenedor) {
+            for (const fila of contenedor.children) {
+                if (fila.style.display === 'none') continue;
+
+                const nombre = fila.querySelector('.nombre');
+                const texto = nombre && nombre.querySelector('.texto');
+                if (!texto) continue;
+
+                const desborde = Math.ceil(texto.scrollWidth - nombre.clientWidth);
+                if (desborde > 1) {
+                    nombre.style.setProperty('--desborde', desborde + 'px');
+                    // Ida y vuelta a unos 45 px por segundo, con un piso para que
+                    // un desborde de dos letras no salga disparado.
+                    nombre.style.setProperty('--duracion', Math.max(4, desborde / 45 + 2).toFixed(1) + 's');
+                    nombre.classList.add('marquesina');
+                } else {
+                    nombre.classList.remove('marquesina');
+                }
+            }
         }
 
         function avanzarBloque(clave) {
