@@ -51,7 +51,7 @@
             height: 100dvh;
             overflow: hidden;
             display: grid;
-            grid-template-rows: auto 1fr auto;
+            grid-template-rows: auto 1fr auto auto;
             gap: clamp(0.4rem, 1.6vh, 1.2rem);
             padding: clamp(0.75rem, 2.5vh, 2rem) clamp(1rem, 4vw, 3rem);
             /* Un resplandor verde detrás de la ronda. Es un degradé quieto: la
@@ -159,6 +159,34 @@
         .ronda svg {
             width: 100%;
             height: 100%;
+            display: block;
+        }
+
+        /*
+         * La franja de brotes: el piso de la página.
+         *
+         * Va fuera del SVG de la ronda y no adentro. Adentro llenaba el ancho
+         * del `viewBox`, que en apaisado es sólo la columna derecha: el pasto
+         * terminaba entero de un lado. Acá es una fila propia del `body`, así
+         * que "todo el ancho" es el de la pantalla.
+         *
+         * Son N ranuras iguales con `flex: 1 1 0`. El alto lo fija el CSS y el
+         * `preserveAspectRatio` por defecto escala cada brote a lo que entre,
+         * así que ninguno se deforma: en una pantalla angosta se achican, en
+         * una ancha se separan.
+         */
+        .pasto {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .pasto svg {
+            flex: 1 1 0;
+            min-width: 0;
+            height: clamp(16px, 3.2vh, 34px);
             display: block;
         }
 
@@ -286,7 +314,7 @@
         <div class="ronda">
             <!-- `aria-hidden`: es decorativo. Lo que la animación cuenta ya
                  está escrito al lado, y anunciarlo de nuevo sólo estorbaría. -->
-            <svg viewBox="0 0 400 400" role="presentation" aria-hidden="true" focusable="false">
+            <svg viewBox="40 40 320 310" role="presentation" aria-hidden="true" focusable="false">
                 <defs>
                     <!-- Una persona sola, instanciada seis veces con <use>. Que
                          todas salgan del mismo glifo es a propósito: en la
@@ -300,12 +328,6 @@
                          curvados hacia adentro para que se lea como destello y
                          no como rombo. -->
                     <path id="chispa" d="M 0 -9 Q 1.6 -1.6 9 0 Q 1.6 1.6 0 9 Q -1.6 1.6 -9 0 Q -1.6 -1.6 0 -9 Z"/>
-
-                    <!-- Un brote, con la base en el origen: así cada copia se
-                         planta con un `translate` a su x y se escala sola. -->
-                    <g id="brote">
-                        <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"/>
-                    </g>
 
                     <!-- La comida que se pasan. Tres cosas distintas, no tres
                          copias de la misma: lo que circula es variado. -->
@@ -398,31 +420,205 @@
                     </use>
                 </g>
 
-                <!--
-                  La franja de brotes al pie: lo que se reconstruye empieza
-                  abajo, y empieza en todas partes, no en el medio.
-
-                  Van de borde a borde del viewBox. Cada uno lleva su escala,
-                  su espejado y su retardo: alineados y del mismo tamaño se
-                  leerían como una cerca, y latiendo todos juntos, como una
-                  sola pieza que sube y baja.
-                -->
-                <g stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none">
-                    <g class="brote" style="animation-delay: 0s"><use href="#brote" transform="translate(12 394) scale(1)"/></g>
-                    <g class="brote" style="animation-delay: 1.6s"><use href="#brote" transform="translate(50 396) scale(-0.75 0.75)"/></g>
-                    <g class="brote" style="animation-delay: 3.2s"><use href="#brote" transform="translate(88 393) scale(1.15)"/></g>
-                    <g class="brote" style="animation-delay: 0.8s"><use href="#brote" transform="translate(124 396) scale(-0.85 0.85)"/></g>
-                    <g class="brote" style="animation-delay: 4.4s"><use href="#brote" transform="translate(160 394) scale(1.05)"/></g>
-                    <g class="brote" style="animation-delay: 2.4s"><use href="#brote" transform="translate(200 392) scale(1.25)"/></g>
-                    <g class="brote" style="animation-delay: 5.2s"><use href="#brote" transform="translate(240 395) scale(-0.9 0.9)"/></g>
-                    <g class="brote" style="animation-delay: 1.2s"><use href="#brote" transform="translate(276 393) scale(1.1)"/></g>
-                    <g class="brote" style="animation-delay: 3.8s"><use href="#brote" transform="translate(312 396) scale(-0.8 0.8)"/></g>
-                    <g class="brote" style="animation-delay: 0.4s"><use href="#brote" transform="translate(350 393) scale(1.2)"/></g>
-                    <g class="brote" style="animation-delay: 4.8s"><use href="#brote" transform="translate(386 395) scale(-0.95 0.95)"/></g>
-                </g>
             </svg>
         </div>
     </main>
+
+    <!-- El piso de la página. Decorativo: no dice nada que no esté escrito. -->
+    <div class="pasto" aria-hidden="true">
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(1.0 1.0)">
+                <g class="brote" style="animation-delay: 0.0s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-0.82 0.82)">
+                <g class="brote" style="animation-delay: 1.6s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(1.12 1.12)">
+                <g class="brote" style="animation-delay: 3.2s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-0.9 0.9)">
+                <g class="brote" style="animation-delay: 0.8s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(1.05 1.05)">
+                <g class="brote" style="animation-delay: 4.4s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-0.78 0.78)">
+                <g class="brote" style="animation-delay: 2.4s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(1.15 1.15)">
+                <g class="brote" style="animation-delay: 5.2s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-0.95 0.95)">
+                <g class="brote" style="animation-delay: 1.2s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(0.85 0.85)">
+                <g class="brote" style="animation-delay: 3.8s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-1.08 1.08)">
+                <g class="brote" style="animation-delay: 0.4s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(0.92 0.92)">
+                <g class="brote" style="animation-delay: 4.8s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-1.02 1.02)">
+                <g class="brote" style="animation-delay: 2.0s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(0.8 0.8)">
+                <g class="brote" style="animation-delay: 5.6s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-1.1 1.1)">
+                <g class="brote" style="animation-delay: 1.0s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(0.97 0.97)">
+                <g class="brote" style="animation-delay: 2.8s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-0.88 0.88)">
+                <g class="brote" style="animation-delay: 4.2s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(1.06 1.06)">
+                <g class="brote" style="animation-delay: 0.6s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-0.83 0.83)">
+                <g class="brote" style="animation-delay: 3.4s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(1.13 1.13)">
+                <g class="brote" style="animation-delay: 5.0s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-0.94 0.94)">
+                <g class="brote" style="animation-delay: 1.8s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(0.86 0.86)">
+                <g class="brote" style="animation-delay: 4.6s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-1.04 1.04)">
+                <g class="brote" style="animation-delay: 0.2s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(0.99 0.99)">
+                <g class="brote" style="animation-delay: 3.0s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+        <svg viewBox="-10 -22 20 24" role="presentation" aria-hidden="true" focusable="false">
+            <g transform="scale(-0.91 0.91)">
+                <g class="brote" style="animation-delay: 5.4s">
+                    <path d="M 0 0 q 0 -14 -8 -20 M 0 0 q 0 -10 8 -14"
+                          stroke="#6ba54a" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                </g>
+            </g>
+        </svg>
+    </div>
 
     <footer class="pie">
         <a href="https://lawal.coop" target="_blank" rel="noopener noreferrer"><img src="logo_lawal_oscuro.png" alt="Lawal"></a>
