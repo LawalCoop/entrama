@@ -1097,12 +1097,12 @@
         .vista-stats.modo-claro .stats-bloque h2 { color: #1e293b; }
 
         .vista-stats.modo-claro .stats-numero .etiqueta,
-        .vista-stats.modo-claro .stats-bloque .nota,
-        .vista-stats.modo-claro .stats-bloque .paginacion,
         .vista-stats.modo-claro .stats-barra .nombre,
         .vista-stats.modo-claro .stats-barra .valor { color: #1e293b; }
 
-        .vista-stats.modo-claro .stats-numero .etiqueta,
+        /* Sólo lo verdaderamente accesorio queda en gris. La etiqueta de cada
+           número estaba en los dos grupos y ganaba este, así que se leía al
+           mismo tono que una acotación. */
         .vista-stats.modo-claro .stats-bloque .nota,
         .vista-stats.modo-claro .stats-bloque .paginacion,
         .vista-stats.modo-claro .stats-barra .segundo { color: #64748b; }
@@ -1137,10 +1137,13 @@
             line-height: 1;
         }
 
+        /* Con el color de texto pleno y no el secundario: es el que dice qué
+           es el número de arriba, así que proyectado tiene que leerse tanto
+           como él. En gris quedaba como una acotación al pie. */
         .vista-stats .stats-numero .etiqueta {
-            margin-top: 0.4rem;
-            font-size: 1.2rem;
-            color: var(--color-texto-secundario);
+            margin-top: 0.5rem;
+            font-size: 1.7rem;
+            color: var(--color-texto);
         }
 
         .vista-stats .stats-bloques {
@@ -2752,7 +2755,14 @@
 
         function barraStats(nombre, valor, maximo, color, segundo) {
             const pct = maximo > 0 ? Math.max(1.5, (valor / maximo) * BARRA_MAX) : 0;
-            const extra = segundo == null ? '' : ` <span class="segundo">· ${segundo} org.</span>`;
+            // El segundo número sólo si dice algo distinto. Cuando cada persona
+            // vino de una organización distinta los dos son iguales, y "5 · 5
+            // org." se lee como un error de la pantalla en vez de como el dato
+            // que es. Apareciendo sólo cuando difiere, que aparezca significa
+            // algo: hay una organización que mandó a más de una persona.
+            const extra = (segundo == null || segundo === valor)
+                ? ''
+                : ` <span class="segundo">· ${segundo} org.</span>`;
             return `
                 <div class="stats-barra">
                     <span class="marca" style="background: ${color}"></span>
