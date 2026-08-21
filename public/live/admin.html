@@ -1150,32 +1150,48 @@
         }
 
         /*
-            Nube de palabras: el tamaño de cada etiqueta es su número, y el
-            número va escrito al lado igual. Sin él la nube deja comparar pero
-            no leer —"¿esa es el doble o el triple?"— y proyectado nadie va a
-            poder medir a ojo.
+            Barras y no tortas: proyectadas se leen mejor, no necesitan leyenda
+            —la etiqueta va pegada a su barra— y no dependen de distinguir
+            colores desde lejos.
         */
-        .vista-stats .stats-nube {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: baseline;
-            justify-content: center;
-            gap: 0.35rem 1.1rem;
-            line-height: 1.2;
-            padding: 0.5rem 0;
+        .vista-stats .stats-barra {
+            display: grid;
+            grid-template-columns: 13rem 1fr auto;
+            align-items: center;
+            gap: 0.9rem;
+            padding: 0.4rem 0;
+            font-size: 1.35rem;
         }
 
-        .vista-stats .stats-palabra {
-            font-weight: 600;
+        .vista-stats .stats-barra .nombre {
+            overflow: hidden;
+            text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .vista-stats .stats-palabra .cuenta {
-            font-size: 0.5em;
-            font-weight: normal;
-            margin-left: 0.25em;
-            opacity: 0.75;
+        .vista-stats .stats-barra .riel {
+            background: rgba(128, 128, 128, 0.2);
+            border-radius: 999px;
+            height: 1.1rem;
+            overflow: hidden;
+        }
+
+        .vista-stats .stats-barra .relleno {
+            height: 100%;
+            border-radius: 999px;
+            min-width: 2px;
+        }
+
+        .vista-stats .stats-barra .valor {
+            font-weight: 600;
             font-variant-numeric: tabular-nums;
+        }
+
+        /* El segundo número de la barra: organizaciones detrás de las personas. */
+        .vista-stats .stats-barra .valor .segundo {
+            font-weight: normal;
+            font-size: 0.95rem;
+            color: var(--color-texto-secundario);
         }
 
         .vista-stats .stats-vacio {
@@ -2616,35 +2632,20 @@
             return clave === 'estado' ? 'Estado' : nombreDeTipo(clave);
         }
 
-        // De qué tamaño puede llegar a ser una palabra de la nube.
-        const NUBE_MIN = 1.2;
-        const NUBE_MAX = 4;
-
-        /**
-         * Una palabra de la nube, con su tamaño y su número.
-         *
-         * El tamaño sale de la raíz de la proporción y no de la proporción
-         * directa: el área que ocupa un texto crece con el cuadrado del cuerpo,
-         * así que mapear lineal haría que el más grande se vea mucho más grande
-         * de lo que en realidad es. Con la raíz, lo que se compara a ojo —la
-         * mancha de tinta— sí es proporcional al número.
-         */
-        function palabraNube(nombre, valor, maximo, color, minimo) {
-            // Todo empatado —el arranque de la actividad, con una persona por
-            // provincia— no tiene nada que codificar: escalar contra el máximo
-            // dejaría todas las palabras en el tamaño más grande, que es una
-            // pared de letras enormes que además no dice nada. En ese caso van
-            // todas a un tamaño intermedio y hablan los números.
-            const proporcion = maximo > 0
-                ? (maximo === minimo ? 0.45 : Math.sqrt(valor / maximo))
-                : 0;
-            const tamano = (NUBE_MIN + (NUBE_MAX - NUBE_MIN) * proporcion).toFixed(2);
-            return `<span class="stats-palabra" style="font-size: ${tamano}rem; color: ${color}">${escaparHtml(nombre)}<span class="cuenta">${valor}</span></span>`;
+        function barraStats(nombre, valor, maximo, color, segundo) {
+            const pct = maximo > 0 ? Math.max(2, Math.round((valor / maximo) * 100)) : 0;
+            const extra = segundo == null ? '' : ` <span class="segundo">· ${segundo} org.</span>`;
+            return `
+                <div class="stats-barra">
+                    <span class="nombre" title="${escaparHtml(nombre)}">${escaparHtml(nombre)}</span>
+                    <span class="riel"><span class="relleno" style="width: ${pct}%; background: ${color}"></span></span>
+                    <span class="valor">${valor}${extra}</span>
+                </div>`;
         }
 
-        function bloqueStats(titulo, nota, palabras, acento) {
-            const cuerpo = palabras.length
-                ? `<div class="stats-nube">${palabras.join('')}</div>`
+        function bloqueStats(titulo, nota, filas, acento) {
+            const cuerpo = filas.length
+                ? filas.join('')
                 : '<p class="stats-vacio">Todavía no hay datos.</p>';
             const subtitulo = nota ? ` <span class="nota">${nota}</span>` : '';
             return `<div class="stats-bloque" style="--acento: ${acento}"><h2>${titulo}${subtitulo}</h2>${cuerpo}</div>`;
@@ -2687,34 +2688,26 @@
                 numeroStats(contarDistintos(gente, p => p.provincia), 'Provincias', color(2))
             ].join('');
 
-            // Las nubes van ordenadas de mayor a menor y no barajadas. Una nube
-            // de verdad mezcla, pero esto se vuelve a dibujar cada tres
-            // segundos: con cualquier azar, las palabras saltarían de lugar
-            // solas en medio de la proyección.
             const porTipo = agrupar(gente, p => [familiaDe(p)]);
             const topTipo = Math.max(1, ...porTipo.map(t => t.personas));
-            const pisoTipo = Math.min(topTipo, ...porTipo.map(t => t.personas));
-            const nubeTipo = porTipo.map((t, i) =>
-                palabraNube(etiquetaDeFamilia(t.clave), t.personas, topTipo, color(i), pisoTipo));
+            const filasTipo = porTipo.map((t, i) =>
+                barraStats(etiquetaDeFamilia(t.clave), t.personas, topTipo, color(i), t.organizaciones));
 
             const porActividad = agrupar(gente, p => (p.actividades || []));
             const topActividad = Math.max(1, ...porActividad.map(a => a.personas));
-            const pisoActividad = Math.min(topActividad, ...porActividad.map(a => a.personas));
-            const nubeActividad = porActividad.slice(0, 12).map((a, i) =>
-                palabraNube(nombreDeActividad(a.clave), a.personas, topActividad, color(i), pisoActividad));
+            const filasActividad = porActividad.slice(0, 8).map((a, i) =>
+                barraStats(nombreDeActividad(a.clave), a.personas, topActividad, color(i), a.organizaciones));
 
-            // Provincias: las doce más grandes y el resto sumado. Entran más que
-            // en barras porque la nube acomoda por ancho y no de a una por
-            // renglón.
+            // Provincias: las ocho más grandes y el resto sumado. Una lista de
+            // veinticuatro no entra proyectada, y la cola son casi todas en uno.
             const porProvincia = agrupar(gente, p => [p.provincia || '']);
             const topProvincia = Math.max(1, ...porProvincia.map(p => p.personas));
-            const pisoProvincia = Math.min(topProvincia, ...porProvincia.map(p => p.personas));
-            const nubeProvincia = porProvincia.slice(0, 12).map((p, i) =>
-                palabraNube(p.clave, p.personas, topProvincia, color(i), pisoProvincia));
-            const cola = porProvincia.slice(12);
+            const filasProvincia = porProvincia.slice(0, 8).map((p, i) =>
+                barraStats(p.clave, p.personas, topProvincia, color(i)));
+            const cola = porProvincia.slice(8);
             if (cola.length) {
                 const suma = cola.reduce((n, p) => n + p.personas, 0);
-                nubeProvincia.push(palabraNube(`Otras ${cola.length}`, suma, topProvincia, 'var(--color-texto-secundario)', pisoProvincia));
+                filasProvincia.push(barraStats(`Otras ${cola.length}`, suma, topProvincia, 'var(--color-texto-secundario)'));
             }
 
             const accionables = equipos.reduce((n, e) =>
@@ -2726,9 +2719,9 @@
             cuerpo.innerHTML = `
                 <div class="stats-numeros">${numeros}</div>
                 <div class="stats-bloques">
-                    ${bloqueStats('Tipo de organización', 'personas', nubeTipo, color(0))}
-                    ${bloqueStats('Actividad', 'personas', nubeActividad, color(1))}
-                    ${bloqueStats('Provincia', 'personas', nubeProvincia, color(2))}
+                    ${bloqueStats('Tipo de organización', 'personas · organizaciones', filasTipo, color(0))}
+                    ${bloqueStats('Actividad', 'personas · organizaciones', filasActividad, color(1))}
+                    ${bloqueStats('Provincia', 'personas', filasProvincia, color(2))}
                 </div>
                 <div class="stats-numeros">
                     ${numeroStats(accionables, 'Accionables escritos', color(3))}
