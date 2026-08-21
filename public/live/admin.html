@@ -1104,8 +1104,7 @@
            número estaba en los dos grupos y ganaba este, así que se leía al
            mismo tono que una acotación. */
         .vista-stats.modo-claro .stats-bloque .nota,
-        .vista-stats.modo-claro .stats-bloque .paginacion,
-        .vista-stats.modo-claro .stats-barra .segundo { color: #64748b; }
+        .vista-stats.modo-claro .stats-bloque .paginacion { color: #64748b; }
 
         .vista-stats .stats-cuerpo {
             flex: 1;
@@ -1292,12 +1291,6 @@
             vertical-align: middle;
             font-weight: 600;
             font-variant-numeric: tabular-nums;
-        }
-
-        .vista-stats .stats-barra .valor .segundo {
-            font-weight: normal;
-            font-size: 0.7em;
-            color: var(--color-texto-secundario);
         }
 
         /* El cambio de tanda entra con un desplazamiento corto. Sin nada, la
@@ -2702,13 +2695,7 @@
         }
 
         /**
-         * Agrupa y cuenta dos cosas por grupo: personas y organizaciones
-         * distintas.
-         *
-         * Son números distintos y los dos importan: una cooperativa que mandó
-         * cinco personas pesa cinco veces en el primero y una sola en el
-         * segundo. Para "cuánta gente de este tipo hay en la sala" sirve el
-         * primero; para "qué tipo de organizaciones vinieron", el segundo.
+         * Cuánta gente hay en cada grupo, de mayor a menor.
          *
          * `claves` devuelve un array, así que la misma función sirve para tipo
          * —una por persona— y para actividades —varias—.
@@ -2719,16 +2706,12 @@
             for (const p of lista) {
                 for (const clave of claves(p)) {
                     if (!clave) continue;
-                    if (!mapa.has(clave)) mapa.set(clave, { personas: 0, organizaciones: new Set() });
-                    const grupo = mapa.get(clave);
-                    grupo.personas++;
-                    const org = normalizar(p.cooperativa);
-                    if (org) grupo.organizaciones.add(org);
+                    mapa.set(clave, (mapa.get(clave) || 0) + 1);
                 }
             }
 
             return [...mapa.entries()]
-                .map(([clave, g]) => ({ clave, personas: g.personas, organizaciones: g.organizaciones.size }))
+                .map(([clave, personas]) => ({ clave, personas }))
                 .sort((a, b) => b.personas - a.personas);
         }
 
@@ -2753,21 +2736,13 @@
         // número viaja pegado a su punta y necesita lugar para entrar.
         const BARRA_MAX = 78;
 
-        function barraStats(nombre, valor, maximo, color, segundo) {
+        function barraStats(nombre, valor, maximo, color) {
             const pct = maximo > 0 ? Math.max(1.5, (valor / maximo) * BARRA_MAX) : 0;
-            // El segundo número sólo si dice algo distinto. Cuando cada persona
-            // vino de una organización distinta los dos son iguales, y "5 · 5
-            // org." se lee como un error de la pantalla en vez de como el dato
-            // que es. Apareciendo sólo cuando difiere, que aparezca significa
-            // algo: hay una organización que mandó a más de una persona.
-            const extra = (segundo == null || segundo === valor)
-                ? ''
-                : ` <span class="segundo">· ${segundo} org.</span>`;
             return `
                 <div class="stats-barra">
                     <span class="marca" style="background: ${color}"></span>
                     <span class="nombre" title="${escaparHtml(nombre)}">${escaparHtml(nombre)}</span>
-                    <span class="medida"><span class="relleno" style="width: ${pct.toFixed(1)}%; background: ${color}"></span><span class="valor">${valor}${extra}</span></span>
+                    <span class="medida"><span class="relleno" style="width: ${pct.toFixed(1)}%; background: ${color}"></span><span class="valor">${valor}</span></span>
                 </div>`;
         }
 
@@ -2958,12 +2933,12 @@
             const porTipo = agrupar(gente, p => [familiaDe(p)]);
             const topTipo = Math.max(1, ...porTipo.map(t => t.personas));
             const filasTipo = porTipo.map((t, i) =>
-                barraStats(etiquetaDeFamilia(t.clave), t.personas, topTipo, color(i), t.organizaciones));
+                barraStats(etiquetaDeFamilia(t.clave), t.personas, topTipo, color(i)));
 
             const porActividad = agrupar(gente, p => (p.actividades || []));
             const topActividad = Math.max(1, ...porActividad.map(a => a.personas));
             const filasActividad = porActividad.map((a, i) =>
-                barraStats(nombreDeActividad(a.clave), a.personas, topActividad, color(i), a.organizaciones));
+                barraStats(nombreDeActividad(a.clave), a.personas, topActividad, color(i)));
 
             // Todas las provincias, sin recortar. Las que trajeron una sola
             // persona son las que menos pueden permitirse desaparecer en un
@@ -2986,8 +2961,8 @@
             cuerpo.innerHTML = `
                 <div class="stats-numeros">${numeros}</div>
                 <div class="stats-bloques">
-                    ${bloqueStats('tipo', 'Tipo de organización', 'personas · organizaciones', filasTipo, color(0))}
-                    ${bloqueStats('actividad', 'Actividad', 'personas · organizaciones', filasActividad, color(1))}
+                    ${bloqueStats('tipo', 'Tipo de organización', 'personas', filasTipo, color(0))}
+                    ${bloqueStats('actividad', 'Actividad', 'personas', filasActividad, color(1))}
                     ${bloqueStats('provincia', 'Provincia', 'personas', filasProvincia, color(2))}
                 </div>
                 <div class="stats-numeros">
