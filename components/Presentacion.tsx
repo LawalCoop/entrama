@@ -65,7 +65,7 @@ const SOLUCIONES = [
   },
   {
     nombre: 'Financiamiento solidario',
-    texto: 'El más desafiante, y hoy no tenemos una solución clara. Microcréditos entre actores, financiamientos internacionales, una moneda respaldada por un banco cooperativo. Falta entender los problemas con precisión.',
+    texto: 'Microcréditos entre actores, financiamientos internacionales. Relevar herramientas que podrían ser de utilidad.',
   },
 ]
 
