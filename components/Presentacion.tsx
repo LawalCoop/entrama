@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Prompt } from '@/app/icons'
 import styles from '@/app/presentar/presentar.module.css'
@@ -254,19 +254,56 @@ function Grupo({
  * que no para es incómodo además de mareador.
  */
 function Ticker({ citas }: { citas: Cita[] }) {
+  const marco = useRef<HTMLDivElement>(null)
+  const pista = useRef<HTMLDivElement>(null)
+  /*
+   * Si las citas entran en pantalla, no desfilan.
+   *
+   * Un cluster de un solo problema tenía su card cruzando la pantalla y
+   * reapareciendo por el otro lado: se lee como un error y distrae de lo único
+   * que hay que mirar, que es el dolor. Cuando entran, se quedan quietas y
+   * centradas.
+   *
+   * Se mide la primera copia y no la pista entera, porque la pista lleva las
+   * citas duplicadas para que el loop no tenga costura: su ancho es siempre el
+   * doble y no diría nada. Y se remide al cambiar el tamaño de la ventana,
+   * porque el ancho de las cards está en `clamp` y depende de la pantalla.
+   */
+  const [entran, setEntran] = useState(false)
+
+  useEffect(() => {
+    function medir() {
+      if (!marco.current || !pista.current) return
+      const copia = Array.from(pista.current.children).slice(0, citas.length) as HTMLElement[]
+      if (!copia.length) return
+      const ultima = copia[copia.length - 1]
+      const ancho = ultima.offsetLeft + ultima.offsetWidth - copia[0].offsetLeft
+      setEntran(ancho <= marco.current.clientWidth)
+    }
+    medir()
+    window.addEventListener('resize', medir)
+    return () => window.removeEventListener('resize', medir)
+  }, [citas])
+
   if (citas.length === 0) return null
 
   const duracion = Math.max(28, citas.length * 5)
   const dobles = [...citas, ...citas]
 
   return (
-    <div className={styles.ticker}>
+    <div ref={marco} className={`${styles.ticker} ${entran ? styles.tickerQuieto : ''}`}>
       <div
+        ref={pista}
         className={styles.tickerPista}
         style={{ animationDuration: `${duracion}s` }}
       >
         {dobles.map((c, i) => (
-          <figure key={i} className={styles.tickerCita} aria-hidden={i >= citas.length}>
+          <figure
+            key={i}
+            className={styles.tickerCita}
+            data-copia={i >= citas.length ? '1' : '0'}
+            aria-hidden={i >= citas.length}
+          >
             <figcaption className={styles.tickerFuente}>
               {c.cooperativa}
               {c.provincia && <span className={styles.tickerProvincia}> · {c.provincia}</span>}

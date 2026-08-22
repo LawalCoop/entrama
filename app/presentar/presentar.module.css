@@ -426,6 +426,30 @@
   min-height: 0;
 }
 
+/*
+   Cuando las citas entran en la pantalla, no desfilan: quedan quietas y
+   centradas, y la copia que existe sólo para que el loop no tenga costura se
+   esconde. Es el caso de un cluster con uno o dos problemas, donde animar hacía
+   cruzar la card de lado a lado y reaparecer.
+
+   El degradado de los bordes también se va: está para que las cards no aparezcan
+   de golpe contra el filo, y si no se mueven no hay nada que suavizar —encima
+   apagaba el borde de la card de más a la izquierda.
+*/
+.tickerQuieto {
+  mask-image: none;
+}
+
+.tickerQuieto .tickerPista {
+  width: 100%;
+  justify-content: center;
+  animation: none;
+}
+
+.tickerQuieto .tickerCita[data-copia='1'] {
+  display: none;
+}
+
 /* La página es pública y alguien la puede abrir en el celular, donde un
    carrusel que no para es incómodo además de mareador. */
 @media (prefers-reduced-motion: reduce) {
