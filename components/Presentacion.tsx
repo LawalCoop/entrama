@@ -45,7 +45,7 @@ type Pantalla =
 const SOLUCIONES = [
   {
     nombre: 'Integración',
-    texto: 'Plataformas comunes para compartir multimedia, manuales y contactos entre productores, comercializadores y prosumidores. Y herramientas de recolección de información.',
+    texto: 'Herramientas de recolección de información. Y plataformas comunes para compartir multimedia, manuales y contactos entre productores, comercializadores y prosumidores.',
   },
   {
     nombre: 'Logística',
