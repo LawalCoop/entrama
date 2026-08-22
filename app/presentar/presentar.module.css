@@ -385,12 +385,29 @@
   to   { transform: translateX(-50%); }
 }
 
+/*
+   La card se ensancha con su texto, nunca se estira hacia abajo.
+
+   Sin ancho fijo: `flex: none` deja que cada una mida lo que mide su contenido,
+   así que "Visibilidad" ocupa lo que ocupa una palabra y una cita larga se
+   estira hasta el tope. Antes todas medían lo mismo, y eso hacía dos cosas
+   malas a la vez: recortaba las largas teniendo lugar de sobra al lado, y le
+   daba a las cortas un cajón medio vacío.
+
+   El alto no entra en la negociación: lo fija la franja, y lo que no entre
+   después de ensancharse se recorta con puntos suspensivos. Que la franja
+   crezca movería todo lo de arriba en cada cambio de cluster.
+
+   El tope existe porque sin él una cita de 600 caracteres daría una card más
+   ancha que varias pantallas y tardaría una eternidad en pasar.
+*/
 .tickerCita {
   display: flex;
   flex-direction: column;
   gap: clamp(4px, 0.8vh, 10px);
   flex: none;
-  width: clamp(240px, 26vw, 440px);
+  min-width: clamp(180px, 15vw, 260px);
+  max-width: min(70vw, 900px);
   padding: clamp(10px, 1.4vh, 20px);
   overflow: hidden;
   border: 1px solid var(--borde);
