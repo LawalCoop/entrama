@@ -782,6 +782,40 @@
          */
         const FECHA_DEL_ENCUENTRO = new Date(2026, 7, 21);
 
+        /**
+         * ¿La reflexión es la misma lista que los accionables?
+         *
+         * Un equipo cargó su reflexión como una lista y después la volcó otra
+         * vez, línea por línea, en los accionables, agregándole un prefijo
+         * ("Resistencia: …", "Reconstrucción: …"). El informe mostraba lo mismo
+         * dos veces seguidas. En ese caso quedan los accionables, que es la
+         * versión ordenada.
+         *
+         * Los tres umbrales están para no comerse una reflexión legítima:
+         *
+         * - **Al menos tres líneas.** Otro equipo escribió "más capacitación y
+         *   articulación." y tiene un accionable que dice "Capacitación": una
+         *   coincidencia suelta no es una lista copiada.
+         * - **Líneas de más de diez caracteres**, por lo mismo.
+         * - **80% o más.** Que una o dos líneas de una lista larga reaparezcan
+         *   como accionable es normal y no vuelve redundante al resto.
+         */
+        function reflexionRepiteAccionables(reflexion, accionables) {
+            const norm = (t) => (t || '').toLowerCase()
+                .replace(/^[-•*\s]+/, '')
+                .replace(/^(resistencia|reconstrucci[oó]n)\s*:\s*/i, '')
+                .replace(/[¿?¡!.,;:]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            const lineas = (reflexion || '').split('\n').map(norm).filter(l => l.length > 10);
+            const acts = (accionables || []).filter(a => a && a.trim()).map(norm);
+            if (lineas.length < 3 || !acts.length) return false;
+
+            const repetidas = lineas.filter(l => acts.some(a => a === l || a.includes(l)));
+            return repetidas.length / lineas.length >= 0.8;
+        }
+
         function renderizar(equipos, participantes) {
             const fecha = FECHA_DEL_ENCUENTRO.toLocaleDateString('es-AR', {
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
@@ -1001,12 +1035,14 @@
                                 ` : '<p class="sin-datos">Sin cooperativas</p>'}
                             </div>
 
+                            ${reflexionRepiteAccionables(equipo.reflexion, accionables) ? '' : `
                             <div class="seccion">
                                 <h3 class="seccion-titulo">Reflexión del grupo</h3>
                                 ${equipo.reflexion ? `
                                     <div class="reflexion-box">${equipo.reflexion}</div>
                                 ` : '<p class="sin-datos">Sin reflexión cargada</p>'}
                             </div>
+                            `}
 
                             <div class="seccion">
                                 <h3 class="seccion-titulo">Accionables</h3>

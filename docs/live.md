@@ -189,6 +189,18 @@ el informe perdería justo el dato que los distingue.
 horas de debate y una de puesta en común—, y una nota sobre que el informe no lo
 transcribió nadie.
 
+**Si la reflexión repite los accionables, no se muestra.** Un equipo cargó su
+reflexión como una lista y después la volcó otra vez, línea por línea, en los
+accionables, agregándole un prefijo; el informe mostraba lo mismo dos veces
+seguidas. `reflexionRepiteAccionables` lo detecta y deja los accionables, que es
+la versión ordenada.
+
+Los umbrales —tres líneas como mínimo, de más de diez caracteres, y 80% de
+coincidencia— están para no comerse una reflexión legítima. Otro equipo escribió
+"más capacitación y articulación." y tiene un accionable que dice "Capacitación":
+con una regla laxa esa reflexión también desaparecía, y no es lo mismo una
+coincidencia suelta que una lista copiada entera.
+
 **La fecha del encuentro está fija** en `FECHA_DEL_ENCUENTRO`, arriba de
 `renderizar`. Antes salía de `new Date()`, así que el informe decía haberse
 debatido el día en que uno lo abría. Va construida con `new Date(año, mes, día)`
