@@ -53,15 +53,15 @@ const SOLUCIONES = [
   },
   {
     nombre: 'Visibilidad',
-    texto: 'No hay solución mágica. Es un trabajo diario de permanencia en las redes principales. Una app para consultar puntos cercanos de la red, alimentada por el mapa, puede ser una parte.',
+    texto: 'No hay solución mágica: es permanencia diaria en las redes principales, y una campaña nacional sobre otro tipo de consumo. Una app para consultar puntos cercanos de la red, alimentada por el mapa, puede ser una parte.',
   },
   {
     nombre: 'Financiamiento solidario',
-    texto: 'El más desafiante, y hoy no tenemos una solución clara. Los microcréditos entre actores podrían ser un camino. Primero hace falta entender los problemas con mucha más precisión.',
+    texto: 'El más desafiante, y hoy no tenemos una solución clara. Los microcréditos entre actores y los financiamientos internacionales podrían ser caminos. Primero hace falta entender los problemas con mucha más precisión.',
   },
   {
     nombre: 'Canales con clientes',
-    texto: 'Recordatorios y avisos de recompra, para sostener el vínculo con quien ya compró. Podrían ser parte de la misma app.',
+    texto: 'Un sistema de suscripciones: en vez de recordarte que compres, ya está comprado. Los recordatorios y avisos de recompra son el escalón previo. Podría ser parte de la misma app.',
   },
 ]
 
