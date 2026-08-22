@@ -53,7 +53,7 @@ const SOLUCIONES = [
   },
   {
     nombre: 'Canales con clientes',
-    texto: 'Un sistema de suscripciones: en vez de recordarte que compres, ya está comprado. Y una app de puntos cercanos —almacenes populares, mercados de cercanía— alimentada por el mapa.',
+    texto: 'Empezar a pensar formas de simplificar la comunicación con clientes regulares: automatizar el envío de mensajes con promociones.',
   },
   {
     nombre: 'Visibilidad',
