@@ -2869,14 +2869,21 @@
                 }
             }
 
-            // Si ya se registró nombre/coope pero no eligió equipo, ir a selección
-            if (estado.nombreUsuario && estado.cooperativaUsuario) {
-                document.getElementById('saludoUsuario').textContent = `${estado.nombreUsuario}, elegí un tema para trabajar`;
-                mostrarPantalla('pantallaSeleccion');
-                return;
-            }
-
-            // Si no hay nada, mostrar registro (ya es la pantalla por defecto)
+            // Tener el perfil guardado pero ninguna fila en la base es alguien
+            // que ya usó la app en un taller anterior: los participantes se
+            // borran al preparar el siguiente, el localStorage no.
+            //
+            // Va al formulario, que le va a aparecer completo con lo de la vez
+            // pasada —sólo tiene que tocar Continuar— y de ahí al reparto, que
+            // lo ubica en los equipos nuevos.
+            //
+            // Antes esto lo mandaba a elegir equipo a mano. Era el flujo de
+            // cuando cada quien elegía su tema; con la asignación automática
+            // significa saltearse el reparto, que es justo lo que no tiene que
+            // pasar cuando arranca un taller nuevo.
+            //
+            // Si no hay nada guardado, también cae acá: el registro es la
+            // pantalla por defecto.
         }
 
         // `.finally` y no al final de init(): esa función tiene un return temprano
