@@ -27,13 +27,11 @@
    una grilla de tarjetas, y cada píxel de más es tarjeta más grande vista desde
    el fondo de la sala.
 
-   El margen negativo se come parte del aire del layout —48px arriba y 56 a los
-   costados—, que en las demás pantallas es respiración y acá es espacio
-   desperdiciado. Queda lo suficiente para que no toque el header ni los bordes.
+   El aire de alrededor lo achica el layout en modo presentación; acá alcanza
+   con soltar el ancho.
 */
 .pantallaAncha {
   max-width: none;
-  margin: -32px -40px 0;
 }
 
 /* Estirar en vez de centrar: si no, una grilla de dos filas queda flotando en
@@ -131,11 +129,17 @@
 
 /* --- Navegación --- */
 
+/* No se encoge nunca y pinta por encima: es lo último de la columna, y si el
+   contenido de arriba pide de más, lo que no puede pasar es que los botones se
+   aplasten o queden tapados por el footer. */
 .nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .btn {

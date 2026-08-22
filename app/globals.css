@@ -237,9 +237,15 @@ body[data-presentando] [data-shell] {
   min-height: 0;
 }
 
+/* Menos aire alrededor que en el resto de la app: proyectando, ese margen no
+   es respiración, es pantalla desperdiciada. Se hace acá y no con márgenes
+   negativos en el contenido, que era lo que empujaba la navegación por debajo
+   del footer. */
 body[data-presentando] [data-content] {
   min-height: 0;
   overflow: hidden;
+  padding: 20px 28px;
+  gap: 16px;
 }
 
 @media (prefers-reduced-motion: reduce) {
