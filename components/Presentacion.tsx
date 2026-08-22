@@ -57,7 +57,7 @@ const SOLUCIONES = [
   },
   {
     nombre: 'Visibilidad',
-    texto: 'Permanencia diaria en las redes y una campaña nacional sobre otro tipo de consumo, que muestre el precio desguazado. Las historias de cada producto y la cara de quien produce ya existen: falta el banco común.',
+    texto: 'Permanencia diaria en las redes y una campaña nacional sobre otro tipo de consumo. Las historias de cada producto y la cara de quien produce ya existen: falta el banco común.',
   },
   {
     nombre: 'Gestión',
