@@ -185,8 +185,15 @@ detecta, no se asume**: si los equipos tienen temas distintos —como en el
 plenario de FACTTIC, de donde viene esta app— vuelven a mostrarse en cada uno, o
 el informe perdería justo el dato que los distingue.
 
-**Cómo se trabajó**, los cinco pasos de la metodología, y una nota sobre que el
-informe no lo transcribió nadie.
+**Cómo se trabajó**, los cinco pasos de la metodología con sus tiempos —dos
+horas de debate y una de puesta en común—, y una nota sobre que el informe no lo
+transcribió nadie.
+
+**La fecha del encuentro está fija** en `FECHA_DEL_ENCUENTRO`, arriba de
+`renderizar`. Antes salía de `new Date()`, así que el informe decía haberse
+debatido el día en que uno lo abría. Va construida con `new Date(año, mes, día)`
+y no con un string: `new Date('2026-08-21')` se interpreta como UTC y en
+Argentina cae el día anterior a las 21.
 
 **El tarjetero intercoop**, al final: una tarjeta por persona con organización,
 tipo, provincia, actividades y el mail de quienes lo dejaron. Ordenado por

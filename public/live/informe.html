@@ -769,8 +769,21 @@
             renderizar(equipos, participantes);
         }
 
+        /*
+         * Cuándo fue el encuentro.
+         *
+         * Estaba con `new Date()`, que ponía la fecha de hoy: el informe decía
+         * haberse debatido el día en que uno lo abría. Es un dato del encuentro,
+         * no del momento en que se mira, así que va fijo.
+         *
+         * Con `new Date(año, mes, día)` y no con un string: `new Date('2026-08-21')`
+         * se interpreta como UTC y en Argentina cae el día anterior a las 21hs.
+         * El mes va 0-indexado, así que 7 es agosto.
+         */
+        const FECHA_DEL_ENCUENTRO = new Date(2026, 7, 21);
+
         function renderizar(equipos, participantes) {
-            const fecha = new Date().toLocaleDateString('es-AR', {
+            const fecha = FECHA_DEL_ENCUENTRO.toLocaleDateString('es-AR', {
                 weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
             });
 
@@ -892,16 +905,16 @@
                             <span>Buscando que en cada uno no se repita la organización, que se crucen tipos distintos, que se mezclen las actividades y que queden parejos en cantidad.</span>
                         </li>
                         <li>
-                            <strong>Cada equipo debatió las preguntas disparadoras</strong>
-                            <span>Con un tiempo común para todos, marcado desde el panel.</span>
+                            <strong>Dos horas de debate en cada equipo</strong>
+                            <span>Sobre las preguntas disparadoras, con un mismo tiempo para todos marcado desde el panel y proyectado en la sala.</span>
                         </li>
                         <li>
                             <strong>Las conclusiones se cargaron ahí mismo</strong>
                             <span>Una reflexión del grupo y los accionables con sus responsables, desde el celular de cualquiera del equipo.</span>
                         </li>
                         <li>
-                            <strong>Se presentaron en plenario</strong>
-                            <span>Proyectando lo que cada equipo había cargado.</span>
+                            <strong>Una hora para compartirlas en plenario</strong>
+                            <span>Cada equipo presentó lo suyo, proyectando lo que había cargado.</span>
                         </li>
                     </ol>
                     <p class="nota-herramienta">
