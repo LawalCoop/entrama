@@ -44,28 +44,28 @@ type Pantalla =
  */
 const SOLUCIONES = [
   {
+    nombre: 'Integración',
+    texto: 'Plataformas comunes para compartir multimedia, manuales y contactos entre productores, comercializadores y prosumidores.',
+  },
+  {
     nombre: 'Logística',
     texto: 'Un mapa interactivo que ayude a recolectar entradas y salidas: desde dónde llegan y hacia dónde se envían insumos y productos.',
-  },
-  {
-    nombre: 'Gestión',
-    texto: 'Sistemas de gestión hay miles. Es una tarea grande: casi todos necesitan muchísima customización y configurarse para cada caso particular.',
-  },
-  {
-    nombre: 'Visibilidad',
-    texto: 'Permanencia diaria en las redes y una campaña nacional sobre otro tipo de consumo, que muestre el precio desguazado. Las historias de cada producto y la cara de quien produce ya existen: falta el banco común.',
-  },
-  {
-    nombre: 'Financiamiento solidario',
-    texto: 'El más desafiante, y hoy no tenemos una solución clara. Microcréditos entre actores, financiamientos internacionales, una moneda respaldada por un banco cooperativo. Falta entender los problemas con precisión.',
   },
   {
     nombre: 'Canales con clientes',
     texto: 'Un sistema de suscripciones: en vez de recordarte que compres, ya está comprado. Y una app de puntos cercanos —almacenes populares, mercados de cercanía— alimentada por el mapa.',
   },
   {
-    nombre: 'Integración',
-    texto: 'Plataformas comunes para compartir multimedia, manuales y contactos entre productores, comercializadores y prosumidores.',
+    nombre: 'Visibilidad',
+    texto: 'Permanencia diaria en las redes y una campaña nacional sobre otro tipo de consumo, que muestre el precio desguazado. Las historias de cada producto y la cara de quien produce ya existen: falta el banco común.',
+  },
+  {
+    nombre: 'Gestión',
+    texto: 'Sistemas de gestión hay miles. Es una tarea grande: casi todos necesitan muchísima customización y configurarse para cada caso particular.',
+  },
+  {
+    nombre: 'Financiamiento solidario',
+    texto: 'El más desafiante, y hoy no tenemos una solución clara. Microcréditos entre actores, financiamientos internacionales, una moneda respaldada por un banco cooperativo. Falta entender los problemas con precisión.',
   },
 ]
 
