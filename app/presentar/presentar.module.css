@@ -1,6 +1,16 @@
 /* Pensado para proyectar: una idea por pantalla, sin scroll, y tipografía que
    se lea desde el fondo de la sala. Las medidas van en `clamp` para que la
-   misma pantalla sirva en un proyector y en una notebook. */
+   misma pantalla sirva en un proyector y en una notebook.
+
+   Los cuerpos de texto se miden en `vh` y no en `vw` a propósito. La regla de
+   proyección conocida como 8H —la última fila a no más de ocho veces el alto de
+   la pantalla— dice que ahí el texto se lee si mide al menos 1/50 de ese alto,
+   y que para proyección conviene 1/25, que es el "se lee cómodo" y no el "se
+   llega a leer". Todo se define contra el alto, así que en el alto se mide.
+
+   Traducido a un proyector de 1080: 1/50 son 21px y 1/25 son 43px. De ahí salen
+   los topes de abajo. Antes el texto de las citas llegaba a 14px —1/77— o sea
+   menos de la mitad del mínimo. */
 
 .pantalla {
   display: flex;
@@ -98,7 +108,7 @@
   align-items: center;
   gap: 8px;
   font-family: var(--font-heading), sans-serif;
-  font-size: clamp(12px, 1.3vw, 16px);
+  font-size: clamp(12px, 1.8vh, 24px);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -111,17 +121,19 @@
 
 .dolorTitulo {
   font-family: var(--font-heading), sans-serif;
-  font-size: clamp(24px, 3.6vw, 46px);
+  font-size: clamp(26px, 5.6vh, 76px);
   font-weight: 700;
   line-height: 1.15;
   color: var(--texto);
 }
 
+/* 1/29 del alto en un proyector de 1080. Antes el tope eran 22px: 1/49, el
+   mínimo justo, para el texto que explica de qué se trata el grupo. */
 .dolorDesc {
-  font-size: clamp(14px, 1.7vw, 22px);
-  line-height: 1.5;
+  font-size: clamp(16px, 3.4vh, 46px);
+  line-height: 1.45;
   color: var(--texto-suave);
-  max-width: 62ch;
+  max-width: 46ch;
 }
 
 /* --- Citas --- */
@@ -295,14 +307,18 @@
   flex: none;
 }
 
+/* Arriba y no centrado: centrado, con el ticker abajo ocupando su alto fijo, el
+   dolor quedaba flotando en el medio de la pantalla con un vacío enorme encima.
+   Lo primero que hay que leer va donde se mira primero. */
 .grupoCentro {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
-  gap: clamp(12px, 2vh, 28px);
+  gap: clamp(12px, 2.4vh, 34px);
+  padding-top: clamp(8px, 2.5vh, 40px);
   text-align: center;
 }
 
@@ -331,9 +347,19 @@
 
 /* --- Ticker de citas --- */
 
+/*
+   El alto es fijo y no lo decide el contenido.
+
+   Antes lo marcaba la card más alta de cada grupo —una cita de una línea contra
+   una de cuatro— así que al pasar de grupo el ticker cambiaba de alto y todo lo
+   de arriba se movía. En una proyección eso se ve como un salto cada vez que
+   alguien aprieta siguiente. Ahora la franja mide siempre lo mismo, las cards la
+   llenan, y lo que no entra se recorta adentro de la card.
+*/
 .ticker {
   flex: none;
   width: 100%;
+  height: clamp(132px, 21vh, 260px);
   overflow: hidden;
   /* Los bordes se desvanecen para que las cards no aparezcan y desaparezcan de
      golpe contra el filo de la pantalla. */
@@ -343,6 +369,8 @@
 
 .tickerPista {
   display: flex;
+  align-items: stretch;
+  height: 100%;
   width: max-content;
   gap: clamp(10px, 0.9vw, 18px);
   animation-name: desfilar;
@@ -360,10 +388,11 @@
 .tickerCita {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: clamp(4px, 0.8vh, 10px);
   flex: none;
-  width: clamp(240px, 22vw, 340px);
-  padding: clamp(10px, 1vw, 16px);
+  width: clamp(240px, 26vw, 440px);
+  padding: clamp(10px, 1.4vh, 20px);
+  overflow: hidden;
   border: 1px solid var(--borde);
   border-radius: 12px;
   background: var(--superficie);
@@ -371,25 +400,30 @@
 
 .tickerFuente {
   font-family: var(--font-heading), sans-serif;
-  font-size: clamp(10px, 0.75vw, 12px);
+  font-size: clamp(10px, 1.5vh, 20px);
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-a);
+  flex: none;
 }
 
 .tickerProvincia {
   color: var(--texto-suave);
 }
 
+/* 1/41 del alto en un proyector de 1080, contra 1/77 de antes. Las líneas se
+   recortan adentro de la card para que el alto de la franja no dependa de qué
+   tan largo escribió cada quien. */
 .tickerTexto {
-  font-size: clamp(11px, 0.9vw, 14px);
-  line-height: 1.4;
+  font-size: clamp(12px, 2.4vh, 32px);
+  line-height: 1.35;
   color: var(--texto);
   display: -webkit-box;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 0;
 }
 
 /* La página es pública y alguien la puede abrir en el celular, donde un
