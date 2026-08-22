@@ -400,7 +400,6 @@
   justify-content: flex-start;
   gap: clamp(4px, 0.8vh, 10px);
   flex: none;
-  max-width: min(70vw, 900px);
   padding: clamp(10px, 1.4vh, 20px);
   overflow: hidden;
   border: 1px solid var(--borde);

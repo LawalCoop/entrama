@@ -290,7 +290,16 @@ function medidaDeCita(texto: string) {
    */
   const ancho = Math.ceil((largo / lineas) * 1.35)
 
-  return { cuerpo, lineas, ancho: Math.min(60, Math.max(12, ancho)) }
+  /*
+   * Sin tope por arriba: la franja desfila de costado, así que ancho hay todo
+   * el que haga falta. Una cita de 600 caracteres da una card de casi dos
+   * pantallas y está bien —pasa entera, que es lo que importa—; recortarla para
+   * que entrase en una pantalla era resolver un problema que no existía.
+   *
+   * El piso sí queda: una cita de una palabra no puede dar una card de dos
+   * centímetros.
+   */
+  return { cuerpo, lineas, ancho: Math.max(12, ancho) }
 }
 
 function Card({ cita, duplicada }: { cita: Cita; duplicada: boolean }) {
@@ -331,6 +340,7 @@ function Ticker({ citas }: { citas: Cita[] }) {
    * porque el ancho de las cards está en `clamp` y depende de la pantalla.
    */
   const [entran, setEntran] = useState(false)
+  const [ancho, setAncho] = useState(0)
 
   useEffect(() => {
     function medir() {
@@ -338,8 +348,9 @@ function Ticker({ citas }: { citas: Cita[] }) {
       const copia = Array.from(pista.current.children).slice(0, citas.length) as HTMLElement[]
       if (!copia.length) return
       const ultima = copia[copia.length - 1]
-      const ancho = ultima.offsetLeft + ultima.offsetWidth - copia[0].offsetLeft
-      setEntran(ancho <= marco.current.clientWidth)
+      const medido = ultima.offsetLeft + ultima.offsetWidth - copia[0].offsetLeft
+      setAncho(medido)
+      setEntran(medido <= marco.current.clientWidth)
     }
     medir()
     window.addEventListener('resize', medir)
@@ -348,7 +359,19 @@ function Ticker({ citas }: { citas: Cita[] }) {
 
   if (citas.length === 0) return null
 
-  const duracion = Math.max(28, citas.length * 5)
+  /*
+   * La duración sale del ancho medido y no de cuántas citas hay.
+   *
+   * La animación recorre media pista en `duracion` segundos, así que atarla a
+   * la cantidad de citas hacía que la velocidad dependiera de cuánto habían
+   * escrito: tres citas largas pasaban volando y tres cortas se arrastraban.
+   * Con el ancho, todas desfilan a la misma cantidad de píxeles por segundo, se
+   * lean desde donde se lean.
+   *
+   * El piso es para que con poco contenido no quede dando vueltas a los
+   * tirones. Y mientras no se midió —el primer pintado— vale la cuenta vieja.
+   */
+  const duracion = ancho ? Math.max(24, Math.round(ancho / 90)) : Math.max(28, citas.length * 5)
   const dobles = [...citas, ...citas]
 
   return (
