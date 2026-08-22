@@ -86,7 +86,7 @@ export default function Presentacion({
   return (
     <div className={styles.pantalla}>
       <div className={styles.lienzo}>
-        {p.tipo === 'apertura' && <Apertura totales={totales} clusters={clusters.length} />}
+        {p.tipo === 'apertura' && <Apertura totales={totales} />}
         {p.tipo === 'panoramica' && <Panoramica clusters={clusters} viabilidadVaria={viabilidadVaria} />}
         {p.tipo === 'cluster' && (
           <Grupo
@@ -117,10 +117,17 @@ export default function Presentacion({
   )
 }
 
-function Apertura({ totales, clusters }: { totales: Totales; clusters: number }) {
+/**
+ * La apertura cuenta lo que trajo la sala, y sólo eso.
+ *
+ * Nada acá sale de la digestión. Los "dolores en común" —la cantidad de
+ * clusters— estaban entre estas cifras y se fueron: ese número lo produce el
+ * agente al agrupar, no lo trajo nadie. Aparece igual dos pantallas después,
+ * donde corresponde: en la panorámica de los grupos.
+ */
+function Apertura({ totales }: { totales: Totales }) {
   const datos = [
     [totales.problemas, totales.problemas === 1 ? 'problema' : 'problemas'],
-    [clusters, clusters === 1 ? 'dolor en común' : 'dolores en común'],
     [totales.organizaciones, totales.organizaciones === 1 ? 'organización' : 'organizaciones'],
     [totales.provincias, totales.provincias === 1 ? 'provincia' : 'provincias'],
   ] as const

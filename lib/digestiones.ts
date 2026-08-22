@@ -237,7 +237,6 @@ export async function ultimaParaPresentar(): Promise<ParaPresentar | null> {
       .map((p) => ({ texto: p.problema, cooperativa: p.cooperativa, provincia: p.provincia })),
   }))
 
-  const todas = clusters.flatMap((c) => c.citas)
   const viabilidades = new Set(clusters.map((c) => c.tech_feasibility).filter(Boolean))
 
   return {
@@ -245,15 +244,39 @@ export async function ultimaParaPresentar(): Promise<ParaPresentar | null> {
     creadoEn: d.creadoEn,
     completa: d.completa,
     clusters,
-    totales: {
-      // Los problemas se cuentan sobre los que efectivamente se resolvieron: si
-      // una digestión quedó incompleta, decir 42 cuando se muestran 39 sería
-      // decir algo que no es.
-      problemas: todas.length,
-      organizaciones: new Set(todas.map((c) => c.cooperativa)).size,
-      provincias: new Set(todas.map((c) => c.provincia).filter(Boolean)).size,
-    },
+    totales: await contarLoQueTrajimos(),
   }
+}
+
+/**
+ * Lo que trajo la sala, contado sobre `problemas` y nada más.
+ *
+ * Antes salía de las citas de la digestión, o sea de los problemas que el
+ * agente había logrado agrupar. Eso hacía que la pantalla de apertura dependiera
+ * del clustering: un problema cargado después de digerir no existía, y uno que
+ * el agente se olvidó de agrupar tampoco. La apertura dice "esto es lo que
+ * trajimos" y lo que trajo la gente son los problemas que cargó, los haya
+ * ordenado alguien después o no.
+ *
+ * El canje: si una digestión queda incompleta, la apertura puede decir 12
+ * mientras los grupos muestran 11. Es el precio de que este número sea de la
+ * sala y no del agente, y se prefiere así.
+ *
+ * Las organizaciones se cuentan sin distinguir mayúsculas ni espacios, igual que
+ * en el resto del proyecto: "Coop La Wiphala" y "coop la wiphala" son una.
+ */
+async function contarLoQueTrajimos(): Promise<ParaPresentar['totales']> {
+  return withClient(async (client) => {
+    const { rows } = await client.query<{
+      problemas: number; organizaciones: number; provincias: number
+    }>(
+      `select count(*)::int                                        as problemas,
+              count(distinct lower(trim(cooperativa)))::int        as organizaciones,
+              count(distinct provincia)::int                       as provincias
+         from problemas`,
+    )
+    return rows[0]
+  })
 }
 
 export { Invalido }
