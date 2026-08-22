@@ -253,6 +253,56 @@ function Grupo({
  * página es pública y alguien la puede abrir en el celular, donde un carrusel
  * que no para es incómodo además de mareador.
  */
+/**
+ * Cómo se dibuja una cita para que llene el alto de su card.
+ *
+ * La franja mide siempre lo mismo —si creciera, movería todo lo de arriba al
+ * cambiar de cluster— y las cards la llenan. Lo que no puede pasar es
+ * desperdiciar ese alto: "control de stock" en un renglón dejaba tres cuartos
+ * de card vacíos.
+ *
+ * Entonces el texto se dimensiona según cuánto es. Corto va en cuerpo grande y
+ * dos renglones; largo, más chico, más ancho y más renglones. El ancho sale de
+ * dividir los caracteres por los renglones que se buscan, y va en `ch` —el
+ * ancho de un cero en ese mismo cuerpo—, así que la cuenta se sostiene aunque
+ * cambie el tamaño de letra con la pantalla.
+ *
+ * Los topes son para los dos extremos: una cita de una palabra no puede dar una
+ * card de dos centímetros, y una de 600 caracteres no puede dar una más ancha
+ * que la pantalla.
+ */
+function medidaDeCita(texto: string) {
+  const largo = texto.trim().length
+
+  const { lineas, cuerpo } =
+    largo <= 30 ? { lineas: 2, cuerpo: styles.citaGrande }
+      : largo <= 90 ? { lineas: 3, cuerpo: styles.citaMedia }
+        : { lineas: 4, cuerpo: styles.citaChica }
+
+  return { cuerpo, lineas, ancho: Math.min(60, Math.max(11, Math.ceil(largo / lineas))) }
+}
+
+function Card({ cita, duplicada }: { cita: Cita; duplicada: boolean }) {
+  const { cuerpo, lineas, ancho } = medidaDeCita(cita.texto)
+
+  return (
+    <figure
+      className={`${styles.tickerCita} ${cuerpo}`}
+      style={{ width: `${ancho}ch` }}
+      data-copia={duplicada ? '1' : '0'}
+      aria-hidden={duplicada}
+    >
+      <figcaption className={styles.tickerFuente}>
+        {cita.cooperativa}
+        {cita.provincia && <span className={styles.tickerProvincia}> · {cita.provincia}</span>}
+      </figcaption>
+      <blockquote className={styles.tickerTexto} style={{ WebkitLineClamp: lineas }}>
+        {cita.texto}
+      </blockquote>
+    </figure>
+  )
+}
+
 function Ticker({ citas }: { citas: Cita[] }) {
   const marco = useRef<HTMLDivElement>(null)
   const pista = useRef<HTMLDivElement>(null)
@@ -298,18 +348,7 @@ function Ticker({ citas }: { citas: Cita[] }) {
         style={{ animationDuration: `${duracion}s` }}
       >
         {dobles.map((c, i) => (
-          <figure
-            key={i}
-            className={styles.tickerCita}
-            data-copia={i >= citas.length ? '1' : '0'}
-            aria-hidden={i >= citas.length}
-          >
-            <figcaption className={styles.tickerFuente}>
-              {c.cooperativa}
-              {c.provincia && <span className={styles.tickerProvincia}> · {c.provincia}</span>}
-            </figcaption>
-            <blockquote className={styles.tickerTexto}>{c.texto}</blockquote>
-          </figure>
+          <Card key={i} cita={c} duplicada={i >= citas.length} />
         ))}
       </div>
     </div>

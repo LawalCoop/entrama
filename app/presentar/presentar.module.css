@@ -386,27 +386,20 @@
 }
 
 /*
-   La card se ensancha con su texto, nunca se estira hacia abajo.
+   El ancho lo calcula el componente y llega en `ch`: caracteres divididos por
+   los renglones que se buscan. Acá va sólo el tope, para que una cita larguísima
+   no dé una card más ancha que la pantalla.
 
-   Sin ancho fijo: `flex: none` deja que cada una mida lo que mide su contenido,
-   así que "Visibilidad" ocupa lo que ocupa una palabra y una cita larga se
-   estira hasta el tope. Antes todas medían lo mismo, y eso hacía dos cosas
-   malas a la vez: recortaba las largas teniendo lugar de sobra al lado, y le
-   daba a las cortas un cajón medio vacío.
-
-   El alto no entra en la negociación: lo fija la franja, y lo que no entre
-   después de ensancharse se recorta con puntos suspensivos. Que la franja
-   crezca movería todo lo de arriba en cada cambio de cluster.
-
-   El tope existe porque sin él una cita de 600 caracteres daría una card más
-   ancha que varias pantallas y tardaría una eternidad en pasar.
+   El alto lo llena la franja y no negocia: crecer movería todo lo de arriba al
+   cambiar de cluster. Que el texto aproveche ese alto es lo que resuelve el
+   cuerpo variable de más abajo.
 */
 .tickerCita {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: clamp(4px, 0.8vh, 10px);
   flex: none;
-  min-width: clamp(180px, 15vw, 260px);
   max-width: min(70vw, 900px);
   padding: clamp(10px, 1.4vh, 20px);
   overflow: hidden;
@@ -429,11 +422,30 @@
   color: var(--texto-suave);
 }
 
-/* 1/41 del alto en un proyector de 1080, contra 1/77 de antes. Las líneas se
-   recortan adentro de la card para que el alto de la franja no dependa de qué
-   tan largo escribió cada quien. */
-.tickerTexto {
+/*
+   Tres cuerpos según cuánto texto hay, para que todas las citas llenen el mismo
+   alto. Van en la card y no en el texto porque el ancho llega en `ch`, que se
+   mide contra el cuerpo del elemento que lo usa: si no coincidieran, la cuenta
+   de caracteres por renglón daría cualquier cosa.
+
+   El más grande es 1/27 del alto en un proyector de 1080 y el más chico 1/45.
+   La referencia es la regla de proyección: 1/50 es el mínimo legible y 1/25 lo
+   cómodo. Antes eran 14px fijos, o sea 1/77.
+*/
+.citaGrande {
+  font-size: clamp(16px, 4vh, 52px);
+}
+
+.citaMedia {
+  font-size: clamp(14px, 3vh, 40px);
+}
+
+.citaChica {
   font-size: clamp(12px, 2.4vh, 32px);
+}
+
+.tickerTexto {
+  font-size: inherit;
   line-height: 1.35;
   color: var(--texto);
   display: -webkit-box;
