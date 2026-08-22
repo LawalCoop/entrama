@@ -65,7 +65,7 @@ const SOLUCIONES = [
   },
   {
     nombre: 'Integración',
-    texto: 'Plataformas comunes para compartir multimedia, manuales y contactos entre productores, comercializadores y prosumidores. Y la pregunta difícil: cómo se distribuyen los excedentes y sobre quién cae el porcentaje.',
+    texto: 'Plataformas comunes para compartir multimedia, manuales y contactos entre productores, comercializadores y prosumidores.',
   },
 ]
 
