@@ -163,6 +163,41 @@ Verde hasta el 60%, ámbar hasta el 90%, rojo de ahí en adelante.
 con realtime, sus conexiones gastan cuota y no aparecen acá. Y una conexión que
 muere tarda unos segundos en desaparecer, hasta que vence el heartbeat.
 
+## El informe del debate
+
+`informe.html` arma solo la sistematización del encuentro con lo que los equipos
+cargaron. Tiene cuatro partes.
+
+**El resumen en números** —personas, organizaciones, provincias, tipos de
+organización, equipos y accionables—. Las categorías que dan cero no se muestran:
+lo que se cargó antes de que el formulario pidiera ese dato viene en null y no
+tiene que contar como una más.
+
+**El tema y las preguntas, una sola vez.** En este encuentro los cinco equipos
+debatieron lo mismo, así que repetirlo en cada tarjeta era ruido. Pero eso **se
+detecta, no se asume**: si los equipos tienen temas distintos —como en el
+plenario de FACTTIC, de donde viene esta app— vuelven a mostrarse en cada uno, o
+el informe perdería justo el dato que los distingue.
+
+**Cómo se trabajó**, los cinco pasos de la metodología, y una nota sobre que el
+informe no lo transcribió nadie.
+
+**El tarjetero intercoop**, al final: una tarjeta por persona con organización,
+tipo, provincia, actividades y el mail de quienes lo dejaron. Ordenado por
+organización y después por nombre, porque se busca "el de tal cooperativa" antes
+que a una persona suelta.
+
+**Los mails quedan a la vista en una página pública.** Se decidió así a
+sabiendas: el informe no está detrás del Basic Auth, y el formulario, cuando esas
+48 personas cargaron su mail, sólo decía "Tu email (opcional)". Si en algún
+momento eso incomoda, las salidas son proteger `informe.html` con el proxy —está
+a una línea del matcher— o mover el tarjetero a su propia página.
+
+Tipos de organización y actividades **se leen de sus tablas**, no de una lista
+fija en el archivo. Copiarlas garantizaba quedar desactualizado, y pasó:
+"confederacion" se dio de alta durante el encuentro y el informe la mostraba como
+slug crudo hasta que se corrigió.
+
 ## El QR para sumarse
 
 Dos formas de que la sala llegue a la dinámica sin tipear nada:

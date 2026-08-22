@@ -146,6 +146,184 @@
         }
 
         /* Lista de cooperativas */
+        /* Bloques del resumen: el tema y la metodología, arriba de todo. */
+        .bloque-tema,
+        .bloque-metodo {
+            background: var(--color-card);
+            border: 1px solid var(--color-borde);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.3s both;
+        }
+
+        .bloque-titulo {
+            color: var(--color-texto-secundario);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 1.2rem;
+            font-weight: 500;
+        }
+
+        .tema-grande {
+            font-size: clamp(1.6rem, 4vw, 2.4rem);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+        }
+
+        .bloque-bajada {
+            color: var(--color-texto-secundario);
+            margin-bottom: 1rem;
+        }
+
+        /* Los pasos de la metodología. `ol` para que el orden sea el del
+           procedimiento y no una lista suelta de cosas que pasaron. */
+        .pasos {
+            list-style: none;
+            counter-reset: paso;
+            display: flex;
+            flex-direction: column;
+            gap: 1.4rem;
+        }
+
+        .pasos li {
+            counter-increment: paso;
+            display: grid;
+            grid-template-columns: 2.2rem 1fr;
+            gap: 0.9rem;
+            align-items: start;
+        }
+
+        .pasos li::before {
+            content: counter(paso);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.2rem;
+            height: 2.2rem;
+            border-radius: 50%;
+            background: var(--color-primario-soft);
+            color: var(--color-primario);
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        /* Los dos van a la segunda columna. Sin esto el `span` cae en la celda
+           de abajo del número —2,2rem de ancho— y el texto sale en vertical,
+           una palabra por línea. */
+        .pasos strong,
+        .pasos span {
+            grid-column: 2;
+        }
+
+        .pasos strong {
+            font-size: 1.05rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .pasos span {
+            color: var(--color-texto-secundario);
+            line-height: 1.5;
+        }
+
+        .nota-herramienta {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--color-borde);
+            color: var(--color-texto-secundario);
+            line-height: 1.6;
+        }
+
+        /* Tarjetero: quiénes estuvieron y cómo ubicarlos. */
+        .tarjetero { margin: 4rem 0 2rem; }
+
+        .tarjetero-titulo {
+            font-size: clamp(1.8rem, 4vw, 2.4rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .tarjetero-bajada {
+            color: var(--color-texto-secundario);
+            margin-bottom: 2rem;
+        }
+
+        /* auto-fill y no auto-fit: con pocas tarjetas, auto-fit las estira hasta
+           ocupar todo el ancho y una sola queda del tamaño de la pantalla. */
+        .tarjetas {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem;
+        }
+
+        .tarjeta {
+            background: var(--color-card);
+            border: 1px solid var(--color-borde);
+            border-radius: 14px;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .tarjeta:hover { border-color: var(--color-primario); }
+
+        .tarjeta-nombre {
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .tarjeta-org {
+            color: var(--color-primario);
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
+
+        .tarjeta-donde {
+            color: var(--color-texto-secundario);
+            font-size: 0.85rem;
+        }
+
+        .tarjeta-acts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.35rem;
+        }
+
+        .tarjeta-act {
+            background: var(--color-primario-soft);
+            color: var(--color-primario);
+            padding: 0.2rem 0.6rem;
+            border-radius: 100px;
+            font-size: 0.75rem;
+        }
+
+        .tarjeta-contacto {
+            margin-top: 0.6rem;
+            padding-top: 0.6rem;
+            border-top: 1px solid var(--color-borde);
+            color: var(--color-texto);
+            font-size: 0.85rem;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .tarjeta-contacto:hover { color: var(--color-primario); }
+
+        .tarjeta-sin-contacto {
+            margin-top: 0.6rem;
+            padding-top: 0.6rem;
+            border-top: 1px solid var(--color-borde);
+            color: var(--color-texto-terciario);
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
         .coops-lista {
             text-align: center;
             padding: 2rem;
@@ -538,14 +716,36 @@
 
         var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        /*
+         * Tipos de organización y actividades son tablas, no listas fijas: la
+         * gente da de alta las que faltan desde el formulario. Copiarlas acá
+         * garantizaba quedar desactualizado —y pasó: "confederacion" se cargó
+         * en el encuentro y este informe la mostraba como slug crudo—.
+         *
+         * Se leen de la base y se resuelven por slug, que es lo que quedó
+         * guardado en cada participante.
+         */
+        let catalogoActividades = [];
+        let catalogoTipos = [];
+
+        const nombreDeActividad = (slug) =>
+            catalogoActividades.find(a => a.slug === slug)?.nombre || slug;
+
+        const nombreDeTipo = (slug) =>
+            catalogoTipos.find(t => t.slug === slug)?.nombre || slug;
+
         async function cargarDatos() {
-            const [equiposRes, participantesRes] = await Promise.all([
+            const [equiposRes, participantesRes, actividadesRes, tiposRes] = await Promise.all([
                 supabase.from('facttic_equipos').select('*').eq('activo', true).order('orden'),
-                supabase.from('facttic_participantes').select('*')
+                supabase.from('facttic_participantes').select('*'),
+                supabase.from('actividades').select('slug, nombre'),
+                supabase.from('tipos_organizacion').select('slug, nombre')
             ]);
 
             const equipos = equiposRes.data || [];
             const participantes = participantesRes.data || [];
+            catalogoActividades = actividadesRes.data || [];
+            catalogoTipos = tiposRes.data || [];
 
             renderizar(equipos, participantes);
         }
@@ -572,6 +772,36 @@
             const todasCooperativas = [...coopMap.values()].sort();
             const totalCooperativas = todasCooperativas.length;
 
+            const personas = [...personasMap.values()];
+
+            // El resto del resumen. `filter(Boolean)` en todos: lo que se cargó
+            // antes de que el formulario pidiera estos datos viene en null, y no
+            // tiene que contar como una categoría más.
+            const provincias = new Set(personas.map(x => x.provincia).filter(Boolean));
+            const tiposOrg = new Set(personas.map(x => x.familia_organizacion || x.tipo_organizacion).filter(Boolean));
+            const actividades = new Set(personas.flatMap(x => x.actividades || []).filter(Boolean));
+            const totalAccionables = equipos.reduce(
+                (n, e) => n + (e.accionables || []).filter(a => a && a.trim()).length, 0);
+
+            /**
+             * El tema y las preguntas, cuando son los mismos para todos.
+             *
+             * En este encuentro los cinco equipos debatieron lo mismo, así que
+             * repetirlo cinco veces era ruido. Pero si algún día cada equipo
+             * tiene su tema —como en el plenario de FACTTIC, de donde viene esta
+             * app— hay que volver a mostrarlo en cada uno o el informe pierde
+             * justo el dato que los distingue. Por eso se detecta en vez de
+             * asumirse.
+             */
+            const unicoSiCoincide = (valores) => {
+                const distintos = new Set(valores.map(v => JSON.stringify(v ?? null)));
+                if (distintos.size !== 1) return null;
+                const valor = JSON.parse([...distintos][0]);
+                return (valor && valor.length) ? valor : null;
+            };
+            const temaComun = unicoSiCoincide(equipos.map(e => e.tema));
+            const preguntasComunes = unicoSiCoincide(equipos.map(e => e.preguntas));
+
             let html = `
                 <header class="header">
                     <img src="logo_alimentos_claro.png" alt="Alimentos Cooperativos">
@@ -581,18 +811,73 @@
                 </header>
 
                 <div class="stats-container animate-on-scroll">
-                    <div class="stat-box">
-                        <div class="stat-numero">${totalPersonas}</div>
-                        <div class="stat-label">Personas</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-numero">${totalCooperativas}</div>
-                        <div class="stat-label">Cooperativas</div>
-                    </div>
+                    ${[
+                        [totalPersonas, 'Personas'],
+                        [totalCooperativas, 'Organizaciones'],
+                        [provincias.size, provincias.size === 1 ? 'Provincia' : 'Provincias'],
+                        [tiposOrg.size, tiposOrg.size === 1 ? 'Tipo de organización' : 'Tipos de organización'],
+                        [equipos.length, equipos.length === 1 ? 'Equipo' : 'Equipos'],
+                        [totalAccionables, 'Accionables']
+                    ].filter(([n]) => n > 0).map(([n, etiqueta]) => `
+                        <div class="stat-box">
+                            <div class="stat-numero">${n}</div>
+                            <div class="stat-label">${etiqueta}</div>
+                        </div>
+                    `).join('')}
                 </div>
 
+                ${temaComun ? `
+                    <section class="bloque-tema animate-on-scroll">
+                        <h3 class="bloque-titulo">El tema</h3>
+                        <p class="tema-grande">${temaComun}</p>
+                        ${preguntasComunes ? `
+                            <p class="bloque-bajada">Todos los equipos debatieron las mismas preguntas:</p>
+                            <div class="preguntas-lista">
+                                ${preguntasComunes.map((q, i) => `
+                                    <div class="pregunta-item">
+                                        <span class="pregunta-numero">${i + 1}.</span>
+                                        <span class="pregunta-texto">${q.trim()}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        ` : ''}
+                    </section>
+                ` : ''}
+
+                <section class="bloque-metodo animate-on-scroll">
+                    <h3 class="bloque-titulo">Cómo se trabajó</h3>
+                    <ol class="pasos">
+                        <li>
+                            <strong>Cada quien se anotó desde su celular</strong>
+                            <span>Nombre, organización, provincia, tipo de organización y actividad.</span>
+                        </li>
+                        <li>
+                            <strong>Los equipos los armó un algoritmo, no el azar</strong>
+                            <span>Buscando que en cada uno no se repita la organización, que se crucen tipos distintos, que se mezclen las actividades y que queden parejos en cantidad.</span>
+                        </li>
+                        <li>
+                            <strong>Cada equipo debatió las preguntas disparadoras</strong>
+                            <span>Con un tiempo común para todos, marcado desde el panel.</span>
+                        </li>
+                        <li>
+                            <strong>Las conclusiones se cargaron ahí mismo</strong>
+                            <span>Una reflexión del grupo y los accionables con sus responsables, desde el celular de cualquiera del equipo.</span>
+                        </li>
+                        <li>
+                            <strong>Se presentaron en plenario</strong>
+                            <span>Proyectando lo que cada equipo había cargado.</span>
+                        </li>
+                    </ol>
+                    <p class="nota-herramienta">
+                        Este informe no lo transcribió nadie: se arma solo con lo que los equipos
+                        cargaron durante el encuentro, y se actualiza cuando algo cambia. La
+                        sistematización —que suele ser el trabajo que queda para después y a veces
+                        no llega— quedó hecha al terminar.
+                    </p>
+                </section>
+
                 <div class="coops-lista animate-on-scroll">
-                    <h3>Cooperativas participantes</h3>
+                    <h3>Organizaciones participantes</h3>
                     <div class="coops-tags">
                         ${todasCooperativas.map(c => `<span class="coop-tag">${c}</span>`).join('')}
                     </div>
@@ -628,9 +913,10 @@
                     <article class="equipo-card animate-on-scroll" style="--equipo-color: ${equipo.color}">
                         <div class="equipo-header">
                             <h2 class="equipo-nombre">${equipo.nombre}</h2>
-                            <p class="equipo-tema">${equipo.tema || ''}</p>
+                            ${temaComun ? '' : `<p class="equipo-tema">${equipo.tema || ''}</p>`}
                         </div>
                         <div class="equipo-body">
+                            ${preguntasComunes ? '' : `
                             <div class="seccion">
                                 <h3 class="seccion-titulo">Preguntas disparadoras</h3>
                                 ${preguntas.length > 0 ? `
@@ -644,6 +930,7 @@
                                     </div>
                                 ` : '<p class="sin-datos">Sin preguntas</p>'}
                             </div>
+                            `}
 
                             <div class="seccion">
                                 <h3 class="seccion-titulo">Participantes (${participantesEquipo.length})</h3>
@@ -657,7 +944,7 @@
                             </div>
 
                             <div class="seccion">
-                                <h3 class="seccion-titulo">Cooperativas (${cooperativas.length})</h3>
+                                <h3 class="seccion-titulo">Organizaciones (${cooperativas.length})</h3>
                                 ${cooperativas.length > 0 ? `
                                     <div class="coops-equipo">
                                         ${cooperativas.map(c => `<span class="coop-equipo-tag">${c}</span>`).join('')}
@@ -696,8 +983,50 @@
                 `;
             });
 
+            // --- Tarjetero ---
+            //
+            // Ordenado por organización y después por nombre: la gente busca
+            // "el de tal cooperativa" antes que a una persona suelta, y así los
+            // de la misma casa quedan juntos.
+            const tarjetas = [...personas].sort((a, b) => {
+                const porOrg = (a.cooperativa || '').localeCompare(b.cooperativa || '', 'es', { sensitivity: 'base' });
+                return porOrg !== 0 ? porOrg : (a.nombre || '').localeCompare(b.nombre || '', 'es', { sensitivity: 'base' });
+            });
+
             html += `
                 </div>
+
+                <section class="tarjetero animate-on-scroll">
+                    <h2 class="tarjetero-titulo">Tarjetero intercoop</h2>
+                    <p class="tarjetero-bajada">
+                        Quiénes estuvieron, de dónde y a qué se dedican. El contacto aparece
+                        en las tarjetas de quienes lo dejaron al anotarse.
+                    </p>
+                    <div class="tarjetas">
+                        ${tarjetas.map(t => {
+                            const tipo = nombreDeTipo(t.tipo_organizacion);
+                            const acts = (t.actividades || []).map(a => nombreDeActividad(a));
+                            return `
+                                <article class="tarjeta">
+                                    <p class="tarjeta-nombre">${t.nombre}</p>
+                                    <p class="tarjeta-org">${t.cooperativa}</p>
+                                    ${(tipo || t.provincia) ? `
+                                        <p class="tarjeta-donde">${[tipo, t.provincia].filter(Boolean).join(' · ')}</p>
+                                    ` : ''}
+                                    ${acts.length ? `
+                                        <div class="tarjeta-acts">
+                                            ${acts.map(a => `<span class="tarjeta-act">${a}</span>`).join('')}
+                                        </div>
+                                    ` : ''}
+                                    ${t.email ? `
+                                        <a class="tarjeta-contacto" href="${'mailto:' + t.email}">${t.email}</a>
+                                    ` : '<p class="tarjeta-sin-contacto">Sin contacto cargado</p>'}
+                                </article>
+                            `;
+                        }).join('')}
+                    </div>
+                </section>
+
                 <footer class="footer">
                     <p>Alimentos Cooperativos</p>
                     <p class="pie-marca">
