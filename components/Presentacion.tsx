@@ -53,7 +53,7 @@ const SOLUCIONES = [
   },
   {
     nombre: 'Visibilidad',
-    texto: 'No hay solución mágica: es permanencia diaria en las redes principales, y una campaña nacional sobre otro tipo de consumo. Una app para consultar puntos cercanos de la red, alimentada por el mapa, puede ser una parte.',
+    texto: 'No hay solución mágica: es permanencia diaria en las redes y una campaña nacional sobre otro tipo de consumo. Ayudan un banco de historias del que todas puedan tomar y una app de puntos cercanos, alimentada por el mapa.',
   },
   {
     nombre: 'Financiamiento solidario',
