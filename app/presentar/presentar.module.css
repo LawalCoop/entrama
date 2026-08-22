@@ -397,7 +397,7 @@
 .tickerCita {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   gap: clamp(4px, 0.8vh, 10px);
   flex: none;
   max-width: min(70vw, 900px);
@@ -410,9 +410,18 @@
 
 .tickerFuente {
   font-family: var(--font-heading), sans-serif;
+/* Dos renglones reservados siempre, entren uno o dos.
+
+   Los nombres largos —"Alimentos Coop Chile · Buenos Aires"— ocupan dos y los
+   cortos uno, así que sin esto cada card arrancaba su texto a una altura
+   distinta y los nombres quedaban desalineados entre sí. Reservando el alto de
+   dos, todos los nombres empiezan en la misma línea y todas las citas también. */
   font-size: clamp(10px, 1.5vh, 20px);
   font-weight: 600;
   letter-spacing: 0.1em;
+  line-height: 1.3;
+  height: 2.6em;
+  overflow: hidden;
   text-transform: uppercase;
   color: var(--color-a);
   flex: none;

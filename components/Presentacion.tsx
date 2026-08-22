@@ -279,7 +279,18 @@ function medidaDeCita(texto: string) {
       : largo <= 90 ? { lineas: 3, cuerpo: styles.citaMedia }
         : { lineas: 4, cuerpo: styles.citaChica }
 
-  return { cuerpo, lineas, ancho: Math.min(60, Math.max(11, Math.ceil(largo / lineas))) }
+  /*
+   * El 1.35 es el aire del corte de palabra.
+   *
+   * Dividir caracteres por renglones da el ancho de un párrafo perfecto, que no
+   * existe: las palabras no se parten, así que cada renglón termina antes del
+   * borde y hacen falta más. Sin ese margen, un texto de 47 caracteres pedía
+   * cuatro renglones donde había tres, y se recortaba con puntos suspensivos
+   * teniendo lugar de sobra al costado.
+   */
+  const ancho = Math.ceil((largo / lineas) * 1.35)
+
+  return { cuerpo, lineas, ancho: Math.min(60, Math.max(12, ancho)) }
 }
 
 function Card({ cita, duplicada }: { cita: Cita; duplicada: boolean }) {
