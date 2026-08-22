@@ -173,6 +173,12 @@ organización, equipos y accionables—. Las categorías que dan cero no se mues
 lo que se cargó antes de que el formulario pidiera ese dato viene en null y no
 tiene que contar como una más.
 
+**De qué se trató**, un par de párrafos que salen de la convocatoria del
+encuentro. Es texto fijo en el HTML, no algo que venga de la base: quien abra el
+informe dentro de seis meses llega sin nada de contexto, y el título solo —"De
+la resistencia a la reconstrucción"— no alcanza para saber qué se discutió. Si
+se reusa la app para otro encuentro, hay que reescribirlo o sacarlo.
+
 **El tema y las preguntas, una sola vez.** En este encuentro los cinco equipos
 debatieron lo mismo, así que repetirlo en cada tarjeta era ruido. Pero eso **se
 detecta, no se asume**: si los equipos tienen temas distintos —como en el
