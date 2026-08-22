@@ -84,7 +84,10 @@ export default function Presentacion({
   const p = pantallas[actual]
 
   return (
-    <div className={styles.pantalla}>
+    /* La panorámica es la única que quiere todo el espacio: son tarjetas en
+       grilla, no un texto que se lee mejor angosto. Las demás conservan el ancho
+       de lectura. */
+    <div className={`${styles.pantalla} ${p.tipo === 'panoramica' ? styles.pantallaAncha : ''}`}>
       <div className={styles.lienzo}>
         {p.tipo === 'apertura' && <Apertura totales={totales} />}
         {p.tipo === 'panoramica' && <Panoramica clusters={clusters} viabilidadVaria={viabilidadVaria} />}

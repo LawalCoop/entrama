@@ -19,6 +19,36 @@
   min-height: 0;
 }
 
+/*
+   La pantalla de la panorámica, que se sale del ancho de lectura.
+
+   El resto de las pantallas es una idea y un texto: angostas se leen mejor, y
+   por eso `.pantalla` tope en 1100px. Acá no hay nada que leer de corrido, hay
+   una grilla de tarjetas, y cada píxel de más es tarjeta más grande vista desde
+   el fondo de la sala.
+
+   El margen negativo se come parte del aire del layout —48px arriba y 56 a los
+   costados—, que en las demás pantallas es respiración y acá es espacio
+   desperdiciado. Queda lo suficiente para que no toque el header ni los bordes.
+*/
+.pantallaAncha {
+  max-width: none;
+  margin: -32px -40px 0;
+}
+
+/* Estirar en vez de centrar: si no, una grilla de dos filas queda flotando en
+   el medio con la mitad de la pantalla vacía arriba y abajo. */
+.pantallaAncha .lienzo {
+  align-items: stretch;
+}
+
+/* Las filas se reparten el alto en partes iguales y las tarjetas lo llenan. */
+.pantallaAncha .panoramica {
+  height: 100%;
+  align-content: stretch;
+  grid-auto-rows: 1fr;
+}
+
 /* --- Apertura --- */
 
 .apertura {
