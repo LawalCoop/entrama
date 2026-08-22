@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
 import { Space_Grotesk, Inter } from 'next/font/google'
 import FooterLogo from '@/components/FooterLogo'
-import PantallaCompleta from '@/components/PantallaCompleta'
 import PaletteProvider from '@/components/PaletteProvider'
 import TopPanel from '@/components/TopPanel'
 import { CICLO, CLAVE, SECUENCIA } from '@/lib/paletas'
@@ -70,7 +69,10 @@ export default function RootLayout({
             <main className={styles.content} data-content>{children}</main>
             <footer className={styles.footer}>
               <FooterLogo />
-              <PantallaCompleta />
+              {/* Donde /presentar cuelga su navegación, por portal. El footer se
+                  monta una sola vez para toda la sesión, así que el nodo está
+                  disponible antes de que la presentación lo busque. */}
+              <div id="nav-presentacion" className={styles.navSlot} />
             </footer>
           </div>
         </PaletteProvider>

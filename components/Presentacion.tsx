@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Prompt } from '@/app/icons'
 import styles from '@/app/presentar/presentar.module.css'
 
@@ -69,6 +70,17 @@ export default function Presentacion({
     return () => { delete document.body.dataset.presentando }
   }, [])
 
+  /*
+   * La navegación vive en el footer, que monta el layout raíz.
+   *
+   * Va por portal y no mudando el componente allá arriba porque los botones
+   * necesitan el estado de la presentación —en qué pantalla está y cuántas
+   * hay—, y el footer se monta una sola vez para toda la sesión. El nodo se
+   * busca después del montaje: en el server no existe.
+   */
+  const [ancla, setAncla] = useState<HTMLElement | null>(null)
+  useEffect(() => { setAncla(document.getElementById('nav-presentacion')) }, [])
+
   useEffect(() => {
     if (history.state?.pantalla === undefined) history.replaceState({ pantalla: 0 }, '')
 
@@ -93,37 +105,42 @@ export default function Presentacion({
 
   const p = pantallas[actual]
 
-  return (
-    /* La panorámica es la única que quiere todo el espacio: son tarjetas en
-       grilla, no un texto que se lee mejor angosto. Las demás conservan el ancho
-       de lectura. */
-    <div className={`${styles.pantalla} ${p.tipo === 'panoramica' ? styles.pantallaAncha : ''}`}>
-      <div className={styles.lienzo}>
-        {p.tipo === 'apertura' && <Apertura totales={totales} />}
-        {p.tipo === 'panoramica' && <Panoramica clusters={clusters} />}
-        {p.tipo === 'cluster' && (
-          <Grupo cluster={p.cluster} indice={p.indice} total={clusters.length} />
-        )}
-      </div>
+  const nav = (
+    <nav className={styles.nav} aria-label="Navegación de la presentación">
+      <button
+        type="button" className={styles.btn} onClick={() => ir(actual - 1)}
+        disabled={actual === 0} aria-label="Anterior"
+        style={{ opacity: actual === 0 ? 0.3 : 1 }}
+      >
+        <Prompt direction="left" width={18} height={22} />
+      </button>
+      <span className={styles.progreso} aria-live="polite">{actual + 1} / {pantallas.length}</span>
+      <button
+        type="button" className={styles.btn} onClick={() => ir(actual + 1)}
+        disabled={actual === pantallas.length - 1} aria-label="Siguiente"
+        style={{ opacity: actual === pantallas.length - 1 ? 0.3 : 1 }}
+      >
+        <Prompt direction="right" width={18} height={22} />
+      </button>
+    </nav>
+  )
 
-      <nav className={styles.nav} aria-label="Navegación de la presentación">
-        <button
-          type="button" className={styles.btn} onClick={() => ir(actual - 1)}
-          disabled={actual === 0} aria-label="Anterior"
-          style={{ opacity: actual === 0 ? 0.3 : 1 }}
-        >
-          <Prompt direction="left" width={24} height={30} />
-        </button>
-        <span className={styles.progreso} aria-live="polite">{actual + 1} / {pantallas.length}</span>
-        <button
-          type="button" className={styles.btn} onClick={() => ir(actual + 1)}
-          disabled={actual === pantallas.length - 1} aria-label="Siguiente"
-          style={{ opacity: actual === pantallas.length - 1 ? 0.3 : 1 }}
-        >
-          <Prompt direction="right" width={24} height={30} />
-        </button>
-      </nav>
-    </div>
+  return (
+    <>
+      {ancla && createPortal(nav, ancla)}
+      {/* La panorámica es la única que quiere todo el espacio: son tarjetas en
+          grilla, no un texto que se lee mejor angosto. Las demás conservan el
+          ancho de lectura. */}
+      <div className={`${styles.pantalla} ${p.tipo === 'panoramica' ? styles.pantallaAncha : ''}`}>
+        <div className={styles.lienzo}>
+          {p.tipo === 'apertura' && <Apertura totales={totales} />}
+          {p.tipo === 'panoramica' && <Panoramica clusters={clusters} />}
+          {p.tipo === 'cluster' && (
+            <Grupo cluster={p.cluster} indice={p.indice} total={clusters.length} />
+          )}
+        </div>
+      </div>
+    </>
   )
 }
 

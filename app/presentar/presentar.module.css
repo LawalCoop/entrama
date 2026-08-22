@@ -8,7 +8,6 @@
   flex: 1;
   width: 100%;
   max-width: 1100px;
-  gap: 24px;
 }
 
 .lienzo {
@@ -129,28 +128,25 @@
 
 /* --- Navegación --- */
 
-/* No se encoge nunca y pinta por encima: es lo último de la columna, y si el
-   contenido de arriba pide de más, lo que no puede pasar es que los botones se
-   aplasten o queden tapados por el footer. */
+/* Vive adentro del footer, que mide 64px de alto: los botones son chicos y la
+   fila no se encoge. Ya no compite con el contenido por el espacio de la
+   pantalla, que era lo que la dejaba aplastada o tapada. */
 .nav {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   flex-shrink: 0;
-  position: relative;
-  z-index: 1;
 }
 
 .btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 88px;
-  padding: 12px 20px;
+  min-width: 52px;
+  padding: 6px 12px;
   border: 1px solid var(--borde);
-  border-radius: 10px;
-  background: var(--superficie);
+  border-radius: 8px;
+  background: var(--fondo);
   color: var(--color-a);
   cursor: pointer;
   transition: border-color 0.15s, opacity 0.15s;
@@ -165,7 +161,7 @@
 }
 
 .progreso {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--texto-suave);
   font-variant-numeric: tabular-nums;
 }
