@@ -201,7 +201,7 @@ function Panoramica({ clusters }: { clusters: Cluster[] }) {
       {clusters.map((c, i) => (
         <article key={i} className={styles.tarjeta}>
           <div className={styles.tarjetaCabecera}>
-            <span className={styles.tarjetaNumero}>Grupo {i + 1}</span>
+            <span className={styles.tarjetaNumero}>Cluster {i + 1}</span>
             <span className={styles.tarjetaCuenta}>{c.citas.length}</span>
           </div>
           <h3 className={styles.tarjetaTitulo}>{c.title}</h3>
@@ -218,7 +218,7 @@ function Grupo({
     <div className={styles.grupo}>
       <div className={styles.grupoCabecera}>
         <span className={styles.dolorLabel}>
-          Grupo {indice + 1} de {total}
+          Cluster {indice + 1} de {total}
           <span className={styles.tramo}> · {cluster.citas.length} {cluster.citas.length === 1 ? 'problema' : 'problemas'}</span>
         </span>
         <div className={styles.puntos} aria-hidden>
