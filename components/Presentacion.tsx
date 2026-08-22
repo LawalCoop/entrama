@@ -49,7 +49,7 @@ const SOLUCIONES = [
   },
   {
     nombre: 'Logística',
-    texto: 'Un mapa interactivo que ayude a recolectar entradas y salidas: desde dónde llegan y hacia dónde se envían insumos y productos.',
+    texto: 'A partir del relevamiento de entradas y salidas, empezar a identificar oportunidades de compartir trayectos entre los distintos nodos de la red.',
   },
   {
     nombre: 'Canales con clientes',
