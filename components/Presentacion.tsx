@@ -27,6 +27,43 @@ type Pantalla =
   | { tipo: 'apertura' }
   | { tipo: 'panoramica' }
   | { tipo: 'cluster'; cluster: Cluster; indice: number }
+  | { tipo: 'soluciones' }
+
+/**
+ * Por dónde empezar, después de haber mirado todos los dolores.
+ *
+ * Va escrito acá y no sale de la digestión a propósito: esto no lo agrupó un
+ * modelo a partir de lo que cargó la gente, lo decidimos nosotras mirando el
+ * conjunto. Mezclarlo con lo que devuelve el clustering sería hacer pasar por
+ * hallazgo lo que es una posición.
+ *
+ * El tono es dispar porque los temas lo son: hay uno con una idea concreta y
+ * otro donde lo honesto es decir que todavía no sabemos. Emparejarlos hacia
+ * arriba —"solución en camino" para los cinco— sería prometer algo que no
+ * tenemos.
+ */
+const SOLUCIONES = [
+  {
+    nombre: 'Logística',
+    texto: 'Un mapa interactivo que ayude a recolectar entradas y salidas: desde dónde llegan y hacia dónde se envían insumos y productos.',
+  },
+  {
+    nombre: 'Gestión',
+    texto: 'Sistemas de gestión hay miles. Es una tarea grande: casi todos necesitan muchísima customización y configurarse para cada caso particular.',
+  },
+  {
+    nombre: 'Visibilidad',
+    texto: 'No hay solución mágica. Es un trabajo diario de permanencia en las redes principales. Una app para consultar puntos cercanos de la red, alimentada por el mapa, puede ser una parte.',
+  },
+  {
+    nombre: 'Financiamiento solidario',
+    texto: 'El más desafiante, y hoy no tenemos una solución clara. Los microcréditos entre actores podrían ser un camino. Primero hace falta entender los problemas con mucha más precisión.',
+  },
+  {
+    nombre: 'Canales con clientes',
+    texto: 'Recordatorios y avisos de recompra, para sostener el vínculo con quien ya compró. Podrían ser parte de la misma app.',
+  },
+]
 
 export default function Presentacion({
   clusters, totales,
@@ -35,6 +72,7 @@ export default function Presentacion({
     { tipo: 'apertura' },
     { tipo: 'panoramica' },
     ...clusters.map((cluster, indice) => ({ tipo: 'cluster' as const, cluster, indice })),
+    { tipo: 'soluciones' },
   ]
   const [actual, setActual] = useState(0)
 
@@ -128,16 +166,17 @@ export default function Presentacion({
   return (
     <>
       {ancla && createPortal(nav, ancla)}
-      {/* La panorámica es la única que quiere todo el espacio: son tarjetas en
-          grilla, no un texto que se lee mejor angosto. Las demás conservan el
-          ancho de lectura. */}
-      <div className={`${styles.pantalla} ${p.tipo === 'panoramica' ? styles.pantallaAncha : ''}`}>
+      {/* Las dos pantallas de grilla quieren todo el espacio: son tarjetas, no
+          un texto que se lee mejor angosto. Las demás conservan el ancho de
+          lectura. */}
+      <div className={`${styles.pantalla} ${p.tipo === 'panoramica' || p.tipo === 'soluciones' ? styles.pantallaAncha : ''}`}>
         <div className={styles.lienzo}>
           {p.tipo === 'apertura' && <Apertura totales={totales} />}
           {p.tipo === 'panoramica' && <Panoramica clusters={clusters} />}
           {p.tipo === 'cluster' && (
             <Grupo cluster={p.cluster} indice={p.indice} total={clusters.length} />
           )}
+          {p.tipo === 'soluciones' && <Soluciones />}
         </div>
       </div>
     </>
@@ -300,6 +339,23 @@ function medidaDeCita(texto: string) {
    * centímetros.
    */
   return { cuerpo, lineas, ancho: Math.max(12, ancho) }
+}
+
+function Soluciones() {
+  return (
+    <div className={styles.soluciones}>
+      <h2 className={styles.solucionesTitulo}>Soluciones para empezar a trabajar</h2>
+      <div className={styles.solucionesGrilla}>
+        {SOLUCIONES.map((s, i) => (
+          <article key={s.nombre} className={styles.solucion}>
+            <span className={styles.solucionNumero}>{i + 1}</span>
+            <h3 className={styles.solucionNombre}>{s.nombre}</h3>
+            <p className={styles.solucionTexto}>{s.texto}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 function Card({ cita, duplicada }: { cita: Cita; duplicada: boolean }) {
