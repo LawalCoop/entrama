@@ -53,15 +53,19 @@ const SOLUCIONES = [
   },
   {
     nombre: 'Visibilidad',
-    texto: 'No hay solución mágica: es permanencia diaria en las redes y una campaña nacional sobre otro tipo de consumo. Ayudan un banco de historias del que todas puedan tomar y una app de puntos cercanos, alimentada por el mapa.',
+    texto: 'Permanencia diaria en las redes y una campaña nacional sobre otro tipo de consumo, que muestre el precio desguazado. Las historias de cada producto y la cara de quien produce ya existen: falta el banco común.',
   },
   {
     nombre: 'Financiamiento solidario',
-    texto: 'El más desafiante, y hoy no tenemos una solución clara. Los microcréditos entre actores y los financiamientos internacionales podrían ser caminos. Primero hace falta entender los problemas con mucha más precisión.',
+    texto: 'El más desafiante, y hoy no tenemos una solución clara. Microcréditos entre actores, financiamientos internacionales, una moneda respaldada por un banco cooperativo. Falta entender los problemas con precisión.',
   },
   {
     nombre: 'Canales con clientes',
-    texto: 'Un sistema de suscripciones: en vez de recordarte que compres, ya está comprado. Los recordatorios y avisos de recompra son el escalón previo. Podría ser parte de la misma app.',
+    texto: 'Un sistema de suscripciones: en vez de recordarte que compres, ya está comprado. Y una app de puntos cercanos —almacenes populares, mercados de cercanía— alimentada por el mapa.',
+  },
+  {
+    nombre: 'Integración',
+    texto: 'Plataformas comunes para compartir multimedia, manuales y contactos entre productores, comercializadores y prosumidores. Y la pregunta difícil: cómo se distribuyen los excedentes y sobre quién cae el porcentaje.',
   },
 ]
 

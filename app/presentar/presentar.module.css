@@ -368,11 +368,13 @@
   flex: none;
 }
 
-/* Se acomodan solas en las columnas que entren. Con cinco y una pantalla ancha
-   quedan tres arriba y dos abajo, que es mejor que cinco tiras finitas. */
+/* Tres columnas fijas y no las que entren: con seis tarjetas eso da tres y
+   tres, y cada una un tercio del ancho, que es el espacio que necesita su
+   texto. Dejándolo automático, una pantalla muy ancha metía cinco arriba y una
+   sola abajo, y las tarjetas quedaban angostas justo donde hay lugar de sobra. */
 .solucionesGrilla {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: clamp(10px, 1.6vh, 22px);
   flex: 1;
   min-height: 0;
@@ -414,6 +416,12 @@
   color: var(--texto-suave);
   min-height: 0;
   overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .solucionesGrilla {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* --- Ticker de citas --- */
