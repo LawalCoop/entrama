@@ -701,10 +701,143 @@
         .animate-on-scroll.delay-3 { transition-delay: 0.3s; }
 
         /* Print styles */
+        /*
+         * Impresión y "Guardar como PDF".
+         *
+         * La pantalla es oscura y el papel es blanco, así que casi nada se
+         * traduce solo: el navegador no imprime fondos, y todo lo que estaba
+         * pensado para leerse en claro sobre oscuro desaparece. En la primera
+         * versión el PDF salía sin logo, sin el título y sin los números.
+         *
+         * La base es redefinir las variables de color: con eso la mayoría de la
+         * página se da vuelta sola. Lo que sigue son los casos que no alcanza.
+         */
         @media print {
+            :root {
+                --color-fondo: #ffffff;
+                --color-card: #ffffff;
+                --color-card-hover: #ffffff;
+                --color-borde: #d4d4d8;
+                --color-texto: #111827;
+                --color-texto-secundario: #4b5563;
+                --color-texto-terciario: #6b7280;
+                /* El verde de marca da 2,96:1 contra el blanco, por debajo del
+                   mínimo legible. Este es el mismo tono oscurecido que usa el
+                   informe imprimible del panel. */
+                --color-primario: #4e7d33;
+                --color-primario-soft: #eef5e9;
+            }
+
+            body {
+                background: #ffffff;
+                color: #111827;
+            }
+
             .bg-gradient { display: none; }
-            body { background: white; color: black; }
-            .equipo-card { break-inside: avoid; }
+
+            /* Sin esto se pierden secciones enteras: arrancan en `opacity: 0` y
+               sólo las despinta el IntersectionObserver al pasar por pantalla,
+               que al imprimir puede no haber ocurrido nunca. */
+            .animate-on-scroll,
+            .header,
+            .stats-container,
+            .bloque-tema,
+            .bloque-metodo {
+                opacity: 1 !important;
+                transform: none !important;
+                animation: none !important;
+            }
+
+            /* El logo es de trazo claro, pensado para el fondo oscuro: sobre
+               papel blanco no se ve. Va la versión oscura. */
+            .header img {
+                content: url('logo_alimentos_oscuro.png');
+                filter: none;
+            }
+
+            .pie-marca img { content: url('logo_lawal_oscuro.png'); }
+            .pie-marca img.logo-facttic { content: url('logo_facttic_oscuro.png'); }
+
+            /* Estos dos pintaban el texto con un degradé recortado
+               (`background-clip: text` + `text-fill-color: transparent`). Sin
+               fondo impreso, el relleno queda transparente y el texto
+               desaparece: era por esto que faltaban el título y los números. */
+            .header h1,
+            .stat-numero {
+                background: none;
+                -webkit-background-clip: initial;
+                background-clip: initial;
+                -webkit-text-fill-color: initial;
+            }
+
+            .header h1 { color: #111827; }
+            .stat-numero { color: var(--color-primario); }
+
+            /* Las cajas quedan con borde: el fondo no se imprime, y sin borde
+               no se distingue dónde empieza y termina cada una. */
+            .stat-box,
+            .bloque-tema,
+            .bloque-metodo,
+            .coops-lista,
+            .equipo-card,
+            .tarjeta,
+            .reflexion-box,
+            .pregunta-item,
+            .accionable-item {
+                background: #ffffff !important;
+                border: 1px solid var(--color-borde) !important;
+                box-shadow: none !important;
+            }
+
+            .coop-tag,
+            .tarjeta-act,
+            .participante-chip,
+            .coop-equipo-tag {
+                background: #ffffff !important;
+                border: 1px solid var(--color-primario) !important;
+                color: var(--color-primario) !important;
+            }
+
+            .pasos li::before {
+                border: 1px solid var(--color-primario);
+                color: var(--color-primario);
+                background: #ffffff;
+            }
+
+            .tarjeta-contacto { color: #111827; }
+
+            /* Los stats en fila se salen del ancho de la hoja. */
+            .stats-container {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1rem;
+            }
+
+            .stat-box { min-width: 0; padding: 1rem; }
+            .stat-numero { font-size: 2.5rem; }
+
+            .tarjetas { grid-template-columns: repeat(3, 1fr); }
+
+            /* Que nada quede partido al medio entre dos páginas. */
+            .equipo-card,
+            .tarjeta,
+            .bloque-tema,
+            .bloque-metodo,
+            .stat-box,
+            .accionable-item,
+            .pregunta-item,
+            .pasos li {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+
+            .header { padding: 1rem 0 2rem; margin-bottom: 1rem; }
+            .container { padding: 0; max-width: none; }
+            .tarjetero { break-before: page; page-break-before: always; }
+
+            /* Los links del tarjetero ya muestran el mail como texto; que el
+               navegador agregue la URL entre paréntesis sería repetirlo. */
+            a[href]::after { content: none !important; }
         }
 
         /* Responsive */

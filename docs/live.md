@@ -201,6 +201,33 @@ coincidencia— están para no comerse una reflexión legítima. Otro equipo esc
 con una regla laxa esa reflexión también desaparecía, y no es lo mismo una
 coincidencia suelta que una lista copiada entera.
 
+### Imprimirlo o guardarlo en PDF
+
+La pantalla es oscura y el papel es blanco, así que casi nada se traduce solo: el
+navegador no imprime fondos, y lo que estaba pensado para leerse en claro sobre
+oscuro desaparece. El PDF salía sin logo, sin el título y sin los números.
+
+El `@media print` lo da vuelta. La base es **redefinir las variables de color**,
+que arregla la mayoría de la página de un saque. Después hay tres casos que no
+alcanza:
+
+- **`background-clip: text`.** El título y los números pintaban el texto con un
+  degradé recortado y el relleno en transparente. Sin fondo impreso, el texto es
+  invisible. En print van con color sólido.
+- **Los logos son de trazo claro.** Se cambian por las versiones oscuras con
+  `content: url(...)`.
+- **`.animate-on-scroll` arranca en `opacity: 0`** y sólo lo despinta el
+  IntersectionObserver al pasar por pantalla, que al imprimir puede no haber
+  ocurrido nunca. Sin forzarlo, se pierden secciones enteras.
+
+Además: los stats y las tarjetas pasan a tres columnas para entrar en la hoja,
+las cajas quedan con borde —sin fondo no se distingue dónde empieza cada una—, y
+`break-inside: avoid` evita que una tarjeta o un equipo queden partidos entre dos
+páginas.
+
+Verificado generando el PDF de verdad con Playwright: 22 páginas, el tarjetero
+arranca en la 17.
+
 **La fecha del encuentro está fija** en `FECHA_DEL_ENCUENTRO`, arriba de
 `renderizar`. Antes salía de `new Date()`, así que el informe decía haberse
 debatido el día en que uno lo abría. Va construida con `new Date(año, mes, día)`
