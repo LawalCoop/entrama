@@ -51,6 +51,24 @@ export default function Presentacion({
     else history.pushState(estado, '')
   }, [pantallas.length])
 
+  /*
+   * Mientras se presenta, la ventana queda clavada.
+   *
+   * Esta pantalla se proyecta: el alto tiene que ser siempre el de la ventana y
+   * nada puede scrollear. Sin esto, un contenido que crece empuja la página,
+   * aparece la barra de scroll y el header y el footer —que son sticky— se
+   * despegan de sus bordes en medio de una presentación.
+   *
+   * Se marca el `body` desde acá y no con una clase en el layout porque el
+   * armazón es común a todas las rutas, y las demás sí tienen que poder
+   * scrollear. Se limpia al desmontar: si no, salir de /presentar dejaría el
+   * resto de la app sin scroll.
+   */
+  useEffect(() => {
+    document.body.dataset.presentando = ''
+    return () => { delete document.body.dataset.presentando }
+  }, [])
+
   useEffect(() => {
     if (history.state?.pantalla === undefined) history.replaceState({ pantalla: 0 }, '')
 

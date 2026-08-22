@@ -215,6 +215,33 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/*
+   Modo presentación: la ventana queda clavada.
+
+   `min-height` deja crecer; acá hace falta `height`, que no. Con el alto fijo y
+   sin scroll, el header y el footer no se despegan nunca de sus bordes, que es
+   lo único que no se puede permitir en una pantalla que se está proyectando.
+   Lo que no entra se recorta o scrollea adentro de su propia caja.
+
+   El atributo lo pone y lo saca /presentar al montar y desmontar: el armazón es
+   común a todas las rutas y las demás sí tienen que poder scrollear.
+*/
+body[data-presentando] {
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body[data-presentando] [data-shell] {
+  height: 100dvh;
+  min-height: 0;
+}
+
+body[data-presentando] [data-content] {
+  min-height: 0;
+  overflow: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   body {
     transition: none;

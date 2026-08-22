@@ -62,9 +62,12 @@ export default function RootLayout({
       <body>
         <script dangerouslySetInnerHTML={{ __html: SCRIPT_PALETA }} />
         <PaletteProvider>
-          <div className={styles.shell}>
+          {/* Los `data-` son el asa para que /presentar clave el alto de la
+              ventana: los nombres de clase son de un módulo y salen con hash,
+              así que desde `globals.css` no hay cómo apuntarles. */}
+          <div className={styles.shell} data-shell>
             <TopPanel>{encabezado}</TopPanel>
-            <main className={styles.content}>{children}</main>
+            <main className={styles.content} data-content>{children}</main>
             <footer className={styles.footer}>
               <FooterLogo />
               <PantallaCompleta />
