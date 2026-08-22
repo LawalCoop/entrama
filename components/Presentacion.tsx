@@ -8,8 +8,6 @@ type Cita = { texto: string; cooperativa: string; provincia: string | null }
 type Cluster = {
   title: string
   description?: string
-  tech_feasibility?: string
-  tech_note?: string
   citas: Cita[]
 }
 type Totales = { problemas: number; organizaciones: number; provincias: number }
@@ -29,15 +27,9 @@ type Pantalla =
   | { tipo: 'panoramica' }
   | { tipo: 'cluster'; cluster: Cluster; indice: number }
 
-const VIABILIDAD: Record<string, { etiqueta: string; color: string; signo: string }> = {
-  alta: { etiqueta: 'Viabilidad alta', color: 'var(--color-a)', signo: '✓' },
-  media: { etiqueta: 'Viabilidad media', color: 'var(--color-b)', signo: '◐' },
-  exploratoria: { etiqueta: 'Exploratoria', color: 'var(--texto-suave)', signo: '✦' },
-}
-
 export default function Presentacion({
-  clusters, totales, viabilidadVaria,
-}: { clusters: Cluster[]; totales: Totales; viabilidadVaria: boolean }) {
+  clusters, totales,
+}: { clusters: Cluster[]; totales: Totales }) {
   const pantallas: Pantalla[] = [
     { tipo: 'apertura' },
     { tipo: 'panoramica' },
@@ -90,12 +82,9 @@ export default function Presentacion({
     <div className={`${styles.pantalla} ${p.tipo === 'panoramica' ? styles.pantallaAncha : ''}`}>
       <div className={styles.lienzo}>
         {p.tipo === 'apertura' && <Apertura totales={totales} />}
-        {p.tipo === 'panoramica' && <Panoramica clusters={clusters} viabilidadVaria={viabilidadVaria} />}
+        {p.tipo === 'panoramica' && <Panoramica clusters={clusters} />}
         {p.tipo === 'cluster' && (
-          <Grupo
-            cluster={p.cluster} indice={p.indice} total={clusters.length}
-            viabilidadVaria={viabilidadVaria}
-          />
+          <Grupo cluster={p.cluster} indice={p.indice} total={clusters.length} />
         )}
       </div>
 
@@ -157,9 +146,12 @@ function Apertura({ totales }: { totales: Totales }) {
  * scrollear — con trece no es lo mismo que con cuatro. El título se recorta a
  * tres líneas: acá alcanza con reconocerlo, se lee entero en su pantalla.
  */
-function Panoramica({ clusters, viabilidadVaria }: { clusters: Cluster[]; viabilidadVaria: boolean }) {
+function Panoramica({ clusters }: { clusters: Cluster[] }) {
   const n = clusters.length
-  const anchoMin = n > 28 ? 190 : n > 18 ? 220 : n > 10 ? 260 : 320
+  // Más anchas que antes: la panorámica usa el ancho completo de la pantalla,
+  // así que pedir más por tarjeta da menos columnas y tarjetas más grandes en
+  // vez de una fila larga de fichitas.
+  const anchoMin = n > 28 ? 260 : n > 18 ? 300 : n > 10 ? 360 : 460
   // Con muchos grupos las tarjetas tienen que achicarse o la grilla no entra en
   // pantalla, y una presentación que hay que scrollear deja de ser proyectable.
   // El título pasa a dos líneas: acá alcanza con reconocer el dolor, se lee
@@ -175,9 +167,6 @@ function Panoramica({ clusters, viabilidadVaria }: { clusters: Cluster[]; viabil
         <article key={i} className={styles.tarjeta}>
           <div className={styles.tarjetaCabecera}>
             <span className={styles.tarjetaNumero}>Grupo {i + 1}</span>
-            {/* La pastilla va en la fila del número y no en una propia: ahorra
-                el alto de una línea por tarjeta sin perder el dato. */}
-            {viabilidadVaria && <Pastilla feasibility={c.tech_feasibility} chica />}
             <span className={styles.tarjetaCuenta}>{c.citas.length}</span>
           </div>
           <h3 className={styles.tarjetaTitulo}>{c.title}</h3>
@@ -188,8 +177,8 @@ function Panoramica({ clusters, viabilidadVaria }: { clusters: Cluster[]; viabil
 }
 
 function Grupo({
-  cluster, indice, total, viabilidadVaria,
-}: { cluster: Cluster; indice: number; total: number; viabilidadVaria: boolean }) {
+  cluster, indice, total,
+}: { cluster: Cluster; indice: number; total: number }) {
   return (
     <div className={styles.grupo}>
       <div className={styles.grupoCabecera}>
@@ -211,27 +200,10 @@ function Grupo({
       <div className={styles.grupoCentro}>
         <h2 className={styles.dolorTitulo}>{cluster.title}</h2>
         {cluster.description && <p className={styles.dolorDesc}>{cluster.description}</p>}
-        {viabilidadVaria && (
-          <div className={styles.pastillaFila}><Pastilla feasibility={cluster.tech_feasibility} /></div>
-        )}
-        {cluster.tech_note && <p className={styles.techNote}>{cluster.tech_note}</p>}
       </div>
 
       <Ticker citas={cluster.citas} />
     </div>
-  )
-}
-
-function Pastilla({ feasibility, chica = false }: { feasibility?: string; chica?: boolean }) {
-  const v = feasibility ? VIABILIDAD[feasibility] : undefined
-  if (!v) return null
-  return (
-    <span
-      className={`${styles.pastilla} ${chica ? styles.pastillaChica : ''}`}
-      style={{ borderColor: v.color, color: v.color }}
-    >
-      <span aria-hidden>{v.signo}</span> {chica ? v.etiqueta.replace('Viabilidad ', '') : v.etiqueta}
-    </span>
   )
 }
 

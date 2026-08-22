@@ -14,8 +14,6 @@ import { refsActuales, type ProblemaRef } from './digerir'
 export type Cluster = {
   title: string
   description?: string
-  tech_feasibility?: string
-  tech_note?: string
   member_refs: string[]
   /** Los uuid reales, resueltos al subir. Ver el comentario de la 0016. */
   member_ids: string[]
@@ -91,8 +89,6 @@ export async function validar(texto: string): Promise<Validacion> {
     clusters.push({
       title,
       description: typeof o.description === 'string' ? o.description : undefined,
-      tech_feasibility: typeof o.tech_feasibility === 'string' ? o.tech_feasibility : undefined,
-      tech_note: typeof o.tech_note === 'string' ? o.tech_note : undefined,
       member_refs: refs,
       member_ids: ids,
     })
@@ -176,10 +172,6 @@ export type Cita = { texto: string; cooperativa: string; provincia: string | nul
 export type ClusterParaPresentar = {
   title: string
   description?: string
-  tech_feasibility?: string
-  /** La pista de qué tipo de solución existe. Es lo que dice algo distinto en
-   *  cada cluster; la viabilidad suele repetirse. */
-  tech_note?: string
   citas: Cita[]
 }
 
@@ -189,14 +181,6 @@ export type ParaPresentar = {
   clusters: ClusterParaPresentar[]
   /** Para la pantalla de apertura. */
   totales: { problemas: number; organizaciones: number; provincias: number }
-  /**
-   * Si la viabilidad distingue algo.
-   *
-   * Cuando todos los clusters dan el mismo valor —pasó: trece veces "alta"— la
-   * etiqueta es la misma trece veces y no informa nada. Que se muestre o no lo
-   * decide el dato, no una constante.
-   */
-  viabilidadVaria: boolean
 }
 
 /**
@@ -229,18 +213,13 @@ export async function ultimaParaPresentar(): Promise<ParaPresentar | null> {
   const clusters = d.clusters.map((c) => ({
     title: c.title,
     description: c.description,
-    tech_feasibility: c.tech_feasibility,
-    tech_note: c.tech_note,
     citas: c.member_ids
       .map((id) => problemas.get(id))
       .filter((p) => p !== undefined)
       .map((p) => ({ texto: p.problema, cooperativa: p.cooperativa, provincia: p.provincia })),
   }))
 
-  const viabilidades = new Set(clusters.map((c) => c.tech_feasibility).filter(Boolean))
-
   return {
-    viabilidadVaria: viabilidades.size > 1,
     creadoEn: d.creadoEn,
     completa: d.completa,
     clusters,

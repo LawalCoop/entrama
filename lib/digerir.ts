@@ -57,17 +57,6 @@ Reglas para armar los clusters:
 - Título: corto, máximo 80 caracteres, en lenguaje del agro, NOMBRA EL DOLOR / EL PATRÓN DE PROBLEMA, nunca una solución o tecnología.
 - Descripción: 1-2 oraciones (máx 240 caracteres) describiendo el patrón compartido — qué tienen en común estos problemas, en qué contexto aparece el dolor. No menciones soluciones, productos, ni tecnologías específicas. Apuntá a 200 caracteres y dejá margen.
 
-Para cada cluster, sumá también señalización de viabilidad tecnológica:
-
-- "tech_feasibility": uno de estos tres valores:
-    - "alta" — hay soluciones probadas, accesibles y replicables hoy
-    - "media" — hay soluciones pero requieren adaptación al contexto cooperativo / rural argentino
-    - "exploratoria" — el problema existe pero las soluciones son incipientes, costosas o poco probadas en este contexto
-- "tech_note": 1 oración (máx 170 caracteres) que oriente QUÉ TIPO DE SOLUCIÓN existe sin nombrar productos comerciales ni marcas. Apuntá a 140 caracteres y dejá margen. Ejemplos:
-  ✓ "Sensores de bajo costo con transmisión de largo alcance están probados en tambos y silos"
-  ✓ "Existen sistemas de gestión cooperativa de código abierto adaptables con desarrollo local"
-  ✓ "Hay investigación académica pero pocas implementaciones rurales en Argentina"
-
 ⚠️ FORMATO DE LOS member_refs:
 Cada problema viene precedido de un identificador hexadecimal único entre corchetes — por ejemplo \`[a3f9c1b8]\` o \`[2d4e6f01]\`. Para \`member_refs\` devolvé EXACTAMENTE esos strings hex tal cual aparecen, sin alterar caracteres. Por ejemplo: \`"member_refs": ["a3f9c1b8", "2d4e6f01", "7c3a8b9f"]\`.
 
@@ -84,8 +73,6 @@ Devolvé EXCLUSIVAMENTE un objeto JSON válido (sin markdown, sin texto extra an
     {
       "title": "string, máx 80 caracteres, NOMBRE DEL PROBLEMA, no de la solución",
       "description": "string, máx 240 caracteres (apuntá a 200), describe el patrón/dolor compartido sin mencionar soluciones",
-      "tech_feasibility": "alta | media | exploratoria",
-      "tech_note": "string, máx 170 caracteres (apuntá a 140), qué TIPO de solución existe (sin marcas)",
       "member_refs": ["a3f9c1b8", "2d4e6f01", "7c3a8b9f"]
     }
   ]

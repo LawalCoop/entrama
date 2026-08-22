@@ -227,8 +227,8 @@
 .tarjeta {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: clamp(12px, 1.2vw, 20px);
+  gap: clamp(10px, 1vw, 16px);
+  padding: clamp(18px, 1.8vw, 32px);
   border: 1px solid var(--borde);
   border-radius: 14px;
   background: var(--superficie);
@@ -240,14 +240,14 @@
   gap: 8px;
 }
 
-/* Empuja la cuenta al extremo, quede o no la pastilla en el medio. */
+/* Empuja la cuenta al extremo del encabezado. */
 .tarjetaCuenta {
   margin-left: auto;
 }
 
 .tarjetaNumero {
   font-family: var(--font-heading), sans-serif;
-  font-size: 10px;
+  font-size: clamp(12px, 1vw, 16px);
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -256,7 +256,7 @@
 
 .tarjetaCuenta {
   font-family: var(--font-heading), sans-serif;
-  font-size: clamp(18px, 1.5vw, 26px);
+  font-size: clamp(26px, 2.4vw, 44px);
   font-weight: 700;
   line-height: 1;
   color: var(--color-a);
@@ -266,7 +266,7 @@
 /* Tres líneas alcanzan para reconocerlo: se lee entero en su propia pantalla. */
 .tarjetaTitulo {
   font-family: var(--font-heading), sans-serif;
-  font-size: clamp(14px, 1.15vw, 20px);
+  font-size: clamp(19px, 1.8vw, 32px);
   font-weight: 600;
   line-height: 1.2;
   color: var(--texto);
@@ -327,32 +327,6 @@
 .puntoActivo {
   width: 24px;
   background: var(--color-a);
-}
-
-.pastillaFila {
-  display: flex;
-  justify-content: center;
-}
-
-.pastilla {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border: 1px solid;
-  border-radius: 999px;
-  font-family: var(--font-heading), sans-serif;
-  font-size: clamp(10px, 0.85vw, 13px);
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.techNote {
-  font-size: clamp(13px, 1.15vw, 19px);
-  line-height: 1.45;
-  color: var(--texto-suave);
-  max-width: 70ch;
 }
 
 /* --- Ticker de citas --- */
@@ -431,18 +405,15 @@
 }
 
 /* Con muchos grupos: menos alto por tarjeta para que la grilla entre entera. */
+/* Con muchos grupos hay que ceder algo, pero menos que antes: la panorámica usa
+   el ancho completo, así que entra más en cada fila. */
 .panoramicaCompacta .tarjeta {
-  gap: 6px;
-  padding: clamp(10px, 0.9vw, 14px);
+  gap: 8px;
+  padding: clamp(14px, 1.3vw, 22px);
 }
 
 .panoramicaCompacta .tarjetaTitulo {
   -webkit-line-clamp: 2;
-  font-size: clamp(13px, 1vw, 17px);
+  font-size: clamp(16px, 1.4vw, 26px);
 }
 
-.pastillaChica {
-  padding: 2px 7px;
-  font-size: 9px;
-  letter-spacing: 0.1em;
-}
